@@ -48,6 +48,7 @@ def updatestatus(jobstatus, outdir, name) :
       if outputfile.IsZombie() :
         print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit"
         jobstatus[i] = -1
+        os.remove(filename)
       elif outputfile.IsOpen() :
         print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy"
         print filename
