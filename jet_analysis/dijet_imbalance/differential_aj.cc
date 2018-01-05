@@ -1,7 +1,5 @@
 // differential_aj.cxx
 
-// TO DO:
-// 1) have the embedding reader start at a random event - done
 // 2) implement reuseTrigger
 
 #include <iostream>
@@ -171,8 +169,8 @@ int main(int argc, char* argv[]) {
                              opts.run_list);
     }
     
-    // I currently use all MB data for embedding, so we want to start each
-    // job with a different initial embedding event
+    // I currently use all MB available data for embedding, so we want to start
+    // each job with a different initial embedding event
     double prob_min = 0.0;
     double prob_max = reader_embed->GetNOfEvents() - 1;
     std::random_device generator;
@@ -431,42 +429,50 @@ int main(int argc, char* argv[]) {
       // select tracks above the minimum pt threshold
       primary_particles = track_pt_min_selector(primary_particles);
       
-      // container that will be passed to the DijetWorker
-      std::vector<fastjet::PseudoJet> input;
+      // now, we will loop over the same data opts.reuse times, using the same
+      // triggered event. This will give us the ability to generate multiple
+      // embedding events per triggered event, giving higher statistics for our
+      // pp reference
       
-      // if relative tracking efficiency smearing is requested,
-      // discard tracks randomly by the ratio of efficiencies
-      // either between AuAu of different centralities, or between
-      // AuAu of a specific centrality and PP
-      if (opts.apply_effic) {
-        if (reader_embed == nullptr) {
-          for (auto vec : primary_particles) {
-            if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
+      for (int i = 0; i < opts.reuse; ++i) {
+        std::cout << "looping event : " << i << std::endl;
+        
+        // container that will be passed to the DijetWorker
+        std::vector<fastjet::PseudoJet> input;
+        
+        // if relative tracking efficiency smearing is requested,
+        // discard tracks randomly by the ratio of efficiencies
+        // either between AuAu of different centralities, or between
+        // AuAu of a specific centrality and PP
+        if (opts.apply_effic) {
+          if (reader_embed == nullptr) {
+            for (auto vec : primary_particles) {
+              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
+                  input.push_back(vec);
+            }
+          }
+          else {
+            for (auto vec : primary_particles) {
+              if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
                 input.push_back(vec);
+            }
           }
         }
+        // if no efficiency correction is being applied, copy the full set of particles
         else {
-          for (auto vec : primary_particles) {
-            if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
-              input.push_back(vec);
+          input = std::vector<fastjet::PseudoJet>(primary_particles.begin(),
+                                                  primary_particles.end());
+        }
+        
+        int embed_centrality = 0;
+        int eff_corr_embed_cent = 0;
+        // if embedding is requested, add to the input
+        if (reader_embed != nullptr) {
+          // read next event, loop to event 0 if needed
+          if (!GetNextValidEvent(reader_embed, embed_triggers)) {
+            std::cerr << "no events found for embedding, given trigger requirements: exiting" << std::endl;
+            return 1;
           }
-        }
-      }
-      // if no efficiency correction is being applied, copy the full set of particles
-      else {
-        input = std::vector<fastjet::PseudoJet>(primary_particles.begin(),
-                                                        primary_particles.end());
-      }
-      
-      int embed_centrality = 0;
-      int eff_corr_embed_cent = 0;
-      // if embedding is requested, add to the input
-      if (reader_embed != nullptr) {
-        // read next event, loop to event 0 if needed
-        if (!GetNextValidEvent(reader_embed, embed_triggers)) {
-          std::cerr << "no events found for embedding, given trigger requirements: exiting" << std::endl;
-          return 1;
-        }
         
         // get the centrality definition of the embedding data
         for (unsigned i = 0; i < refcent_def.size(); ++i)
@@ -474,99 +480,99 @@ int main(int argc, char* argv[]) {
             embed_centrality = i;
             break;
           }
-        if (embed_centrality > 8)
-          eff_corr_embed_cent = 8;
-        else
-          eff_corr_embed_cent = embed_centrality;
+          if (embed_centrality > 8)
+            eff_corr_embed_cent = 8;
+          else
+            eff_corr_embed_cent = embed_centrality;
         
-        // get the vector container for embedding
-        TStarJetVectorContainer<TStarJetVector>* container_embed = reader_embed->GetOutputContainer();
-        std::vector<fastjet::PseudoJet> embed_particles;
-        ConvertTStarJetVector(container_embed, embed_particles);
+          // get the vector container for embedding
+          TStarJetVectorContainer<TStarJetVector>* container_embed = reader_embed->GetOutputContainer();
+          std::vector<fastjet::PseudoJet> embed_particles;
+          ConvertTStarJetVector(container_embed, embed_particles);
         
-        // again, apply minimal kinematic cuts
-        embed_particles = track_pt_min_selector(embed_particles);
-       
-        // if relative tracking efficiency smearing is requested,
-        // discard tracks randomly by the ratio of efficiencies
-        // it is assumed that the embedding event is AuAu
-        if (opts.apply_effic) {
-          for (auto vec : embed_particles)
-            if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
-              input.push_back(vec);
+          // again, apply minimal kinematic cuts
+          embed_particles = track_pt_min_selector(embed_particles);
+        
+          // if relative tracking efficiency smearing is requested,
+          // discard tracks randomly by the ratio of efficiencies
+          // it is assumed that the embedding event is AuAu
+          if (opts.apply_effic) {
+            for (auto vec : embed_particles)
+              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
+                input.push_back(vec);
+          }
+          else {
+            input.insert(input.end(), embed_particles.begin(), embed_particles.end());
+          }
         }
-        else {
-          input.insert(input.end(), embed_particles.begin(), embed_particles.end());
+        
+        // run the worker
+        auto worker_out = worker.Run(input);
+        
+        // process any found di-jet pairs
+        for (auto result : worker_out) {
+          std::string key = result.first;
+          ClusterOutput out = result.second;
+        
+          // fill all branches for that key
+          run_id_dict[key] = header->GetRunId();
+          event_id_dict[key] = header->GetEventId();
+          vz_dict[key] = header->GetPrimaryVertexZ();
+          refmult_dict[key] = header->GetReferenceMultiplicity();
+          grefmult_dict[key] = header->GetGReferenceMultiplicity();
+          refmultcorr_dict[key] = header->GetCorrectedReferenceMultiplicity();
+          grefmultcorr_dict[key] = header->GetCorrectedGReferenceMultiplicity();
+          cent_dict[key] = centrality;
+          zdcrate_dict[key] = header->GetZdcCoincidenceRate();
+          reactionplane_dict[key] = header->GetReactionPlaneAngle();
+          nglobal_dict[key] = header->GetNGlobalTracks();
+
+          // if embedding is being done
+          if (reader_embed != nullptr) {
+            embed_runid_dict[key] = header_embed->GetRunId();
+            embed_eventid_dict[key] = header_embed->GetEventId();
+            embed_refmult_dict[key] = header_embed->GetReferenceMultiplicity();
+            embed_grefmult_dict[key] = header_embed->GetGReferenceMultiplicity();
+            embed_refmultcorr_dict[key] = header_embed->GetCorrectedReferenceMultiplicity();
+            embed_grefmultcorr_dict[key] = header_embed->GetCorrectedGReferenceMultiplicity();
+            embed_cent_dict[key] = embed_centrality;
+            embed_vz_dict[key] = header_embed->GetPrimaryVertexZ();
+            embed_zdc_dict[key] = header_embed->GetZdcCoincidenceRate();
+            embed_rp_dict[key] = header_embed->GetReactionPlaneAngle();
+          }
+    
+          // set the four jets
+          lead_hard_jet_dict[key] = TLorentzVector(out.lead_hard.px(),
+                                                   out.lead_hard.py(),
+                                                   out.lead_hard.pz(),
+                                                   out.lead_hard.E());
+          lead_hard_jet_nconst_dict[key] = out.lead_hard.constituents().size();
+          lead_hard_rho_dict[key] = out.lead_hard_rho;
+          lead_hard_sigma_dict[key] = out.lead_hard_sigma;
+          lead_match_jet_dict[key] = TLorentzVector(out.lead_match.px(),
+                                                    out.lead_match.py(),
+                                                    out.lead_match.pz(),
+                                                    out.lead_match.E());
+          lead_match_jet_nconst_dict[key] = out.lead_match.constituents().size();
+          lead_match_rho_dict[key] = out.lead_match_rho;
+          lead_match_sigma_dict[key] = out.lead_match_sigma;
+          sublead_hard_jet_dict[key] = TLorentzVector(out.sublead_hard.px(),
+                                                      out.sublead_hard.py(),
+                                                      out.sublead_hard.pz(),
+                                                      out.sublead_hard.E());
+          sublead_hard_jet_nconst_dict[key] = out.sublead_hard.constituents().size();
+          sublead_hard_rho_dict[key] = out.sublead_hard_rho;
+          sublead_hard_sigma_dict[key] = out.sublead_hard_sigma;
+          sublead_match_jet_dict[key] = TLorentzVector(out.sublead_match.px(),
+                                                       out.sublead_match.py(),
+                                                       out.sublead_match.pz(),
+                                                       out.sublead_match.E());
+          sublead_match_jet_nconst_dict[key] = out.sublead_match.constituents().size();
+          sublead_match_rho_dict[key] = out.sublead_match_rho;
+          sublead_match_sigma_dict[key] = out.sublead_match_sigma;
+          
+          trees[key]->Fill();
         }
-      }
-      
-      // run the worker
-      auto worker_out = worker.Run(input);
-      
-      // process any found di-jet pairs
-      for (auto result : worker_out) {
-        std::string key = result.first;
-        ClusterOutput out = result.second;
-      
-        // fill all branches for that key
-        run_id_dict[key] = header->GetRunId();
-        event_id_dict[key] = header->GetEventId();
-        vz_dict[key] = header->GetPrimaryVertexZ();
-        refmult_dict[key] = header->GetReferenceMultiplicity();
-        grefmult_dict[key] = header->GetGReferenceMultiplicity();
-        refmultcorr_dict[key] = header->GetCorrectedReferenceMultiplicity();
-        grefmultcorr_dict[key] = header->GetCorrectedGReferenceMultiplicity();
-        cent_dict[key] = centrality;
-        zdcrate_dict[key] = header->GetZdcCoincidenceRate();
-        reactionplane_dict[key] = header->GetReactionPlaneAngle();
-        nglobal_dict[key] = header->GetNGlobalTracks();
-      
-        // if embedding is being done
-        if (reader_embed != nullptr) {
-          embed_runid_dict[key] = header_embed->GetRunId();
-          embed_eventid_dict[key] = header_embed->GetEventId();
-          embed_refmult_dict[key] = header_embed->GetReferenceMultiplicity();
-          embed_grefmult_dict[key] = header_embed->GetGReferenceMultiplicity();
-          embed_refmultcorr_dict[key] = header_embed->GetCorrectedReferenceMultiplicity();
-          embed_grefmultcorr_dict[key] = header_embed->GetCorrectedGReferenceMultiplicity();
-          embed_cent_dict[key] = embed_centrality;
-          embed_vz_dict[key] = header_embed->GetPrimaryVertexZ();
-          embed_zdc_dict[key] = header_embed->GetZdcCoincidenceRate();
-          embed_rp_dict[key] = header_embed->GetReactionPlaneAngle();
-        }
-      
-        // set the four jets
-        lead_hard_jet_dict[key] = TLorentzVector(out.lead_hard.px(),
-                                                 out.lead_hard.py(),
-                                                 out.lead_hard.pz(),
-                                                 out.lead_hard.E());
-        lead_hard_jet_nconst_dict[key] = out.lead_hard.constituents().size();
-        lead_hard_rho_dict[key] = out.lead_hard_rho;
-        lead_hard_sigma_dict[key] = out.lead_hard_sigma;
-        lead_match_jet_dict[key] = TLorentzVector(out.lead_match.px(),
-                                                  out.lead_match.py(),
-                                                  out.lead_match.pz(),
-                                                  out.lead_match.E());
-        lead_match_jet_nconst_dict[key] = out.lead_match.constituents().size();
-        lead_match_rho_dict[key] = out.lead_match_rho;
-        lead_match_sigma_dict[key] = out.lead_match_sigma;
-        sublead_hard_jet_dict[key] = TLorentzVector(out.sublead_hard.px(),
-                                                    out.sublead_hard.py(),
-                                                    out.sublead_hard.pz(),
-                                                    out.sublead_hard.E());
-        sublead_hard_jet_nconst_dict[key] = out.sublead_hard.constituents().size();
-        sublead_hard_rho_dict[key] = out.sublead_hard_rho;
-        sublead_hard_sigma_dict[key] = out.sublead_hard_sigma;
-        sublead_match_jet_dict[key] = TLorentzVector(out.sublead_match.px(),
-                                                     out.sublead_match.py(),
-                                                     out.sublead_match.pz(),
-                                                     out.sublead_match.E());
-        sublead_match_jet_nconst_dict[key] = out.sublead_match.constituents().size();
-        sublead_match_rho_dict[key] = out.sublead_match_rho;
-        sublead_match_sigma_dict[key] = out.sublead_match_sigma;
-      
-        trees[key]->Fill();
-      
       }
     }
   } catch(std::exception& e) {
