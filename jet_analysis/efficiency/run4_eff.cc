@@ -70,5 +70,5 @@ double Run4Eff::AuAuPPRatio(double pt, double eta, int cent) {
 }
 
 double Run4Eff::CentRatio(double pt, double eta, int cent, int reference_cent) {
-  return AuAuEff(pt, eta, reference_cent) / AuAuEff(pt, eta, reference_cent);
+  return AuAuEff(pt, eta, reference_cent) / AuAuEff(pt, eta, cent);
 }
