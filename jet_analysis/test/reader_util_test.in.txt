@@ -2,7 +2,7 @@
 # used to set up TStarJetPicoReader with event cuts, etc
 
 # first, reader level (hadronic correction, bad run list, etc)
-badrunlist=/Users/nick/physics/analysis/jet_analysis/build/bin/test/example_bad_run_list.txt
+badrunlist=${CMAKE_BINARY_DIR}/bin/test/example_bad_run_list.txt
 hadroniccorrection=1
 hadcorrfraction=0.999
 
@@ -32,7 +32,7 @@ track::phirange=1.0-2.0
 
 # tower cuts
 tower::towerstatus=1
-tower::badtowerlist=/Users/nick/physics/analysis/jet_analysis/build/bin/test/example_bad_tower_list.txt
+tower::badtowerlist=${CMAKE_BINARY_DIR}/bin/test/example_bad_tower_list.txt
 tower::y8pythia=0
 tower::etmax=1500
 tower::phirange=1.0-2.0

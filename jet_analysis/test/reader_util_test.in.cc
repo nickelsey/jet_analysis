@@ -20,9 +20,9 @@ int main() {
   // first test the csv parser
   
   // possible locations to find the csv file...
-  std::string csv_file_source = "/Users/nick/physics/analysis/jet_analysis/jet_analysis/test/csv_test.csv";
-  std::string csv_file_bin = "/Users/nick/physics/analysis/jet_analysis/build/bin/test/csv_test.csv";
-  std::string csv_file_install = "";
+  std::string csv_file_source = "${CMAKE_SOURCE_DIR}/jet_analysis/test/csv_test.csv";
+  std::string csv_file_bin = "${CMAKE_BINARY_DIR}/bin/test/csv_test.csv";
+  std::string csv_file_install = "${CMAKE_INSTALL_DIR}";
   
   if (!csv_file_install.empty())
     csv_file_install += "/jet_analysis/test/csv_test.csv";
@@ -60,16 +60,16 @@ int main() {
   
   // find the bad tower list & bad run list files, plus the
   // parameter file used for non-default initialization
-  std::vector<std::string> run_list_paths = {"/Users/nick/physics/analysis/jet_analysis/jet_analysis/test/example_bad_run_list.txt",
-                                             "/Users/nick/physics/analysis/jet_analysis/build/bin/test/example_bad_run_list.txt"};
-  std::vector<std::string> tower_list_paths = {"/Users/nick/physics/analysis/jet_analysis/jet_analysis/test/example_bad_tower_list.txt",
-                                               "/Users/nick/physics/analysis/jet_analysis/build/bin/test/example_bad_tower_list.txt"};
-  std::vector<std::string> param_list_paths = {"/Users/nick/physics/analysis/jet_analysis/jet_analysis/test/reader_util_test.txt",
-                                               "/Users/nick/physics/analysis/jet_analysis/build/bin/test/reader_util_test.txt"};
-  if (!std::string("").empty()) {
-    run_list_paths.push_back("/jet_analysis/test/example_bad_run_list.txt");
-    tower_list_paths.push_back("/jet_analysis/test/example_bad_tower_list.txt");
-    param_list_paths.push_back("/jet_analysis/test/reader_util_test.txt");
+  std::vector<std::string> run_list_paths = {"${CMAKE_SOURCE_DIR}/jet_analysis/test/example_bad_run_list.txt",
+                                             "${CMAKE_BINARY_DIR}/bin/test/example_bad_run_list.txt"};
+  std::vector<std::string> tower_list_paths = {"${CMAKE_SOURCE_DIR}/jet_analysis/test/example_bad_tower_list.txt",
+                                               "${CMAKE_BINARY_DIR}/bin/test/example_bad_tower_list.txt"};
+  std::vector<std::string> param_list_paths = {"${CMAKE_SOURCE_DIR}/jet_analysis/test/reader_util_test.txt",
+                                               "${CMAKE_BINARY_DIR}/bin/test/reader_util_test.txt"};
+  if (!std::string("${CMAKE_INSTALL_DIR}").empty()) {
+    run_list_paths.push_back("${CMAKE_INSTALL_DIR}/jet_analysis/test/example_bad_run_list.txt");
+    tower_list_paths.push_back("${CMAKE_INSTALL_DIR}/jet_analysis/test/example_bad_tower_list.txt");
+    param_list_paths.push_back("${CMAKE_INSTALL_DIR}/jet_analysis/test/reader_util_test.txt");
   }
   
   std::string run_list;

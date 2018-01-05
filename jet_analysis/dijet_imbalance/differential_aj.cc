@@ -1,5 +1,9 @@
 // differential_aj.cxx
 
+// TO DO:
+// 1) have the embedding reader start at a random event
+// 2) implement reuseTrigger
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -166,6 +170,16 @@ int main(int argc, char* argv[]) {
       InitReaderWithDefaults(reader_embed, embed_chain, opts.tow_list,
                              opts.run_list);
     }
+    
+    // I currently use all MB data for embedding, so we want to start each
+    // job with a different initial embedding event
+    double prob_min = 0.0;
+    double prob_max = reader_embed->GetNOfEvents() - 1;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<> flat_probability(prob_min, prob_max);
+    reader_embed->GetEvent(flat_probability(generator));
+    
+    std::cout <<"EVENT NUMBER: " <<GetNOfCurrentEvent()<<std::endl;
   }
   
   // get the triggers IDs that will be used
