@@ -4,8 +4,8 @@
 #include <string>
 #include <fstream>
 
-#include "util/arg_helper.hh"
-#include "util/trigger_lookup.hh"
+#include "jet_analysis/util/arg_helper.hh"
+#include "jet_analysis/util/trigger_lookup.hh"
 
 #include "TTree.h"
 #include "TChain.h"

@@ -1,6 +1,6 @@
 // dijet_worker.cc
 
-#include "dijet_worker/dijet_worker.hh"
+#include "jet_analysis/dijet_worker/dijet_worker.hh"
 
 #include "fastjet/tools/Subtractor.hh"
 

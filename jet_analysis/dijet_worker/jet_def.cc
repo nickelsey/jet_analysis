@@ -1,6 +1,6 @@
 // jet_def.cc
 
-#include "dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/jet_def.hh"
 
 // JetDef class imp
 

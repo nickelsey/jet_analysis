@@ -9,12 +9,12 @@
 #include <random>
 #include <exception>
 
-#include "util/arg_helper.hh"
-#include "util/trigger_lookup.hh"
-#include "util/reader_util.hh"
-#include "util/vector_conversion.hh"
-#include "efficiency/run4_eff.hh"
-#include "dijet_worker/dijet_worker.hh"
+#include "jet_analysis/util/arg_helper.hh"
+#include "jet_analysis/util/trigger_lookup.hh"
+#include "jet_analysis/util/reader_util.hh"
+#include "jet_analysis/util/vector_conversion.hh"
+#include "jet_analysis/efficiency/run4_eff.hh"
+#include "jet_analysis/dijet_worker/dijet_worker.hh"
 
 #include "TTree.h"
 #include "TChain.h"

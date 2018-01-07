@@ -7,11 +7,11 @@
 #include <sstream>
 #include <iomanip>
 
-#include "dijet_worker/dijet_definition.hh"
-#include "dijet_worker/jet_def.hh"
-#include "dijet_worker/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_definition.hh"
+#include "jet_analysis/dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/match_def.hh"
 
-#include "util/selector_compare.hh"
+#include "jet_analysis/util/selector_compare.hh"
 
 std::string MakeKeyFromDijetDefinition(const DijetDefinition& def) {
   std::string ret;

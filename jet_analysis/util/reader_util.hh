@@ -19,7 +19,7 @@
 #include "TStarJetPicoTowerCuts.h"
 #include "TStarJetPicoUtils.h"
 
-#include "util/arg_helper.hh"
+#include "jet_analysis/util/arg_helper.hh"
 
 bool GetNextValidEvent(TStarJetPicoReader* reader, std::set<unsigned> triggers) {
   // loop over events to find one with an accepted trigger

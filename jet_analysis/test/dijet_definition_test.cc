@@ -1,6 +1,6 @@
-#include "dijet_worker/jet_def.hh"
-#include "dijet_worker/match_def.hh"
-#include "dijet_worker/dijet_definition.hh"
+#include "jet_analysis/dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_definition.hh"
 
 int main() {
 

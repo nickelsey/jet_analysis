@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include "dijet_worker/dijet_matrix.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix.hh"
 
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"

@@ -3,7 +3,7 @@
 #ifndef MATCH_DEF_HH
 #define MATCH_DEF_HH
 
-#include "dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/jet_def.hh"
 
 class MatchDef {
 public:

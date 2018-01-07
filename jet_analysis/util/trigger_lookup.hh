@@ -29,7 +29,7 @@
 #include <string>
 #include <iostream>
 
-#include "arg_helper.hh"
+#include "jet_analysis/util/arg_helper.hh"
 
 std::set<unsigned> GetTriggerIDsAlt(std::string token) {
   // lowercase everything

@@ -1,5 +1,5 @@
-#include "dijet_worker/dijet_matrix.hh"
-#include "util/selector_compare.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix.hh"
+#include "jet_analysis/util/selector_compare.hh"
 
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/AreaDefinition.hh"

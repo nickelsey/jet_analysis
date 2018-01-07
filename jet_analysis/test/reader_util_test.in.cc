@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "util/reader_util.hh"
+#include "jet_analysis/util/reader_util.hh"
 
 #include "boost/filesystem.hpp"
 

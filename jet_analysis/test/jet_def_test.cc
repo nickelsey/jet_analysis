@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string>
 
-#include "dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/jet_def.hh"
 
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/AreaDefinition.hh"

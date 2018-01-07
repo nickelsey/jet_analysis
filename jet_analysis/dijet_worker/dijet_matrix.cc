@@ -1,10 +1,9 @@
 // dijet_matrix.cc
 
-#include "dijet_worker/dijet_matrix.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix.hh"
 
-#include "util/selector_compare.hh"
-
-#include "util/dijet_key.hh"
+#include "jet_analysis/util/selector_compare.hh"
+#include "jet_analysis/util/dijet_key.hh"
 
 // default constructor
 DijetMatrix::DijetMatrix() :

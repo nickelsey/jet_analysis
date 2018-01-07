@@ -11,7 +11,7 @@
 
 #include <memory>
 
-#include "dijet_worker/match_def.hh"
+#include "jet_analysis/dijet_worker/match_def.hh"
 
 class DijetDefinition {
 public:

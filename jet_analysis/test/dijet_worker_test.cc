@@ -5,9 +5,8 @@
 // I just use them as a sanity check
 // for my core analysis routine
 
-#include "dijet_worker/dijet_worker.hh"
-
-#include "util/selector_compare.hh"
+#include "jet_analysis/dijet_worker/dijet_worker.hh"
+#include "jet_analysis/util/selector_compare.hh"
 
 #include "TMath.h"
 

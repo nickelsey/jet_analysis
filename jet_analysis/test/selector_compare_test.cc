@@ -1,4 +1,4 @@
-#include "util/selector_compare.hh"
+#include "jet_analysis/util/selector_compare.hh"
 
 #include "fastjet/Selector.hh"
 

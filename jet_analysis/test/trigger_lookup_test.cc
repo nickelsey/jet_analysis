@@ -1,4 +1,4 @@
-#include "util/trigger_lookup.hh"
+#include "jet_analysis/util/trigger_lookup.hh"
 
 #include <set>
 #include <algorithm>
