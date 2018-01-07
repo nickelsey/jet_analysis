@@ -1,7 +1,5 @@
 // differential_aj.cxx
 
-// 2) implement reuseTrigger
-
 #include <iostream>
 #include <string>
 #include <fstream>
