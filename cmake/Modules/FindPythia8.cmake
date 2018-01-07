@@ -54,4 +54,4 @@ endif(PYTHIA8_FOUND)
 
 # Add pythia include path to cmake
 include_directories(${PYTHIA8_INCLUDE_DIRS})
-LINK_DIRECTORIES(${PYTHIA8_LIBRARY})
+
