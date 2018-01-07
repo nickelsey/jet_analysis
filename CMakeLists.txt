@@ -49,6 +49,7 @@ add_subdirectory(jet_analysis/)
 install(DIRECTORY jet_analysis DESTINATION .
         FILES_MATCHING PATTERN "CMakeLists.txt" EXCLUDE
         PATTERN "._*" EXCLUDE
+        PATTERN "*.in.*" EXCLUDE
         PATTERN "submit" EXCLUDE
         PATTERN "*")
 

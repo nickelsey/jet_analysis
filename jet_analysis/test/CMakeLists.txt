@@ -65,16 +65,16 @@ set_target_properties(dijet_key_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE
 
 ## reader util testing has a few text files it depends on,
 ## which are copied into the binary directory
-configure_file(csv_test.csv ${CMAKE_BINARY_DIR}/bin/test/csv_test.csv)
-configure_file(reader_util_test.in.txt ${CMAKE_SOURCE_DIR}/jet_analysis/test/reader_util_test.txt)
-configure_file(reader_util_test.in.txt ${CMAKE_BINARY_DIR}/bin/test/reader_util_test.txt)
-configure_file(example_bad_run_list.txt ${CMAKE_BINARY_DIR}/bin/test/example_bad_run_list.txt)
-configure_file(example_bad_tower_list.txt ${CMAKE_BINARY_DIR}/bin/test/example_bad_tower_list.txt)
+configure_file(csv_test.csv ${CMAKE_BINARY_DIR}/jet_analysis/test/csv_test.csv)
+configure_file(reader_util_test.in.txt ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.txt)
+configure_file(reader_util_test.in.txt ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.txt)
+configure_file(example_bad_run_list.txt ${CMAKE_BINARY_DIR}/jet_analysis/test/example_bad_run_list.txt)
+configure_file(example_bad_tower_list.txt ${CMAKE_BINARY_DIR}/jet_analysis/test/example_bad_tower_list.txt)
 
 ## and also must be configured itself
-configure_file(reader_util_test.in.cc ${CMAKE_SOURCE_DIR}/jet_analysis/test/reader_util_test.cc)
+configure_file(reader_util_test.in.cc ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.cc)
 
-set(READER_UTIL_TESTING_SRCS reader_util_test.cc)
+set(READER_UTIL_TESTING_SRCS ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.cc)
 add_executable(reader_util_test ${READER_UTIL_TESTING_SRCS})
 target_link_libraries(reader_util_test ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(reader_util_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test)
@@ -116,3 +116,9 @@ install(TARGETS dijet_matrix_test dijet_worker_test
          DESTINATION bin/test)
 install(TARGETS reader_util_test run4_eff_test
          DESTINATION bin/test)
+
+## install the configured targets
+install(FILES ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.cc
+        DESTINATION jet_analysis/test)
+install(FILES ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.txt
+        DESTINATION jet_analysis/test)
