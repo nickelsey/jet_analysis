@@ -29,6 +29,14 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 include(cmake/Dependencies.cmake)
 
 #######################################
+## system checks
+include(cmake/SysCheck.cmake)
+
+#######################################
+## utility functions
+include(cmake/Utils.cmake)
+
+#######################################
 ## forcing proper include lookup paths - must take
 ## configured files in build dir before empty files
 ## in the source dir
