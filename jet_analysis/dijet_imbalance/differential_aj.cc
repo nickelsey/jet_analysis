@@ -232,7 +232,7 @@ int main(int argc, char* argv[]) {
   // and the necessary branches
   std::unordered_map<std::string, int> run_id_dict;
   std::unordered_map<std::string, int> event_id_dict;
-  std::unordered_map<std::string, int> vz_dict;
+  std::unordered_map<std::string, double> vz_dict;
   std::unordered_map<std::string, int> refmult_dict;
   std::unordered_map<std::string, int> grefmult_dict;
   std::unordered_map<std::string, double> refmultcorr_dict;
@@ -262,8 +262,8 @@ int main(int argc, char* argv[]) {
   std::unordered_map<std::string, int> embed_eventid_dict;
   std::unordered_map<std::string, int> embed_refmult_dict;
   std::unordered_map<std::string, int> embed_grefmult_dict;
-  std::unordered_map<std::string, int> embed_refmultcorr_dict;
-  std::unordered_map<std::string, int> embed_grefmultcorr_dict;
+  std::unordered_map<std::string, double> embed_refmultcorr_dict;
+  std::unordered_map<std::string, double> embed_grefmultcorr_dict;
   std::unordered_map<std::string, int> embed_cent_dict;
   std::unordered_map<std::string, double> embed_vz_dict;
   std::unordered_map<std::string, double> embed_zdc_dict;
@@ -324,6 +324,7 @@ int main(int argc, char* argv[]) {
     tmp->Branch("grefmult", &grefmult_dict[key]);
     tmp->Branch("refmultcorr", &refmultcorr_dict[key]);
     tmp->Branch("grefmultcorr", &grefmultcorr_dict[key]);
+    tmp->Branch("cent", &cent_dict[key]);
     tmp->Branch("zdcrate", &zdcrate_dict[key]);
     tmp->Branch("rp", &reactionplane_dict[key]);
     tmp->Branch("nglobal", &nglobal_dict[key]);
