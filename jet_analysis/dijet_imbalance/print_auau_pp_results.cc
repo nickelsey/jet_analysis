@@ -450,14 +450,13 @@ int main(int argc, char* argv[]) {
       pp_match_aj_spectra[i]->Scale(1.0/pp_match_aj_spectra[i]->Integral());
     }
     Overlay1D(auau_hard_aj_spectra, refcent_string, out_loc, "auau_hard_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.2, 0.0);
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(auau_match_aj_spectra, refcent_string, out_loc, "auau_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.2, 0.0);
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(pp_hard_aj_spectra, refcent_string, out_loc, "pp_hard_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.2, 0.0);
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(pp_match_aj_spectra, refcent_string, out_loc, "pp_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.2, 0.0);
-    
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     
   }
   
