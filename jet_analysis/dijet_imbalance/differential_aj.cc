@@ -434,7 +434,6 @@ int main(int argc, char* argv[]) {
       // pp reference
       
       for (int i = 0; i < opts.reuse; ++i) {
-        std::cout << "looping event : " << i << std::endl;
         
         // container that will be passed to the DijetWorker
         std::vector<fastjet::PseudoJet> input;
