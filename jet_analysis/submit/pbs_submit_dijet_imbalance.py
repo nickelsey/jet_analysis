@@ -200,7 +200,7 @@ if __name__ == "__main__":
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
-  parser.add_argument('--efficiency', default='0', help='apply a relative efficiency correction to compare all species/centralities at effective 0-5% AuAu efficiency')
+  parser.add_argument('--efficiency', default='1', help='apply a relative efficiency correction to compare all species/centralities at effective 0-5% AuAu efficiency')
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='y14ht', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
