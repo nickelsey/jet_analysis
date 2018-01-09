@@ -226,30 +226,20 @@ int main(int argc, char* argv[]) {
     TTreeReaderValue<double> pp_jsmsig(pp_reader, "jsmsig");
     
     // check if embedding was done for pp
-    TTreeReaderValue<int>* embed_eventid;
-    TTreeReaderValue<int>* embed_runid;
-    TTreeReaderValue<int>* embed_refmult;
-    TTreeReaderValue<int>* embed_grefmult;
-    TTreeReaderValue<double>* embed_refmultcorr;
-    TTreeReaderValue<double>* embed_grefmultcorr;
-    TTreeReaderValue<int>* embed_cent;
-    TTreeReaderValue<double>* embed_rp;
-    TTreeReaderValue<double>* embed_zdcrate;
-    TTreeReaderValue<double>* embed_vz;
     bool pp_embedded = false;
-    if (pp_tree->GetBranch("embed_eventid")) {
+    if (pp_tree->GetBranch("embed_eventid"))
       pp_embedded = true;
-      embed_eventid = new TTreeReaderValue<int>(pp_reader, "embed_eventid");
-      embed_runid = new TTreeReaderValue<int>(pp_reader, "embed_runid");
-      embed_refmult = new TTreeReaderValue<int>(pp_reader, "embed_refmult");
-      embed_grefmult = new TTreeReaderValue<int>(pp_reader, "embed_grefmult");
-      embed_refmultcorr = new TTreeReaderValue<double>(pp_reader, "embed_refmultcorr");
-      embed_grefmultcorr = new TTreeReaderValue<double>(pp_reader, "embed_grefmultcorr");
-      embed_cent = new TTreeReaderValue<int>(pp_reader, "embed_cent");
-      embed_rp = new TTreeReaderValue<double>(pp_reader, "embed_rp");
-      embed_zdcrate = new TTreeReaderValue<double>(pp_reader, "embed_zdcrate");
-      embed_vz = new TTreeReaderValue<double>(pp_reader, "embed_vz");
-    }
+    // build all embedding branches (only used if pp_embedded is true)
+    TTreeReaderValue<int> embed_eventid(pp_reader, "embed_eventid");
+    TTreeReaderValue<int> embed_runid(pp_reader, "embed_runid");
+    TTreeReaderValue<int> embed_refmult(pp_reader, "embed_refmult");
+    TTreeReaderValue<int> embed_grefmult(pp_reader, "embed_grefmult");
+    TTreeReaderValue<double> embed_refmultcorr(pp_reader, "embed_refmultcorr");
+    TTreeReaderValue<double> embed_grefmultcorr(pp_reader, "embed_grefmultcorr");
+    TTreeReaderValue<int> embed_cent(pp_reader, "embed_cent");
+    TTreeReaderValue<double> embed_rp(pp_reader, "embed_rp");
+    TTreeReaderValue<double> embed_zdcrate(pp_reader, "embed_zdcrate");
+    TTreeReaderValue<double> embed_vz(pp_reader, "embed_vz");
     
     // -----------------
     // define histograms
@@ -318,15 +308,15 @@ int main(int argc, char* argv[]) {
       if (pp_embedded) {
         
         // pp single jet pt
-        pp_hard_lead_pt->Fill(*pp_refmult + **embed_refmult, (*pp_jl).Pt());
-        pp_hard_sub_pt->Fill(*pp_refmult + **embed_refmult, (*pp_js).Pt());
-        pp_match_lead_pt->Fill(*pp_refmult + **embed_refmult, (*pp_jlm).Pt());
-        pp_match_sub_pt->Fill(*pp_refmult + **embed_refmult, (*pp_jsm).Pt());
+        pp_hard_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jl).Pt());
+        pp_hard_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_js).Pt());
+        pp_match_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jlm).Pt());
+        pp_match_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jsm).Pt());
         
         // pp Aj
-        pp_hard_aj->Fill(*pp_refmult + **embed_refmult,
+        pp_hard_aj->Fill(*pp_refmult + *embed_refmult,
                          fabs((*pp_jl).Pt() - (*pp_js).Pt())/((*pp_jl).Pt() + (*pp_js).Pt()));
-        pp_match_aj->Fill(*pp_refmult + **embed_refmult,
+        pp_match_aj->Fill(*pp_refmult + *embed_refmult,
                           fabs((*pp_jlm).Pt() - (*pp_jsm).Pt())/((*pp_jlm).Pt() + (*pp_jsm).Pt()));
         
         // pp dphi
@@ -337,7 +327,7 @@ int main(int argc, char* argv[]) {
         while (dphi > 2.0 * TMath::Pi())
           dphi -= 2.0 * TMath::Pi();
         
-        pp_dphi->Fill(*pp_refmult + **embed_refmult, dphi);
+        pp_dphi->Fill(*pp_refmult + *embed_refmult, dphi);
       }
       else {
         
