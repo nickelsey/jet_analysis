@@ -31,7 +31,7 @@ def updatestatus(jobstatus, outdir, name) :
     proccommand = 'qstat | grep dx5412 | grep \' ' + name + str(i) + ' \' | wc -l '
     proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
     jobinprocess = int(proc.stdout.read())
-    if jobinprocess == 1 :
+    if jobinprocess >= 1 :
       jobstatus[i] = 1
       continue
     
