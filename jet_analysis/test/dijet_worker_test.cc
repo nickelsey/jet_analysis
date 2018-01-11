@@ -339,7 +339,8 @@ int main () {
       fabs((dijet_worker_output.sublead_match.pt() - matched_sublead_jet.pt())/dijet_worker_output.sublead_match.pt()) > 0.1)
     return 1;
   
-  // last test: see if the jets bkg is being calculated properly, by finding the average
+  // **************************
+  // next test: see if the jets bkg is being calculated properly, by finding the average
   // over an ensemble of events
   double lead_pt_total = 0.0;
   double sublead_pt_total = 0.0;
@@ -368,6 +369,43 @@ int main () {
   
   if (fabs((lead_pt_total/n_tries-lead_pt)/lead_pt) > 0.05 ||
       fabs((sublead_pt_total/n_tries-sub_pt)/sub_pt) > 0.05)
+    return 1;
+  
+  // **************************
+  // next test: make sure the clustering output is successfully finding events
+  // that have the leading jet, the subleading jet, and the matched jets
+  cluster_input.clear();
+  leading_jet_in.reset_PtYPhiM(21, 0.1, 3.14, 0);
+  subleading_jet_in.reset_PtYPhiM(9, -0.1, 0.01, 0);
+  cluster_input.push_back(leading_jet_in);
+  cluster_input.push_back(subleading_jet_in);
+  
+  DijetWorker b(fastjet::antikt_algorithm);
+  b.Initialize();
+  worker_output = b.Run(cluster_input);
+  
+  if (worker_output.size() != 1)
+    return 1;
+  
+  auto only_output = worker_output.begin();
+  if ((*only_output).second.found_lead != true ||
+      (*only_output).second.found_sublead != false)
+    return 1;
+  
+  // now make sure it can find a subleading jet & match
+  cluster_input.clear();
+  subleading_jet_in.reset_PtYPhiM(11, -0.1, 0.01, 0);
+  cluster_input.push_back(leading_jet_in);
+  cluster_input.push_back(subleading_jet_in);
+  
+  worker_output = b.Run(cluster_input);
+  if (worker_output.size() != 1)
+    return 1;
+  
+  only_output = worker_output.begin();
+  if ((*only_output).second.found_lead != true ||
+      (*only_output).second.found_sublead != true ||
+      (*only_output).second.found_match != true)
     return 1;
   
   return 0;

@@ -50,7 +50,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
   cluster_result.clear();
   
   // check to make sure the DijetMatrix has been initialized;
-  // if not, initialize
+  // if not, do so
   if (Size() == 0)
     Initialize();
   
@@ -71,7 +71,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     if (!lead->IsValid() || !sub->IsValid())
       continue;
     
-    ClusterOutput out_container(dijet_def.second);
+    ClusterOutput dijet_container(dijet_def.second);
     
     // do initial hard clustering for leading & subleading jets
     std::shared_ptr<fastjet::ClusterSequenceArea> cl_hard_lead = nullptr;
@@ -100,8 +100,11 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::vector<fastjet::PseudoJet> sublead_hard_jets = fastjet::sorted_by_pt(sub->InitialJetDef().JetSelector()(cl_hard_sub->inclusive_jets()));
     
     
-    if (lead_hard_jets.size() == 0 || sublead_hard_jets.size() == 0)
+    if (lead_hard_jets.size() == 0)
       continue;
+    
+    // we have found a leading jet
+    dijet_container.found_lead = true;
 
     // now, using the highest pT jet as the leading jet, try to find a
     // subleading jet that satisfies the dPhi cut
@@ -110,8 +113,13 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     recoil_selector.set_reference(leading_hard_jet);
     std::vector<fastjet::PseudoJet> dphi_selected_recoil = fastjet::sorted_by_pt(recoil_selector(sublead_hard_jets));
     
-    if (dphi_selected_recoil.size() == 0)
+    if (dphi_selected_recoil.size() == 0) {
+      cluster_result.insert({key, dijet_container});
       continue;
+    }
+    
+    // we have found a subleading jet that satisfies dPhi cuts
+    dijet_container.found_sublead = true;
     
     fastjet::PseudoJet subleading_hard_jet = dphi_selected_recoil[0];
     
@@ -138,12 +146,12 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     }
     
     // write the hard jets to the output container
-    out_container.lead_hard = leading_hard_jet;
-    out_container.lead_hard_rho = lead_hard_bkg_est->rho();
-    out_container.lead_hard_sigma = lead_hard_bkg_est->sigma();
-    out_container.sublead_hard = subleading_hard_jet;
-    out_container.sublead_hard_rho = sublead_hard_bkg_est->rho();
-    out_container.sublead_hard_sigma = sublead_hard_bkg_est->sigma();
+    dijet_container.lead_hard = leading_hard_jet;
+    dijet_container.lead_hard_rho = lead_hard_bkg_est->rho();
+    dijet_container.lead_hard_sigma = lead_hard_bkg_est->sigma();
+    dijet_container.sublead_hard = subleading_hard_jet;
+    dijet_container.sublead_hard_rho = sublead_hard_bkg_est->rho();
+    dijet_container.sublead_hard_sigma = sublead_hard_bkg_est->sigma();
     
     // now we will perform the matching jet finding
     // for both leading & subleading jets
@@ -173,8 +181,10 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::vector<fastjet::PseudoJet> lead_match_jets = fastjet::sorted_by_pt(lead->MatchedJetDef().JetSelector()(cl_match_lead->inclusive_jets()));
     std::vector<fastjet::PseudoJet> sublead_match_jets = fastjet::sorted_by_pt(sub->MatchedJetDef().JetSelector()(cl_match_sub->inclusive_jets()));
     
-    if (lead_match_jets.size() == 0 || sublead_match_jets.size() == 0)
+    if (lead_match_jets.size() == 0 || sublead_match_jets.size() == 0) {
+      cluster_result.insert({key, dijet_container});
       continue;
+    }
     
     // now do background subtraction
     std::shared_ptr<fastjet::JetMedianBackgroundEstimator> lead_match_bkg_est = nullptr;
@@ -218,23 +228,27 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     
     
     // make sure there is a valid matched jet
-    if (matched_to_leading.size() == 0 || matched_to_subleading.size() == 0)
+    if (matched_to_leading.size() == 0 || matched_to_subleading.size() == 0) {
+      cluster_result.insert({key, dijet_container});
       continue;
+    }
+    
+    dijet_container.found_match = true;
     
     fastjet::PseudoJet leading_matched_jet = matched_to_leading[0];
     fastjet::PseudoJet subleading_matched_jet = matched_to_subleading[0];
     
     // put into output container
-    out_container.lead_match = leading_matched_jet;
-    out_container.lead_match_rho = lead_match_bkg_est->rho();
-    out_container.lead_match_sigma = lead_match_bkg_est->sigma();
+    dijet_container.lead_match = leading_matched_jet;
+    dijet_container.lead_match_rho = lead_match_bkg_est->rho();
+    dijet_container.lead_match_sigma = lead_match_bkg_est->sigma();
     
-    out_container.sublead_match = subleading_matched_jet;
-    out_container.sublead_match_rho = sublead_match_bkg_est->rho();
-    out_container.sublead_match_sigma = sublead_match_bkg_est->sigma();
+    dijet_container.sublead_match = subleading_matched_jet;
+    dijet_container.sublead_match_rho = sublead_match_bkg_est->rho();
+    dijet_container.sublead_match_sigma = sublead_match_bkg_est->sigma();
     
     // and put the container in the output
-    cluster_result.insert({key, out_container});
+    cluster_result.insert({key, dijet_container});
     
   }
   

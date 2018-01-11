@@ -16,11 +16,25 @@
 // struct used to return the results of a dijet clustering
 struct ClusterOutput {
   
-  ClusterOutput() : dijet_def(nullptr) { }
+  ClusterOutput() :
+        dijet_def(nullptr),
+        found_lead(false),
+        found_sublead(false),
+        found_match(false) { }
+  
   ClusterOutput(std::shared_ptr<DijetDefinition> def) :
-        dijet_def(def) { };
+        dijet_def(def),
+        found_lead(false),
+        found_sublead(false),
+        found_match(false) { }
+  
+  inline bool FoundDijet() {return found_match;}
   
   std::shared_ptr<DijetDefinition> dijet_def;
+  
+  bool found_lead;
+  bool found_sublead;
+  bool found_match;
   
   fastjet::PseudoJet lead_hard;
   double lead_hard_rho;
