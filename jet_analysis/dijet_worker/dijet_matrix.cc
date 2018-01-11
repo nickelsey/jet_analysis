@@ -7,6 +7,8 @@
 
 // default constructor
 DijetMatrix::DijetMatrix() :
+      force_constituent_pt_equality(true),
+      force_constituent_eta_equality(true),
       strategy(fastjet::Best),
       scheme(fastjet::E_scheme),
       area_type(fastjet::active_area_explicit_ghosts),
@@ -38,6 +40,8 @@ DijetMatrix::DijetMatrix(fastjet::JetAlgorithm jet_alg_in,
       lead_R(std::set<double>{lead_R_in}),
       sub_pt(std::set<double>{sub_pt_in}),
       sub_R(std::set<double>{sub_R_in}),
+      force_constituent_pt_equality(true),
+      force_constituent_eta_equality(true),
       strategy(fastjet::Best),
       scheme(fastjet::E_scheme),
       area_type(fastjet::active_area_explicit_ghosts),
@@ -71,6 +75,8 @@ DijetMatrix::DijetMatrix(std::set<fastjet::JetAlgorithm> jet_alg_in,
       lead_R(lead_R_in),
       sub_pt(sub_pt_in),
       sub_R(sub_R_in),
+      force_constituent_pt_equality(true),
+      force_constituent_eta_equality(true),
       strategy(fastjet::Best),
       scheme(fastjet::E_scheme),
       area_type(fastjet::active_area_explicit_ghosts),
@@ -93,6 +99,8 @@ DijetMatrix::DijetMatrix(const DijetMatrix& rhs) :
       lead_R(rhs.lead_R),
       sub_pt(rhs.sub_pt),
       sub_R(rhs.sub_R),
+      force_constituent_pt_equality(rhs.force_constituent_pt_equality),
+      force_constituent_eta_equality(rhs.force_constituent_eta_equality),
       strategy(rhs.strategy),
       scheme(rhs.scheme),
       area_type(rhs.area_type),
@@ -126,6 +134,16 @@ void DijetMatrix::ClearDijetDefs() {
   lead_matchdefs.clear();
   sub_matchdefs.clear();
   keys.clear();
+}
+
+void DijetMatrix::ForceConstituentPtEquality(bool flag) {
+  force_constituent_pt_equality = flag;
+  CheckToUpdate();
+}
+
+void DijetMatrix::ForceConstituentEtaEquality(bool flag) {
+  force_constituent_eta_equality = flag;
+  CheckToUpdate();
 }
 
 void DijetMatrix::AddConstituentEta(double eta) {
@@ -376,6 +394,24 @@ void DijetMatrix::Initialize() {
       // make sure that the pt lead > pt sub
       if (SelectorPtMinLessThan(lead->InitialJetDef().JetSelector(), sub->InitialJetDef().JetSelector()))
         continue;
+      // if forcce_constituent_pt_equality is on, force
+      // pt to be equal. Same for eta
+      if (force_constituent_pt_equality) {
+        double lead_pt_init = ExtractDoubleFromSelector(lead->InitialJetDef().ConstituentSelector(), "pt >=");
+        double sub_pt_init = ExtractDoubleFromSelector(sub->InitialJetDef().ConstituentSelector(), "pt >=");
+        if (lead_pt_init != sub_pt_init)
+          continue;
+        double lead_pt_match = ExtractDoubleFromSelector(lead->MatchedJetDef().ConstituentSelector(), "pt >=");
+        double sub_pt_match = ExtractDoubleFromSelector(sub->MatchedJetDef().ConstituentSelector(), "pt >=");
+        if (lead_pt_match != sub_pt_match)
+          continue;
+      }
+      if (force_constituent_eta_equality) {
+        double lead_eta = ExtractDoubleFromSelector(lead->InitialJetDef().ConstituentSelector(), "|rap| <=");
+        double sub_eta = ExtractDoubleFromSelector(sub->InitialJetDef().ConstituentSelector(), "|rap| <=");
+        if (lead_eta != sub_eta)
+          continue;
+      }
       
       auto tmp = std::make_shared<DijetDefinition>(lead, sub, 0.4);
       

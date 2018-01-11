@@ -82,6 +82,11 @@ public:
   std::unordered_map<std::string, std::shared_ptr<DijetDefinition>> DijetDefinitions() const
                                                                            {return dijet_defs;}
   
+  // force leading and subleading jets to have equal constituent
+  // pt cuts or eta cuts
+  void ForceConstituentPtEquality(bool flag = true);
+  void ForceConstituentEtaEquality(bool flag = true);
+  
   // get the keys to the map
   const std::set<std::string>& Keys() const {return keys;}
   
@@ -170,6 +175,11 @@ protected:
   std::set<double> const_lead_pt_match;
   std::set<double> const_sub_pt_init;
   std::set<double> const_sub_pt_match;
+  
+  // forces constituent pt or eta cut to be equal in leading & subleading
+  // jet definitions
+  bool force_constituent_pt_equality;
+  bool force_constituent_eta_equality;
   
   // allow different radii for leading & subleading
   // jets, but do not allow different jet algorithms

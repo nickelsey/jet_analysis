@@ -141,7 +141,8 @@ int main() {
   }
   
   DijetMatrix matrix;
-  
+  matrix.ForceConstituentPtEquality(false);
+  matrix.ForceConstituentEtaEquality(false);
   matrix.AddJetAlgorithm({fastjet::antikt_algorithm, fastjet::kt_algorithm});
   matrix.AddLeadJetR({0.4, 0.5});
   matrix.AddSubJetR({0.4, 0.5});
@@ -219,6 +220,50 @@ int main() {
                               bkg_area_def_sub))
       return 1;
   }
+  
+  // now test that forcing equality of constituent pt & eta in
+  // leading & subleading definitions works as intended
+  matrix.Clear();
+  matrix.ForceConstituentPtEquality(true);
+  matrix.ForceConstituentEtaEquality(true);
+  matrix.AddConstituentLeadInitialPt({2.0, 3.0});
+  matrix.AddConstituentSubInitialPt({2.0, 3.0});
+  matrix.AddConstituentEta({1.0, 2.0});
+  matrix.Initialize();
+  if (matrix.Size() != 4)
+    return 1;
+  
+  matrix.ForceConstituentEtaEquality(false);
+  matrix.Initialize();
+  if(matrix.Size() != 8)
+    return 1;
+  
+  matrix.Clear();
+  matrix.ForceConstituentPtEquality(true);
+  matrix.ForceConstituentEtaEquality(true);
+  matrix.AddConstituentLeadInitialPt(2.0);
+  matrix.AddConstituentSubInitialPt(2.0);
+  matrix.AddConstituentEta(1.0);
+  matrix.AddConstituentLeadMatchPt({0.2, 0.3});
+  matrix.AddConstituentSubMatchPt({0.2, 0.3});
+  matrix.Initialize();
+  
+  if (matrix.Size() != 2)
+    return 1;
+  
+  // test to make sure that a "lonely" pt is not used
+  matrix.Clear();
+  matrix.ForceConstituentPtEquality(true);
+  matrix.ForceConstituentEtaEquality(true);
+  matrix.AddConstituentLeadInitialPt({2.0, 3.0});
+  matrix.AddConstituentSubInitialPt(2.0);
+  matrix.AddConstituentEta(1.0);
+  matrix.AddConstituentLeadMatchPt({0.2, 0.3});
+  matrix.AddConstituentSubMatchPt({0.2, 0.3});
+  matrix.Initialize();
+  
+  if (matrix.Size() != 2)
+    return 1;
   
   return 0;
 }
