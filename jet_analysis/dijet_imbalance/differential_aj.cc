@@ -361,6 +361,21 @@ int main(int argc, char* argv[]) {
     trees.insert({key, tmp});
   }
   
+  // define histograms for coincidence measurements
+  std::unordered_map<string, TH1D*> lead_jet_count_dict;
+  std::unordered_map<string, TH1D*> sublead_jet_count_dict;
+  
+  for (auto key : keys) {
+    // create a unique histogram name for each key
+    string lead_name = key + "_lead_count";
+    string sublead_name = key + "_sublead_count";
+    TH1D* lead_tmp = new TH1D(lead_name.c_str(), "count lead jets", 800, 0.5, 800.5);
+    TH1D* sublead_tmp = new TH1D(sublead_name.c_str(), "count sublead jets", 800, 0.5, 800.5);
+    
+    lead_jet_count_dict.insert({key, lead_tmp});
+    sublead_jet_count_dict.insert({key, sublead_tmp});
+  }
+  
   // initialize the efficiency class
   Run4Eff efficiency;
   
@@ -511,65 +526,73 @@ int main(int argc, char* argv[]) {
         for (auto result : worker_out) {
           std::string key = result.first;
           ClusterOutput out = result.second;
-        
-          // fill all branches for that key
-          run_id_dict[key] = header->GetRunId();
-          event_id_dict[key] = header->GetEventId();
-          vz_dict[key] = header->GetPrimaryVertexZ();
-          refmult_dict[key] = header->GetReferenceMultiplicity();
-          grefmult_dict[key] = header->GetGReferenceMultiplicity();
-          refmultcorr_dict[key] = header->GetCorrectedReferenceMultiplicity();
-          grefmultcorr_dict[key] = header->GetCorrectedGReferenceMultiplicity();
-          cent_dict[key] = centrality;
-          zdcrate_dict[key] = header->GetZdcCoincidenceRate();
-          reactionplane_dict[key] = header->GetReactionPlaneAngle();
-          nglobal_dict[key] = header->GetNGlobalTracks();
-
-          // if embedding is being done
-          if (reader_embed != nullptr) {
-            embed_runid_dict[key] = header_embed->GetRunId();
-            embed_eventid_dict[key] = header_embed->GetEventId();
-            embed_refmult_dict[key] = header_embed->GetReferenceMultiplicity();
-            embed_grefmult_dict[key] = header_embed->GetGReferenceMultiplicity();
-            embed_refmultcorr_dict[key] = header_embed->GetCorrectedReferenceMultiplicity();
-            embed_grefmultcorr_dict[key] = header_embed->GetCorrectedGReferenceMultiplicity();
-            embed_cent_dict[key] = embed_centrality;
-            embed_vz_dict[key] = header_embed->GetPrimaryVertexZ();
-            embed_zdc_dict[key] = header_embed->GetZdcCoincidenceRate();
-            embed_rp_dict[key] = header_embed->GetReactionPlaneAngle();
-          }
-    
-          // set the four jets
-          lead_hard_jet_dict[key] = TLorentzVector(out.lead_hard.px(),
-                                                   out.lead_hard.py(),
-                                                   out.lead_hard.pz(),
-                                                   out.lead_hard.E());
-          lead_hard_jet_nconst_dict[key] = out.lead_hard.constituents().size();
-          lead_hard_rho_dict[key] = out.lead_hard_rho;
-          lead_hard_sigma_dict[key] = out.lead_hard_sigma;
-          lead_match_jet_dict[key] = TLorentzVector(out.lead_match.px(),
-                                                    out.lead_match.py(),
-                                                    out.lead_match.pz(),
-                                                    out.lead_match.E());
-          lead_match_jet_nconst_dict[key] = out.lead_match.constituents().size();
-          lead_match_rho_dict[key] = out.lead_match_rho;
-          lead_match_sigma_dict[key] = out.lead_match_sigma;
-          sublead_hard_jet_dict[key] = TLorentzVector(out.sublead_hard.px(),
-                                                      out.sublead_hard.py(),
-                                                      out.sublead_hard.pz(),
-                                                      out.sublead_hard.E());
-          sublead_hard_jet_nconst_dict[key] = out.sublead_hard.constituents().size();
-          sublead_hard_rho_dict[key] = out.sublead_hard_rho;
-          sublead_hard_sigma_dict[key] = out.sublead_hard_sigma;
-          sublead_match_jet_dict[key] = TLorentzVector(out.sublead_match.px(),
-                                                       out.sublead_match.py(),
-                                                       out.sublead_match.pz(),
-                                                       out.sublead_match.E());
-          sublead_match_jet_nconst_dict[key] = out.sublead_match.constituents().size();
-          sublead_match_rho_dict[key] = out.sublead_match_rho;
-          sublead_match_sigma_dict[key] = out.sublead_match_sigma;
           
-          trees[key]->Fill();
+          if (out.found_lead)
+            lead_jet_count_dict[key]->Fill(header->GetReferenceMultiplicity());
+          if (out.found_sublead)
+            sublead_jet_count_dict[key]->Fill(header->GetReferenceMultiplicity());
+        
+          // now fill dijet results
+          if (out.found_match) {
+            // fill all branches for that key
+            run_id_dict[key] = header->GetRunId();
+            event_id_dict[key] = header->GetEventId();
+            vz_dict[key] = header->GetPrimaryVertexZ();
+            refmult_dict[key] = header->GetReferenceMultiplicity();
+            grefmult_dict[key] = header->GetGReferenceMultiplicity();
+            refmultcorr_dict[key] = header->GetCorrectedReferenceMultiplicity();
+            grefmultcorr_dict[key] = header->GetCorrectedGReferenceMultiplicity();
+            cent_dict[key] = centrality;
+            zdcrate_dict[key] = header->GetZdcCoincidenceRate();
+            reactionplane_dict[key] = header->GetReactionPlaneAngle();
+            nglobal_dict[key] = header->GetNGlobalTracks();
+
+            // if embedding is being done
+            if (reader_embed != nullptr) {
+              embed_runid_dict[key] = header_embed->GetRunId();
+              embed_eventid_dict[key] = header_embed->GetEventId();
+              embed_refmult_dict[key] = header_embed->GetReferenceMultiplicity();
+              embed_grefmult_dict[key] = header_embed->GetGReferenceMultiplicity();
+              embed_refmultcorr_dict[key] = header_embed->GetCorrectedReferenceMultiplicity();
+              embed_grefmultcorr_dict[key] = header_embed->GetCorrectedGReferenceMultiplicity();
+              embed_cent_dict[key] = embed_centrality;
+              embed_vz_dict[key] = header_embed->GetPrimaryVertexZ();
+              embed_zdc_dict[key] = header_embed->GetZdcCoincidenceRate();
+              embed_rp_dict[key] = header_embed->GetReactionPlaneAngle();
+            }
+    
+            // set the four jets
+            lead_hard_jet_dict[key] = TLorentzVector(out.lead_hard.px(),
+                                                     out.lead_hard.py(),
+                                                     out.lead_hard.pz(),
+                                                     out.lead_hard.E());
+            lead_hard_jet_nconst_dict[key] = out.lead_hard.constituents().size();
+            lead_hard_rho_dict[key] = out.lead_hard_rho;
+            lead_hard_sigma_dict[key] = out.lead_hard_sigma;
+            lead_match_jet_dict[key] = TLorentzVector(out.lead_match.px(),
+                                                      out.lead_match.py(),
+                                                      out.lead_match.pz(),
+                                                      out.lead_match.E());
+            lead_match_jet_nconst_dict[key] = out.lead_match.constituents().size();
+            lead_match_rho_dict[key] = out.lead_match_rho;
+            lead_match_sigma_dict[key] = out.lead_match_sigma;
+            sublead_hard_jet_dict[key] = TLorentzVector(out.sublead_hard.px(),
+                                                        out.sublead_hard.py(),
+                                                        out.sublead_hard.pz(),
+                                                        out.sublead_hard.E());
+            sublead_hard_jet_nconst_dict[key] = out.sublead_hard.constituents().size();
+            sublead_hard_rho_dict[key] = out.sublead_hard_rho;
+            sublead_hard_sigma_dict[key] = out.sublead_hard_sigma;
+            sublead_match_jet_dict[key] = TLorentzVector(out.sublead_match.px(),
+                                                         out.sublead_match.py(),
+                                                         out.sublead_match.pz(),
+                                                         out.sublead_match.E());
+            sublead_match_jet_nconst_dict[key] = out.sublead_match.constituents().size();
+            sublead_match_rho_dict[key] = out.sublead_match_rho;
+            sublead_match_sigma_dict[key] = out.sublead_match_sigma;
+          
+            trees[key]->Fill();
+          }
         }
       }
     }
