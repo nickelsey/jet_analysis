@@ -306,22 +306,22 @@ int main(int argc, char* argv[]) {
     case efficiencyType::None :
       std::cout << "None" << std::endl;
       break;
-    case efficiency::AuAu :
+    case efficiencyType::AuAu :
       std::cout << "AuAu" << std::endl;
       break;
-    case efficiency::PP :
+    case efficiencyType::PP :
       std::cout << "PP" << std::endl;
       break;
   }
-  std::cout << "efficiency corrections for PP: " << () << std::endl;
+  std::cout << "efficiency corrections for PP: ";
   switch (embed_efficiency) {
     case efficiencyType::None :
       std::cout << "None" << std::endl;
       break;
-    case efficiency::AuAu :
+    case efficiencyType::AuAu :
       std::cout << "AuAu" << std::endl;
       break;
-    case efficiency::PP :
+    case efficiencyType::PP :
       std::cout << "PP" << std::endl;
       break;
   }
