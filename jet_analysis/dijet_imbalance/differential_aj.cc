@@ -299,6 +299,33 @@ int main(int argc, char* argv[]) {
     }
   }
   
+  // for logging/debugging
+  std::cout << "efficiency corrections " << (do_efficiency ? "enabled" : "disabled") << std::endl;
+  std::cout << "efficiency corrections for trigger data: ";
+  switch (trigger_efficiency) {
+    case efficiencyType::None :
+      std::cout << "None" << std::endl;
+      break;
+    case efficiency::AuAu :
+      std::cout << "AuAu" << std::endl;
+      break;
+    case efficiency::PP :
+      std::cout << "PP" << std::endl;
+      break;
+  }
+  std::cout << "efficiency corrections for PP: " << () << std::endl;
+  switch (embed_efficiency) {
+    case efficiencyType::None :
+      std::cout << "None" << std::endl;
+      break;
+    case efficiency::AuAu :
+      std::cout << "AuAu" << std::endl;
+      break;
+    case efficiency::PP :
+      std::cout << "PP" << std::endl;
+      break;
+  }
+  
   // now parse analysis variables from command line arguments
   
   // first, hard code the algorithm to be anti-kt
