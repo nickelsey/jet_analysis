@@ -50,29 +50,35 @@
 
 using std::string;
 struct Options {
-  string name      = "job"; /* output file name */
-  string id        = "0";   /* job id */
-  string input     = "";    /* root file/root file list*/
-  string embed     = "";    /* root file/file list for embedding*/
-  int    reuse     = 1;     /* number of events an HT event should be embedded in */
-  string reader    = "";    /* settings file for primary reader */
-  string readeremb = "";    /* settings for embedding reader */
-  string out_dir   = "";    /* directory to save output in */
-  string tow_list  = "";    /* list of hot towers to remove */
-  string run_list  = "";    /* list of runs to remove */
-  string triggers  = "";    /* triggers to consider (see trigger_lookup.hh) */
-  string trigemb   = "";    /* triggers to consider for embedding (should be mb) */
-  string const_eta = "";    /* constituent eta cut */
-  string lc_pt     = "";    /* leading hard constituent pt cut */
-  string sc_pt     = "";    /* subleading hard constituent pt cut */
-  string lcm_pt    = "";    /* leading matched constituent pt cut */
-  string scm_pt    = "";    /* subleading matched constituent pt cut */
-  string lead_r    = "";    /* lead jet radii */
-  string sub_r     = "";    /* sublead jet radii */
-  string lj_pt     = "";    /* leading hard jet pt cut */
-  string sj_pt     = "";    /* subleading hard jet pt cut */
-  int apply_effic  =  0;    /* whether or not to do efficiency corrections */
+  string name        = "job"; /* output file name */
+  string id          = "0";   /* job id */
+  string input       = "";    /* root file/root file list*/
+  string embed       = "";    /* root file/file list for embedding*/
+  int    reuse       = 1;     /* number of events an HT event should be embedded in */
+  string reader      = "";    /* settings file for primary reader */
+  string readeremb   = "";    /* settings for embedding reader */
+  string out_dir     = "";    /* directory to save output in */
+  string tow_list    = "";    /* list of hot towers to remove */
+  string run_list    = "";    /* list of runs to remove */
+  string triggers    = "";    /* triggers to consider (see trigger_lookup.hh) */
+  string trigemb     = "";    /* triggers to consider for embedding (should be mb) */
+  string const_eta   = "";    /* constituent eta cut */
+  string lc_pt       = "";    /* leading hard constituent pt cut */
+  string sc_pt       = "";    /* subleading hard constituent pt cut */
+  string lcm_pt      = "";    /* leading matched constituent pt cut */
+  string scm_pt      = "";    /* subleading matched constituent pt cut */
+  string lead_r      = "";    /* lead jet radii */
+  string sub_r       = "";    /* sublead jet radii */
+  string lj_pt       = "";    /* leading hard jet pt cut */
+  string sj_pt       = "";    /* subleading hard jet pt cut */
+  int apply_effic    =  0;    /* whether or not to do efficiency corrections */
+  string trig_effic  = "";    /* auau or pp, defines if trigger efficiency corrections
+                                 are done assuming pp input or AuAu input */
+  string embed_effic = "";    /* auau or pp, defines if trigger efficiency corrections
+                                 are done assuming pp input or AuAu input */
 };
+
+enum class efficiencyType {None = 100, AuAu = 101, PP = 102};
 
 int main(int argc, char* argv[]) {
   
@@ -92,6 +98,8 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseStrFlag(string(argv[i]), "--embedTriggers", &opts.trigemb) ||
         ParseIntFlag(string(argv[i]), "--efficiency", &opts.apply_effic) ||
+        ParseStrFlag(string(argv[i]), "--triggerEfficiency", &opts.trig_effic) ||
+        ParseStrFlag(string(argv[i]), "--embedEfficiency", &opts.embed_effic) ||
         ParseStrFlag(string(argv[i]), "--constEta", &opts.const_eta) ||
         ParseStrFlag(string(argv[i]), "--leadConstPt", &opts.lc_pt) ||
         ParseStrFlag(string(argv[i]), "--subConstPt", &opts.sc_pt) ||
@@ -114,16 +122,13 @@ int main(int argc, char* argv[]) {
   
   // check to make sure the input file paths are sane
   if (!boost::filesystem::exists(opts.input)) {
-    std::cerr << "input root file does not exist: ";
-    std::cerr << opts.input << std::endl;
-    std::cerr << "exiting" << std::endl;
+    std::cerr << "input root file does not exist: " << opts.input << std::endl;;
     return 1;
   }
   
   if (!boost::filesystem::exists(opts.embed) && !opts.embed.empty()) {
-    std::cerr << "input embedding file specified but doesn't exist:";
-    std::cerr << opts.embed << std::endl;
-    std::cerr << "exiting" << std::endl;
+    std::cerr << "input embedding file specified but doesn't exist: "
+              << opts.embed << std::endl;
     return 1;
   }
   
@@ -133,8 +138,7 @@ int main(int argc, char* argv[]) {
   TChain* chain = NewChainFromInput(opts.input);
   TChain* embed_chain = NewChainFromInput(opts.embed);
   
-  // build output directory if it doesn't exist
-  // using the boost::filesystem library
+  // build output directory if it doesn't exist, using boost::filesystem
   if (opts.out_dir.empty())
     opts.out_dir = "tmp";
   boost::filesystem::path dir(opts.out_dir.c_str());
@@ -167,8 +171,8 @@ int main(int argc, char* argv[]) {
                              opts.run_list);
     }
     
-    // I currently use all MB available data for embedding, so we want to start
-    // each job with a different initial embedding event
+    // its possible to use all MB available data for embedding, so we want to start
+    // each job with a different initial embedding event, to avoid reuse
     double prob_min = 0.0;
     double prob_max = reader_embed->GetNOfEvents() - 1;
     std::random_device generator;
@@ -194,6 +198,105 @@ int main(int argc, char* argv[]) {
     for (auto i : embed_triggers)
       std::cout << i << " ";
     std::cout << std::endl;
+  }
+  
+  // sort out efficiency corrections - if embedEfficiency or triggerEfficiency
+  // are not specified, use heuristics
+  // heuristic 1: if embedding is specified, assume trigger data is pp
+  //              and embedding is AuAu (y14)
+  // heuristic 2: if embedding is not specified, look at the file path,
+  //              for the input and check for strings 'pp' or 'auau'
+  // heuristic 3: assume AuAu
+  
+  bool do_efficiency = static_cast<bool>(opts.apply_effic);
+  efficiencyType trigger_efficiency = efficiencyType::None;
+  efficiencyType embed_efficiency = efficiencyType::None;
+  
+  if (do_efficiency) {
+    if (opts.trig_effic != "") {
+      string tmp = opts.trig_effic;
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
+      
+      // check if user input specified auau or pp or none
+      if (tmp.find("auau") != string::npos)
+        trigger_efficiency = efficiencyType::AuAu;
+      
+      else if (tmp.find("pp") != string::npos)
+        trigger_efficiency = efficiencyType::PP;
+      
+      else if (tmp.find("none") != string::npos)
+        trigger_efficiency = efficiencyType::None;
+      
+      // check if embedding data was given; if so, assume trigger is PP
+      else if (reader_embed != nullptr)
+        trigger_efficiency = efficiencyType::PP;
+      
+      // check if input file path contains a 'hint', either AuAu or PP
+      else if (opts.input.find("AuAu") != string::npos ||
+               opts.input.find("auau") != string::npos) {
+        trigger_efficiency = efficiencyType::AuAu;
+      }
+      else if (opts.input.find("PP") != string::npos ||
+               opts.input.find("pp") != string::npos) {
+        trigger_efficiency = efficiencyType::PP;
+      }
+      
+      // if not, assume the source is AuAu
+      else
+        trigger_efficiency = efficiencyType::AuAu;
+    }
+    
+    // if nothing was specified by the user, use the same heuristics
+    // check if embedding is being done, assume the trigger
+    // data is pp if it is
+    else {
+      // check if embedding data was given; if so, assume trigger is PP
+      if (reader_embed != nullptr)
+        trigger_efficiency = efficiencyType::PP;
+      
+      // check if input file path contains a 'hint', either AuAu or PP
+      else if (opts.input.find("AuAu") != string::npos ||
+               opts.input.find("auau") != string::npos) {
+        trigger_efficiency = efficiencyType::AuAu;
+      }
+      else if (opts.input.find("PP") != string::npos ||
+               opts.input.find("pp") != string::npos) {
+        trigger_efficiency = efficiencyType::PP;
+      }
+      
+      // if not, assume the source is AuAu
+      else
+        trigger_efficiency = efficiencyType::AuAu;
+    }
+    
+    // do a similar calculation for the embedding data
+    if (opts.embed_effic != "" && reader_embed != nullptr) {
+      string tmp = opts.embed_effic;
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
+      
+      if (tmp.find("auau") != string::npos)
+        embed_efficiency = efficiencyType::AuAu;
+      
+      else if (tmp.find("pp") != string::npos)
+        embed_efficiency = efficiencyType::PP;
+      
+      else if (tmp.find("none") != string::npos)
+        embed_efficiency = efficiencyType::None;
+      
+      else
+        embed_efficiency = efficiencyType::AuAu;
+    }
+    
+    // if embedding data was given, assume it is AuAu. If not,
+    // then this is doesn't matter and set it to none, since there
+    // is no embedding...
+    else {
+      if (reader_embed != nullptr)
+        embed_efficiency = efficiencyType::AuAu;
+      
+      else
+        embed_efficiency = efficiencyType::None;
+    }
   }
   
   // now parse analysis variables from command line arguments
@@ -222,13 +325,15 @@ int main(int argc, char* argv[]) {
                      lead_const_hard_pt, lead_const_match_pt, sublead_const_hard_pt,
                      sublead_const_match_pt, const_eta);
   worker.Initialize();
-  std::cout << "worker initialized - number of dijet definitions: " << worker.Size() <<std::endl;
+  std::cout << "worker initialized - number of dijet definitions: "
+            << worker.Size() <<std::endl;
   std::set<std::string> keys = worker.Keys();
   for (auto key : keys)
     std::cout << key << std::endl;
   
   // create an output tree for each definition
   std::unordered_map<std::string, std::shared_ptr<TTree>> trees;
+  
   // and the necessary branches
   std::unordered_map<std::string, int> run_id_dict;
   std::unordered_map<std::string, int> event_id_dict;
@@ -241,6 +346,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<std::string, double> zdcrate_dict;
   std::unordered_map<std::string, double> reactionplane_dict;
   std::unordered_map<std::string, int> nglobal_dict;
+  std::unordered_map<std::string, int> npart_dict;
   std::unordered_map<std::string, TLorentzVector> lead_hard_jet_dict;
   std::unordered_map<std::string, int> lead_hard_jet_nconst_dict;
   std::unordered_map<std::string, double> lead_hard_rho_dict;
@@ -257,6 +363,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<std::string, int> sublead_match_jet_nconst_dict;
   std::unordered_map<std::string, double> sublead_match_rho_dict;
   std::unordered_map<std::string, double> sublead_match_sigma_dict;
+  
   // if embedding is being done
   std::unordered_map<std::string, int> embed_runid_dict;
   std::unordered_map<std::string, int> embed_eventid_dict;
@@ -265,9 +372,11 @@ int main(int argc, char* argv[]) {
   std::unordered_map<std::string, double> embed_refmultcorr_dict;
   std::unordered_map<std::string, double> embed_grefmultcorr_dict;
   std::unordered_map<std::string, int> embed_cent_dict;
+  std::unordered_map<std::string, int> embed_npart_dict;
   std::unordered_map<std::string, double> embed_vz_dict;
   std::unordered_map<std::string, double> embed_zdc_dict;
   std::unordered_map<std::string, double> embed_rp_dict;
+  
   // fill the maps first, so that they don't decide to resize/move themselves
   // after branch creation...
   for (auto key : keys) {
@@ -282,6 +391,7 @@ int main(int argc, char* argv[]) {
     zdcrate_dict.insert({key, 0});
     reactionplane_dict.insert({key, 0});
     nglobal_dict.insert({key, 0});
+    npart_dict.insert({key, 0});
     lead_hard_jet_dict.insert({key, TLorentzVector()});
     lead_hard_jet_nconst_dict.insert({key, 0});
     lead_hard_rho_dict.insert({key, 0});
@@ -310,6 +420,7 @@ int main(int argc, char* argv[]) {
       embed_grefmult_dict.insert({key, 0});
       embed_refmultcorr_dict.insert({key, 0});
       embed_grefmultcorr_dict.insert({key, 0});
+      embed_npart_dict.insert({key, 0});
     }
   }
   
@@ -328,6 +439,7 @@ int main(int argc, char* argv[]) {
     tmp->Branch("zdcrate", &zdcrate_dict[key]);
     tmp->Branch("rp", &reactionplane_dict[key]);
     tmp->Branch("nglobal", &nglobal_dict[key]);
+    tmp->Branch("npart", &npart_dict[key]);
     tmp->Branch("jl", &lead_hard_jet_dict[key]);
     tmp->Branch("js", &sublead_hard_jet_dict[key]);
     tmp->Branch("jlm", &lead_match_jet_dict[key]);
@@ -353,6 +465,7 @@ int main(int argc, char* argv[]) {
       tmp->Branch("embed_refmultcorr", &embed_refmultcorr_dict[key]);
       tmp->Branch("embed_grefmultcorr", &embed_grefmultcorr_dict[key]);
       tmp->Branch("embed_cent", &embed_cent_dict[key]);
+      tmp->Branch("embed_npart", &embed_npart_dict[key]);
       tmp->Branch("embed_rp", &embed_rp_dict[key]);
       tmp->Branch("embed_zdcrate", &embed_zdc_dict[key]);
       tmp->Branch("embed_vz", &embed_vz_dict[key]);
@@ -392,6 +505,7 @@ int main(int argc, char* argv[]) {
   double prob_min = 0.0;
   double prob_max = 1.0;
   std::uniform_real_distribution<> flat_probability(prob_min, prob_max);
+  
   // create the generator
   // standard mersenne_twister_engine seeded with a constant,
   // so that it is reproducible
@@ -425,15 +539,13 @@ int main(int argc, char* argv[]) {
       // get event reference centrality
       int centrality = 0;
       int eff_corr_cent = 0; // used for efficiency corrections
-      for (unsigned i = 0; i < refcent_def.size(); ++i)
+      for (unsigned i = 0; i < refcent_def.size(); ++i) {
         if (header->GetReferenceMultiplicity() > refcent_def[i]) {
           centrality = i;
           break;
         }
-      if (centrality > 8)
-        eff_corr_cent = 8;
-      else
-        eff_corr_cent = centrality;
+      }
+      eff_corr_cent = (centrality > 8 ? 8 : centrality);
       
       // get the vector container
       TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
@@ -457,18 +569,22 @@ int main(int argc, char* argv[]) {
         // discard tracks randomly by the ratio of efficiencies
         // either between AuAu of different centralities, or between
         // AuAu of a specific centrality and PP
-        if (opts.apply_effic) {
-          if (reader_embed == nullptr) {
+        if (do_efficiency) {
+          if (trigger_efficiency == efficiencyType::AuAu) {
             for (auto vec : primary_particles) {
               if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
                   input.push_back(vec);
             }
           }
-          else {
+          else if (trigger_efficiency == efficiencyType::PP) {
             for (auto vec : primary_particles) {
               if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
                 input.push_back(vec);
             }
+          }
+          else {
+            input = std::vector<fastjet::PseudoJet>(primary_particles.begin(),
+                                                    primary_particles.end());
           }
         }
         // if no efficiency correction is being applied, copy the full set of particles
@@ -477,9 +593,10 @@ int main(int argc, char* argv[]) {
                                                   primary_particles.end());
         }
         
+        // if embedding is requested, add to the input
         int embed_centrality = 0;
         int eff_corr_embed_cent = 0;
-        // if embedding is requested, add to the input
+        std::vector<fastjet::PseudoJet> embed_particles;
         if (reader_embed != nullptr) {
           // read next event, loop to event 0 if needed
           if (!GetNextValidEvent(reader_embed, embed_triggers)) {
@@ -487,20 +604,17 @@ int main(int argc, char* argv[]) {
             return 1;
           }
         
-        // get the centrality definition of the embedding data
-        for (unsigned i = 0; i < refcent_def.size(); ++i)
-          if (header_embed->GetReferenceMultiplicity() > refcent_def[i]) {
-            embed_centrality = i;
-            break;
+          // get the centrality definition of the embedding data
+          for (unsigned i = 0; i < refcent_def.size(); ++i) {
+            if (header_embed->GetReferenceMultiplicity() > refcent_def[i]) {
+              embed_centrality = i;
+              break;
+            }
           }
-          if (embed_centrality > 8)
-            eff_corr_embed_cent = 8;
-          else
-            eff_corr_embed_cent = embed_centrality;
+          eff_corr_embed_cent = (embed_centrality > 8 ? 8 : embed_centrality);
         
           // get the vector container for embedding
           TStarJetVectorContainer<TStarJetVector>* container_embed = reader_embed->GetOutputContainer();
-          std::vector<fastjet::PseudoJet> embed_particles;
           ConvertTStarJetVector(container_embed, embed_particles);
         
           // again, apply minimal kinematic cuts
@@ -509,10 +623,20 @@ int main(int argc, char* argv[]) {
           // if relative tracking efficiency smearing is requested,
           // discard tracks randomly by the ratio of efficiencies
           // it is assumed that the embedding event is AuAu
-          if (opts.apply_effic) {
-            for (auto vec : embed_particles)
-              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
-                input.push_back(vec);
+          if (do_efficiency) {
+            if (embed_efficiency == efficiencyType::AuAu) {
+              for (auto vec : embed_particles)
+                if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
+                  input.push_back(vec);
+            }
+            else if (embed_efficiency == efficiencyType::PP) {
+              for (auto vec : embed_particles)
+                if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
+                  input.push_back(vec);
+            }
+            else {
+              input.insert(input.end(), embed_particles.begin(), embed_particles.end());
+            }
           }
           else {
             input.insert(input.end(), embed_particles.begin(), embed_particles.end());
@@ -546,6 +670,7 @@ int main(int argc, char* argv[]) {
             zdcrate_dict[key] = header->GetZdcCoincidenceRate();
             reactionplane_dict[key] = header->GetReactionPlaneAngle();
             nglobal_dict[key] = header->GetNGlobalTracks();
+            npart_dict[key] = primary_particles.size();
 
             // if embedding is being done
             if (reader_embed != nullptr) {
@@ -559,6 +684,7 @@ int main(int argc, char* argv[]) {
               embed_vz_dict[key] = header_embed->GetPrimaryVertexZ();
               embed_zdc_dict[key] = header_embed->GetZdcCoincidenceRate();
               embed_rp_dict[key] = header_embed->GetReactionPlaneAngle();
+              embed_npart_dict[key] = embed_particles.size();
             }
     
             // set the four jets

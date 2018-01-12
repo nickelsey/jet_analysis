@@ -104,6 +104,27 @@ def main(args) :
   
   ## count the number of qsub submission failures
   qsubfail = 0
+
+  ## select defaults
+  embedTrig = ''
+  if args.embedTriggers is not None :
+    embedTrig = args.embedTriggers
+
+  reader = ''
+  if args.readerSetting is not None :
+    reader = args.readerSetting
+
+  embedReader = ''
+  if args.embedReaderSetting is not None :
+    embedReader = args.embedReaderSetting
+
+  triggerEfficiency = ''
+  if args.triggerEfficiency is not None :
+    triggerEfficiency = args.triggerEfficiency
+
+  embedEfficiency = ''
+  if args.embedEfficiency is not None :
+    embedEfficiency = args.embedEfficiency
   
   while checkstatus(jobstatus) :
     
@@ -139,17 +160,6 @@ def main(args) :
       ## select embedding data randomly
       embed_choice = random.choice(embedding_list)
 
-      ## select defaults
-      embedTrig = ''
-      if args.embedTriggers is not None :
-        embedTrig = args.embedTriggers
-      reader = ''
-      if args.readerSetting is not None :
-        reader = args.readerSetting
-      embedReader = ''
-      if args.embedReaderSetting is not None :
-        embedReader = args.embedReaderSetting
-
       ## build our qsub execution string
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --efficiency=' +str(args.efficiency)
@@ -161,7 +171,8 @@ def main(args) :
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
       clargs = clargs + ' --readerSetting=' + reader + ' --embedReaderSetting='
       clargs = clargs + embedReader + ' --reuseTrigger=' + str(args.reuseTrigger)
-      clargs = clargs + ' --embed=' + embed_choice
+      clargs = clargs + ' --embed=' + embed_choice + ' --triggerEfficiency=' + triggerEfficiency
+      clargs = clargs + ' --embedEfficiency=' + embedEfficiency
 
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
@@ -200,7 +211,9 @@ if __name__ == "__main__":
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
-  parser.add_argument('--efficiency', default='0', help='apply a relative efficiency correction to compare all species/centralities at effective 0-5% AuAu efficiency')
+  parser.add_argument('--efficiency', default='0', help='apply a relative efficiency correction to compare all species/centralities at effective 0-5% AuAu efficiency. If [trigger/embed]Efficiency are not specified, they are deduced')
+  parser.add_argument('--triggerEfficiency', default=None, help='defines if efficiency corrections for trigger data are to be done with PP or AuAu efficiency curves, "NONE" to disable trigger but still apply embedding corrections')
+  parser.add_argument('--embedEfficiency', default=None, help='defines if efficiency corrections for embed data are to be done with PP or AuAu efficiency curves, "NONE" to disable embedding but apply trigger corrections')
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='y14ht', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
