@@ -228,7 +228,7 @@ if __name__ == "__main__":
   parser.add_argument('--pp', default=None, help='specify that trigger data is pp')
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
-  parser.add_argument('--triggers', default='y14ht', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
+  parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
   parser.add_argument('--embedTriggers', default=None, help=' event triggers to consider for embedding data (see above for options)')
   parser.add_argument('--embed', default=None, help='list file containing root files for pp embedding, not used for AuAu')
   parser.add_argument('--reuseTrigger', type=int, default=1, help='[for pp] how many times a pp event should be embedded')

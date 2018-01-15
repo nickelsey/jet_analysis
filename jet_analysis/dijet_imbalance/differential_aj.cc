@@ -19,6 +19,7 @@
 #include "TFile.h"
 #include "TH2.h"
 #include "TH1.h"
+#include "TProfile2D.h"
 
 #include "TStarJetPicoReader.h"
 #include "TStarJetPicoEvent.h"
@@ -395,6 +396,16 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH1D*> lead_jet_count_dict;
   std::unordered_map<string, TH1D*> sublead_jet_count_dict;
   
+  TProfile2D* pp_eff_ratio = new TProfile2D("pp_eff_ratio",
+                                            "average pp efficiency ratio;p_{T};centrality;ratio",
+                                            200, 0, 10, -0.5, 8.5);
+  TProfile2D* auau_eff_ratio  = new TProfile2D("auau_eff_ratio",
+                                               "average auau efficiency ratio;p_{T};centrality;ratio",
+                                               200, 0, 10, -0.5, 8.5);
+  TProfile2D* embed_eff_ratio  = new TProfile2D("embed_eff_ratio",
+                                                "average embed efficiency ratio;p_{T};centrality;ratio",
+                                                200, 0, 10, -0.5, 8.5);
+  
   for (auto key : keys) {
     // create a unique histogram name for each key
     string lead_name = key + "_lead_count";
@@ -561,9 +572,12 @@ int main(int argc, char* argv[]) {
           // discard tracks randomly by the ratio of efficiencies
           // it is assumed that the embedding event is AuAu
           if (embed_efficiency == efficiencyType::AuAu) {
-            for (auto vec : embed_particles)
-              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
+            for (auto vec : embed_particles) {
+              double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference);
+              embed_eff_ratio->Fill(vec.pt(), eff_corr_embed_cent, ratio);
+              if (ratio > flat_probability(gen))
                 input.push_back(vec);
+            }
           }
           else {
             input.insert(input.end(), embed_particles.begin(), embed_particles.end());
@@ -596,16 +610,21 @@ int main(int argc, char* argv[]) {
         switch (trigger_efficiency) {
           case efficiencyType::AuAu :
             for (auto vec : primary_particles) {
-              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
+              double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference);
+              auau_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
+              if (ratio > flat_probability(gen))
                 input.push_back(vec);
             }
             break;
             
           case efficiencyType::PP :
             if (eff_corr_embed_cent >= 0) {
-              for (auto vec : primary_particles)
-                if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent) > flat_probability(gen))
+              for (auto vec : primary_particles) {
+                double ratio = efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent);
+                pp_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
+                if (ratio > flat_probability(gen))
                   input.push_back(vec);
+              }
             }
             
           case efficiencyType::None :
