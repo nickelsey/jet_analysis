@@ -134,6 +134,8 @@ def main(args) :
     extraOpts = extraOpts + ' --embedEfficiency'
   if args.pp :
     extraOpts = extraOpts + ' --pp'
+  if args.ForcePPEffCent is not None :
+    extraOpts = extraOpts + ' --forcePPCent=' + str(args.ForcePPEffCent)
   
   while checkstatus(jobstatus) :
     
@@ -229,6 +231,7 @@ if __name__ == "__main__":
   parser.add_argument('--no_pp', dest='pp', action='store_false')
   parser.add_argument('--auau', dest='pp', action='store_false')
   parser.set_defaults(pp=False)
+  parser.add_argument('--ForcePPEffCent', default=None, help='if efficiency corrections are on, forces the centrality for pp corrections. If not on, the centrality is calculated from embedding, or chosen randomly')
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
