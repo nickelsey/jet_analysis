@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--outDir", &opts.out_dir) ||
         ParseStrFlag(string(argv[i]), "--inFile", &opts.in_file)) continue;
     std::cerr << "unknown command line option: " << argv[i] << std::endl;
+    return 1;
   }
   
   // build output directory if it doesn't exist, using boost::filesystem
@@ -64,10 +65,13 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < opts.nbins; ++i) {
     h_aj.push_back((TH1D*) in.Get(MakeString("aj_", i).c_str()));
     h_aj[i]->Scale(1.0/h_aj[i]->Integral());
+    h_aj[i]->Rebin(2);
     h_count1.push_back((TH1D*) in.Get(MakeString("npa_", i).c_str()));
     h_count1[i]->Scale(1.0/h_count1[i]->Integral());
+    h_count1[i]->Rebin(2);
     h_count2.push_back((TH1D*) in.Get(MakeString("npb_", i).c_str()));
     h_count2[i]->Scale(1.0/h_count2[i]->Integral());
+    h_count2[i]->Rebin(2);
   }
   
   eff_strings.resize(opts.nbins);

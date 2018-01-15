@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
         ParseIntFlag(string(argv[i]), "--eventsPerBin", &opts.ev) ||
         ParseIntFlag(string(argv[i]), "--id", &opts.id)) continue;
     std::cerr << "unknown command line option: " << argv[i] << std::endl;
+    return 1;
   }
   
   // build output directory if it doesn't exist, using boost::filesystem

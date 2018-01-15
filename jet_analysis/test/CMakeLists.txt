@@ -84,6 +84,11 @@ add_executable(run4_eff_test ${RUN4_EFF_TESTING_SRCS})
 target_link_libraries(run4_eff_test ${ROOT_LIBRARIES} Efficiency)
 set_target_properties(run4_eff_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test)
 
+set(PT_DIST_TESTING_SRCS pt_distribution_test.cc)
+add_executable(pt_distribution_test ${PT_DIST_TESTING_SRCS})
+target_link_libraries(pt_distribution_test ${ROOT_LIBRARIES})
+set_target_properties(pt_distribution_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/test)
+
 
 #########################################
 ## Add tests
@@ -101,6 +106,7 @@ add_test(NAME dijet_matrix COMMAND dijet_matrix_test)
 add_test(NAME dijet_worker COMMAND dijet_worker_test)
 add_test(NAME reader_util COMMAND reader_util_test)
 add_test(NAME run4_eff COMMAND run4_eff_test)
+add_test(NAME pt_dist_test COMMAND pt_distribution_test)
 
 #########################################
 ## install targets
@@ -116,6 +122,8 @@ install(TARGETS dijet_matrix_test dijet_worker_test
          DESTINATION bin/test)
 install(TARGETS reader_util_test run4_eff_test
          DESTINATION bin/test)
+install(TARGETS pt_distribution_test
+        DESTINATION bin/test)
 
 ## install the configured targets
 install(FILES ${CMAKE_BINARY_DIR}/jet_analysis/test/reader_util_test.cc
