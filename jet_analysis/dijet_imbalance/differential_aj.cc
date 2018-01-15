@@ -71,11 +71,11 @@ struct Options {
   string sub_r       = "";    /* sublead jet radii */
   string lj_pt       = "";    /* leading hard jet pt cut */
   string sj_pt       = "";    /* subleading hard jet pt cut */
-  int apply_effic    =  0;    /* whether or not to do efficiency corrections */
-  string trig_effic  = "";    /* auau or pp, defines if trigger efficiency corrections
-                                 are done assuming pp input or AuAu input */
-  string embed_effic = "";    /* auau or pp, defines if trigger efficiency corrections
-                                 are done assuming pp input or AuAu input */
+  bool trig_effic    = false; /* turn on efficiency corrections for trigger data */
+  bool embed_effic   = false; /* turn on efficiency corrections for embedding data */
+  bool trig_is_pp    = false; /* trigger data is PP*/
+  int force_pp_cent  = -1;    /* if you want pp to be compared at a specific centrality */
+  
 };
 
 enum class efficiencyType {None = 100, AuAu = 101, PP = 102};
@@ -97,9 +97,11 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseStrFlag(string(argv[i]), "--embedTriggers", &opts.trigemb) ||
-        ParseIntFlag(string(argv[i]), "--efficiency", &opts.apply_effic) ||
-        ParseStrFlag(string(argv[i]), "--triggerEfficiency", &opts.trig_effic) ||
-        ParseStrFlag(string(argv[i]), "--embedEfficiency", &opts.embed_effic) ||
+        ParseBoolFlag(string(argv[i]), "--efficiency", &opts.trig_effic) ||
+        ParseBoolFlag(string(argv[i]), "--embedEfficiency", &opts.embed_effic) ||
+        ParseBoolFlag(string(argv[i]), "--PP", &opts.trig_is_pp) ||
+        ParseBoolFlag(string(argv[i]), "--pp", &opts.trig_is_pp) ||
+        ParseIntFlag(string(argv[i]), "--forcePPCent", &opts.force_pp_cent) ||
         ParseStrFlag(string(argv[i]), "--constEta", &opts.const_eta) ||
         ParseStrFlag(string(argv[i]), "--leadConstPt", &opts.lc_pt) ||
         ParseStrFlag(string(argv[i]), "--subConstPt", &opts.sc_pt) ||
@@ -113,12 +115,21 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   
+  // reader & environment initialization
+  // -----------------------------------
+  
   // sanity check - if no embedding is specified,
+  // and no efficiency corrections are applied to trigger,
   // triggers can't be reused (just double counting at
   // that point). Also make sure its >= 1, so it doesn't
   // break...
-  if (opts.embed.empty() || opts.reuse < 1)
+  if ((opts.embed.empty() && !opts.trig_effic) || opts.reuse < 1)
     opts.reuse = 1;
+  
+  // second sanity check - if embedding is specified, we
+  // are using PP for the trigger
+  if (!opts.embed.empty())
+    opts.trig_is_pp = true;
   
   // check to make sure the input file paths are sane
   if (!boost::filesystem::exists(opts.input)) {
@@ -200,133 +211,8 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
   }
   
-  // sort out efficiency corrections - if embedEfficiency or triggerEfficiency
-  // are not specified, use heuristics
-  // heuristic 1: if embedding is specified, assume trigger data is pp
-  //              and embedding is AuAu (y14)
-  // heuristic 2: if embedding is not specified, look at the file path,
-  //              for the input and check for strings 'pp' or 'auau'
-  // heuristic 3: assume AuAu
-  
-  bool do_efficiency = static_cast<bool>(opts.apply_effic);
-  efficiencyType trigger_efficiency = efficiencyType::None;
-  efficiencyType embed_efficiency = efficiencyType::None;
-  
-  if (do_efficiency) {
-    if (opts.trig_effic != "") {
-      string tmp = opts.trig_effic;
-      std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
-      
-      // check if user input specified auau or pp or none
-      if (tmp.find("auau") != string::npos)
-        trigger_efficiency = efficiencyType::AuAu;
-      
-      else if (tmp.find("pp") != string::npos)
-        trigger_efficiency = efficiencyType::PP;
-      
-      else if (tmp.find("none") != string::npos)
-        trigger_efficiency = efficiencyType::None;
-      
-      // check if embedding data was given; if so, assume trigger is PP
-      else if (reader_embed != nullptr)
-        trigger_efficiency = efficiencyType::PP;
-      
-      // check if input file path contains a 'hint', either AuAu or PP
-      else if (opts.input.find("AuAu") != string::npos ||
-               opts.input.find("auau") != string::npos) {
-        trigger_efficiency = efficiencyType::AuAu;
-      }
-      else if (opts.input.find("PP") != string::npos ||
-               opts.input.find("pp") != string::npos) {
-        trigger_efficiency = efficiencyType::PP;
-      }
-      
-      // if not, assume the source is AuAu
-      else
-        trigger_efficiency = efficiencyType::AuAu;
-    }
-    
-    // if nothing was specified by the user, use the same heuristics
-    // check if embedding is being done, assume the trigger
-    // data is pp if it is
-    else {
-      // check if embedding data was given; if so, assume trigger is PP
-      if (reader_embed != nullptr)
-        trigger_efficiency = efficiencyType::PP;
-      
-      // check if input file path contains a 'hint', either AuAu or PP
-      else if (opts.input.find("AuAu") != string::npos ||
-               opts.input.find("auau") != string::npos) {
-        trigger_efficiency = efficiencyType::AuAu;
-      }
-      else if (opts.input.find("PP") != string::npos ||
-               opts.input.find("pp") != string::npos) {
-        trigger_efficiency = efficiencyType::PP;
-      }
-      
-      // if not, assume the source is AuAu
-      else
-        trigger_efficiency = efficiencyType::AuAu;
-    }
-    
-    // do a similar calculation for the embedding data
-    if (opts.embed_effic != "" && reader_embed != nullptr) {
-      string tmp = opts.embed_effic;
-      std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
-      
-      if (tmp.find("auau") != string::npos)
-        embed_efficiency = efficiencyType::AuAu;
-      
-      else if (tmp.find("pp") != string::npos)
-        embed_efficiency = efficiencyType::PP;
-      
-      else if (tmp.find("none") != string::npos)
-        embed_efficiency = efficiencyType::None;
-      
-      else
-        embed_efficiency = efficiencyType::AuAu;
-    }
-    
-    // if embedding data was given, assume it is AuAu. If not,
-    // then this is doesn't matter and set it to none, since there
-    // is no embedding...
-    else {
-      if (reader_embed != nullptr)
-        embed_efficiency = efficiencyType::AuAu;
-      
-      else
-        embed_efficiency = efficiencyType::None;
-    }
-  }
-  
-  // for logging/debugging
-  std::cout << "efficiency corrections " << (do_efficiency ? "enabled" : "disabled") << std::endl;
-  std::cout << "efficiency corrections for trigger data: ";
-  switch (trigger_efficiency) {
-    case efficiencyType::None :
-      std::cout << "None" << std::endl;
-      break;
-    case efficiencyType::AuAu :
-      std::cout << "AuAu" << std::endl;
-      break;
-    case efficiencyType::PP :
-      std::cout << "PP" << std::endl;
-      break;
-  }
-  std::cout << "efficiency corrections for PP: ";
-  switch (embed_efficiency) {
-    case efficiencyType::None :
-      std::cout << "None" << std::endl;
-      break;
-    case efficiencyType::AuAu :
-      std::cout << "AuAu" << std::endl;
-      break;
-    case efficiencyType::PP :
-      std::cout << "PP" << std::endl;
-      break;
-  }
-  
-  // now parse analysis variables from command line arguments
+  // parse jetfinding variables
+  // --------------------------
   
   // first, hard code the algorithm to be anti-kt
   std::set<fastjet::JetAlgorithm> alg{fastjet::antikt_algorithm};
@@ -359,6 +245,8 @@ int main(int argc, char* argv[]) {
     std::cout << key << std::endl;
   
   // create an output tree for each definition
+  // -----------------------------------------
+  
   std::unordered_map<std::string, std::shared_ptr<TTree>> trees;
   
   // and the necessary branches
@@ -501,7 +389,9 @@ int main(int argc, char* argv[]) {
     trees.insert({key, tmp});
   }
   
-  // define histograms for coincidence measurements
+  // histograms
+  // ----------
+  
   std::unordered_map<string, TH1D*> lead_jet_count_dict;
   std::unordered_map<string, TH1D*> sublead_jet_count_dict;
   
@@ -516,6 +406,47 @@ int main(int argc, char* argv[]) {
     sublead_jet_count_dict.insert({key, sublead_tmp});
   }
   
+  // Efficiency corrections
+  // ----------------------
+  efficiencyType trigger_efficiency = efficiencyType::None;
+  efficiencyType embed_efficiency   = efficiencyType::None;
+  
+  if (opts.embed_effic)
+    embed_efficiency = efficiencyType::AuAu;
+  if (opts.trig_effic && opts.trig_is_pp)
+    trigger_efficiency = efficiencyType::PP;
+  else if (opts.trig_effic)
+    trigger_efficiency = efficiencyType::AuAu;
+  
+  
+  // for logging/debugging
+  std::cout << "efficiency corrections " << (opts.trig_effic || opts.embed_effic ?
+                                             "enabled" : "disabled") << std::endl;
+  std::cout << "efficiency corrections for trigger data: ";
+  switch (trigger_efficiency) {
+    case efficiencyType::None :
+      std::cout << "None" << std::endl;
+      break;
+    case efficiencyType::AuAu :
+      std::cout << "AuAu" << std::endl;
+      break;
+    case efficiencyType::PP :
+      std::cout << "PP" << std::endl;
+      break;
+  }
+  std::cout << "efficiency corrections for embedding data: ";
+  switch (embed_efficiency) {
+    case efficiencyType::None :
+      std::cout << "None" << std::endl;
+      break;
+    case efficiencyType::AuAu :
+      std::cout << "AuAu" << std::endl;
+      break;
+    case efficiencyType::PP :
+      std::cerr << "logic error: embedding shouldn't have pp efficiencies" << std::endl;
+      return 1;
+      break;
+  }
   // initialize the efficiency class
   Run4Eff efficiency;
   
@@ -542,6 +473,8 @@ int main(int argc, char* argv[]) {
   fastjet::Selector track_pt_min_selector = fastjet::SelectorPtMin(0.2) && fastjet::SelectorAbsRapMax(1.0);
   
   // start the analysis loop
+  // -----------------------
+  
   try {
     while (reader->NextEvent()) {
       // Print out reader status every 10 seconds
@@ -566,8 +499,9 @@ int main(int argc, char* argv[]) {
       // get event reference centrality
       int centrality = 0;
       int eff_corr_cent = 0; // used for efficiency corrections
+      int refmult = header->GetReferenceMultiplicity();
       for (unsigned i = 0; i < refcent_def.size(); ++i) {
-        if (header->GetReferenceMultiplicity() > refcent_def[i]) {
+        if (refmult > refcent_def[i]) {
           centrality = i;
           break;
         }
@@ -592,39 +526,13 @@ int main(int argc, char* argv[]) {
         // container that will be passed to the DijetWorker
         std::vector<fastjet::PseudoJet> input;
         
-        // if relative tracking efficiency smearing is requested,
-        // discard tracks randomly by the ratio of efficiencies
-        // either between AuAu of different centralities, or between
-        // AuAu of a specific centrality and PP
-        if (do_efficiency) {
-          if (trigger_efficiency == efficiencyType::AuAu) {
-            for (auto vec : primary_particles) {
-              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
-                  input.push_back(vec);
-            }
-          }
-          else if (trigger_efficiency == efficiencyType::PP) {
-            for (auto vec : primary_particles) {
-              if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
-                input.push_back(vec);
-            }
-          }
-          else {
-            input = std::vector<fastjet::PseudoJet>(primary_particles.begin(),
-                                                    primary_particles.end());
-          }
-        }
-        // if no efficiency correction is being applied, copy the full set of particles
-        else {
-          input = std::vector<fastjet::PseudoJet>(primary_particles.begin(),
-                                                  primary_particles.end());
-        }
-        
         // if embedding is requested, add to the input
         int embed_centrality = 0;
         int eff_corr_embed_cent = 0;
+        int refmult_embed = 0;
         std::vector<fastjet::PseudoJet> embed_particles;
         if (reader_embed != nullptr) {
+          
           // read next event, loop to event 0 if needed
           if (!GetNextValidEvent(reader_embed, embed_triggers)) {
             std::cerr << "no events found for embedding, given trigger requirements: exiting" << std::endl;
@@ -632,6 +540,7 @@ int main(int argc, char* argv[]) {
           }
         
           // get the centrality definition of the embedding data
+          refmult_embed = header_embed->GetReferenceMultiplicity();
           for (unsigned i = 0; i < refcent_def.size(); ++i) {
             if (header_embed->GetReferenceMultiplicity() > refcent_def[i]) {
               embed_centrality = i;
@@ -644,30 +553,63 @@ int main(int argc, char* argv[]) {
           TStarJetVectorContainer<TStarJetVector>* container_embed = reader_embed->GetOutputContainer();
           ConvertTStarJetVector(container_embed, embed_particles);
         
-          // again, apply minimal kinematic cuts
+          // apply minimal kinematic cuts
           embed_particles = track_pt_min_selector(embed_particles);
         
           // if relative tracking efficiency smearing is requested,
           // discard tracks randomly by the ratio of efficiencies
           // it is assumed that the embedding event is AuAu
-          if (do_efficiency) {
-            if (embed_efficiency == efficiencyType::AuAu) {
-              for (auto vec : embed_particles)
-                if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
-                  input.push_back(vec);
-            }
-            else if (embed_efficiency == efficiencyType::PP) {
-              for (auto vec : embed_particles)
-                if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), refcent_reference) > flat_probability(gen))
-                  input.push_back(vec);
-            }
-            else {
-              input.insert(input.end(), embed_particles.begin(), embed_particles.end());
-            }
+          if (embed_efficiency == efficiencyType::AuAu) {
+            for (auto vec : embed_particles)
+              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference) > flat_probability(gen))
+                input.push_back(vec);
           }
           else {
             input.insert(input.end(), embed_particles.begin(), embed_particles.end());
           }
+        }
+        
+        // if the trigger source is pp, we modify the centrality -
+        // if embedding is done, we use the embedding refmult + trigger refmult
+        // If no embedding is done, we randomize it
+        if (opts.trig_is_pp) {
+          if (opts.force_pp_cent >= 0 && opts.force_pp_cent <= 10) {
+            centrality = opts.force_pp_cent;
+          }
+          else if (reader_embed != nullptr) {
+            // we modify the centrality of the trigger event to account
+            // for the embedding
+            int tmp = header->GetReferenceMultiplicity() + header_embed->GetReferenceMultiplicity();
+            for (unsigned i = 0; i < refcent_def.size(); ++i)
+              if (tmp > refcent_def[i])
+                centrality = i;
+                break;
+          }
+          else
+            centrality = rand() % 11;
+        }
+        eff_corr_cent = (centrality > 8 ? 8 : centrality);
+        
+        // now add the trigger data to the input - if efficiency
+        // smearing smearing is turned on, that is done here
+        switch (trigger_efficiency) {
+          case efficiencyType::AuAu :
+            for (auto vec : primary_particles) {
+              if (efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference) > flat_probability(gen))
+                input.push_back(vec);
+            }
+            break;
+            
+          case efficiencyType::PP :
+            if (eff_corr_embed_cent >= 0) {
+              for (auto vec : primary_particles)
+                if (efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent) > flat_probability(gen))
+                  input.push_back(vec);
+            }
+            
+          case efficiencyType::None :
+            input.insert(input.end(), primary_particles.begin(), primary_particles.end());
+            break;
         }
         
         // run the worker
