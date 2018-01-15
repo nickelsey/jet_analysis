@@ -134,8 +134,8 @@ def main(args) :
     extraOpts = extraOpts + ' --embedEfficiency'
   if args.pp :
     extraOpts = extraOpts + ' --pp'
-  if args.ForcePPEffCent is not None :
-    extraOpts = extraOpts + ' --forcePPCent=' + str(args.ForcePPEffCent)
+  if args.forcePPEffCent is not None :
+    extraOpts = extraOpts + ' --forcePPCent=' + str(args.forcePPEffCent)
   
   while checkstatus(jobstatus) :
     
