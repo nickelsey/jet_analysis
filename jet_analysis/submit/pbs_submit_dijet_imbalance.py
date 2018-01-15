@@ -128,11 +128,11 @@ def main(args) :
 
   ## define extra boolean options string
   extraOpts = ''
-  if args.triggerEfficiency is not None :
-    extraOpts = extraOpts + '--efficiency'
-  if args.embedEfficiency is not None :
+  if args.triggerEfficiency :
+    extraOpts = extraOpts + ' --efficiency'
+  if args.embedEfficiency :
     extraOpts = extraOpts + ' --embedEfficiency'
-  if args.pp is not None :
+  if args.pp :
     extraOpts = extraOpts + ' --pp'
   
   while checkstatus(jobstatus) :
@@ -219,8 +219,12 @@ if __name__ == "__main__":
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
-  parser.add_argument('--triggerEfficiency', default=None, help='defines if efficiency corrections for trigger data are to be done with PP or AuAu efficiency curves, "NONE" to disable trigger but still apply embedding corrections')
-  parser.add_argument('--embedEfficiency', default=None, help='defines if efficiency corrections for embed data are to be done with PP or AuAu efficiency curves, "NONE" to disable embedding but apply trigger corrections')
+  parser.add_argument('--triggerEfficiency', dest='triggerEfficiency', action='store_true')
+  parser.add_argument('--no-triggerEfficiency', dest='triggerEfficiency', action='store_false')
+  parser.set_defaults(triggerEfficiency=False)
+  parser.add_argument('--embedEfficiency', dest='embedEfficiency', action='store_true')
+  parser.add_argument('--no-embedEfficiency', dest='embedEfficiency', action='store_false')
+  parser.set_defaults(embedEfficiency=False)
   parser.add_argument('--pp', default=None, help='specify that trigger data is pp')
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
