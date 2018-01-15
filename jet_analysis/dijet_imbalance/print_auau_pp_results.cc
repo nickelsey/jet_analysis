@@ -2,6 +2,7 @@
 
 #include "jet_analysis/util/root_print_routines.hh"
 #include "jet_analysis/util/arg_helper.hh"
+#include "jet_analysis/util/string_util.hh"
 
 #include "TROOT.h"
 #include "TCanvas.h"
@@ -133,31 +134,72 @@ int main(int argc, char* argv[]) {
   
   // match keys
   for (auto entry : auau_trees) {
-    if (pp_trees.find(entry.first) == pp_trees.end())
-      auau_trees.erase(entry.first);
-  }
-  for (auto entry : pp_trees) {
-    if (auau_trees.find(entry.first) == auau_trees.end())
-      pp_trees.erase(entry.first);
-    else
+    if (pp_trees.find(entry.first) != pp_trees.end()) {
       keys.push_back(entry.first);
+    }
   }
-  
+
+ 
+
   // for now, use hard coded centrality definition for run 14
   std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
   std::vector<string> refcent_string{"0-5%", "5-10%", "10-20%", "20-30%",
-                                     "30-40%", "40-50%", "40-60%", "60-70%",
+                                     "30-40%", "40-50%", "50-60%", "60-70%",
                                      "70-80%", "80-90%", "90-100%"};
   std::vector<string> refcent_alt_string{"0-5%", "5-10%", "10-20%", "20-30%",
-                                         "30-40%", "40-50%", "40-60%", "60-70%",
+                                         "30-40%", "40-50%", "50-60%", "60-70%",
                                          "70-80%"};
   
+  // create a refcent def for larger bins
+  std::vector<int> refcent_def_5{364, 276, 156, 68, 0};
+  std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-100%"};
+  
+  // save all histograms so we can do comparisons
+  // between different keys
+  std::unordered_map<string, TH2D*> auau_hard_lead_pt;
+  std::unordered_map<string, TH2D*> auau_hard_sub_pt;
+  std::unordered_map<string, TH2D*> auau_match_lead_pt;
+  std::unordered_map<string, TH2D*> auau_match_sub_pt;
+  std::unordered_map<string, TH2D*> pp_hard_lead_pt;
+  std::unordered_map<string, TH2D*> pp_hard_sub_pt;
+  std::unordered_map<string, TH2D*> pp_match_lead_pt;
+  std::unordered_map<string, TH2D*> pp_match_sub_pt;
+  std::unordered_map<string, TH2D*> auau_hard_aj;
+  std::unordered_map<string, TH2D*> auau_match_aj;
+  std::unordered_map<string, TH2D*> pp_hard_aj;
+  std::unordered_map<string, TH2D*> pp_match_aj;
+  std::unordered_map<string, TH2D*> auau_dphi;
+  std::unordered_map<string, TH2D*> pp_dphi;
+  std::unordered_map<string, TH2D*> auau_hard_lead_rp;
+  
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_lead_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_sub_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_lead_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_sub_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_lead_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_sub_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_lead_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_sub_pt_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_aj_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_aj_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_cent;
+  
+  // count which key we are on
+  int entry = -1;
   // loop over all matched trees
   for (auto key : keys) {
+    
+    //count which key we're on
+    entry++;
+    
     // make output directory
-    string out_loc = opts.out_loc += "/" + key;
+    string out_loc = opts.out_loc + "/" + key;
     boost::filesystem::path dir(out_loc.c_str());
     boost::filesystem::create_directories(dir);
+    
+    // key prefix for names so histograms don't get confused
+    std::string key_prefix = "key_" + std::to_string(entry) + "_";
     
     // and create the file name prefix
     string file_prefix = out_loc + "/" + opts.out_prefix;
@@ -246,43 +288,69 @@ int main(int argc, char* argv[]) {
     // -----------------
     
     // jet pt
-    TH2D* auau_hard_lead_pt = new TH2D("auauhardleadpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* auau_hard_sub_pt = new TH2D("auauhardsubpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* auau_match_lead_pt = new TH2D("auaumatchleadpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* auau_match_sub_pt = new TH2D("auaumatchsubpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* pp_hard_lead_pt = new TH2D("pphardleadpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* pp_hard_sub_pt = new TH2D("pphardsubpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* pp_match_lead_pt = new TH2D("ppmatchleadpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
-    TH2D* pp_match_sub_pt = new TH2D("ppmatchsubpt", "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_hard_lead_pt = new TH2D(MakeString(key_prefix, "auauhardleadpt").c_str(),
+                                         "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_hard_sub_pt = new TH2D(MakeString(key_prefix, "auauhardsubpt").c_str(),
+                                        "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_match_lead_pt = new TH2D(MakeString(key_prefix, "auaumatchleadpt").c_str(),
+                                          "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_match_sub_pt = new TH2D(MakeString(key_prefix, "auaumatchsubpt").c_str(),
+                                         "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_hard_lead_pt = new TH2D(MakeString(key_prefix, "pphardleadpt").c_str(),
+                                       "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_hard_sub_pt = new TH2D(MakeString(key_prefix, "pphardsubpt").c_str(),
+                                      "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_match_lead_pt = new TH2D(MakeString(key_prefix, "ppmatchleadpt").c_str(),
+                                        "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_match_sub_pt = new TH2D(MakeString(key_prefix, "ppmatchsubpt").c_str(),
+                                       "p_{T}", 800, 0.5, 800.5, 100, 0, 100);
     
     // aj
-    TH2D* auau_hard_aj = new TH2D("auauhardaj", "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
-    TH2D* auau_match_aj = new TH2D("auaumatchaj", "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
-    TH2D* pp_hard_aj = new TH2D("pphardaj", "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
-    TH2D* pp_match_aj = new TH2D("ppmatchaj", "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
+    TH2D* h_auau_hard_aj = new TH2D(MakeString(key_prefix, "auauhardaj").c_str(),
+                                    "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
+    TH2D* h_auau_match_aj = new TH2D(MakeString(key_prefix, "auaumatchaj").c_str(),
+                                     "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
+    TH2D* h_pp_hard_aj = new TH2D(MakeString(key_prefix, "pphardaj").c_str(),
+                                  "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
+    TH2D* h_pp_match_aj = new TH2D(MakeString(key_prefix, "ppmatchaj").c_str(),
+                                   "A_{J}", 800, 0.5, 800.5, 30, 0, 0.9);
     
     // dphi
-    TH2D* auau_dphi = new TH2D("auaudphi", "d#phi", 800, 0.5, 800.5, 100, 0, 2*TMath::Pi());
-    TH2D* pp_dphi = new TH2D("ppdphi", "d#phi", 800, 0.5, 800.5, 100, 0, 2*TMath::Pi());
+    TH2D* h_auau_dphi = new TH2D(MakeString(key_prefix, "auaudphi").c_str(),
+                                 "d#phi", 800, 0.5, 800.5, 100, 0, 2*TMath::Pi());
+    TH2D* h_pp_dphi = new TH2D(MakeString(key_prefix, "ppdphi").c_str(),
+                               "d#phi", 800, 0.5, 800.5, 100, 0, 2*TMath::Pi());
     
     // lead jet - reaction plane
-    TH2D* auau_hard_lead_rp = new TH2D("auauhardleaddphi", "phi - rp", 9, -0.5, 8.5, 100, 0, 2*TMath::Pi());
+    TH2D* h_auau_hard_lead_rp = new TH2D(MakeString(key_prefix, "auauhardleaddphi").c_str(),
+                                         "phi - rp", 9, -0.5, 8.5, 100, 0, 2*TMath::Pi());
     
+    // insert into the dictionaries
+    auau_hard_lead_pt.insert({key, h_auau_hard_lead_pt});
+    auau_hard_sub_pt.insert({key, h_auau_hard_lead_pt});
+    auau_match_lead_pt.insert({key, h_auau_match_lead_pt});
+    auau_match_sub_pt.insert({key, h_auau_match_lead_pt});
+    pp_hard_lead_pt.insert({key, h_pp_hard_lead_pt});
+    pp_hard_sub_pt.insert({key, h_pp_hard_sub_pt});
+    pp_match_lead_pt.insert({key, h_pp_match_lead_pt});
+    pp_match_sub_pt.insert({key, h_pp_match_sub_pt});
+    
+    auau_hard_lead_pt.insert({key, h_auau_hard_lead_pt});
     
     // loop over the data & fill histograms
     while (auau_reader.Next()) {
       
       // auau jet pt
-      auau_hard_lead_pt->Fill(*auau_refmult, (*auau_jl).Pt());
-      auau_hard_sub_pt->Fill(*auau_refmult, (*auau_js).Pt());
-      auau_match_lead_pt->Fill(*auau_refmult,(*auau_jlm).Pt());
-      auau_match_sub_pt->Fill(*auau_refmult, (*auau_jsm).Pt());
+      h_auau_hard_lead_pt->Fill(*auau_refmult, (*auau_jl).Pt());
+      h_auau_hard_sub_pt->Fill(*auau_refmult, (*auau_js).Pt());
+      h_auau_match_lead_pt->Fill(*auau_refmult,(*auau_jlm).Pt());
+      h_auau_match_sub_pt->Fill(*auau_refmult, (*auau_jsm).Pt());
       
       // auau Aj
-      auau_hard_aj->Fill(*auau_refmult,
-                         fabs((*auau_jl).Pt() - (*auau_js).Pt())/((*auau_jl).Pt() + (*auau_js).Pt()));
-      auau_match_aj->Fill(*auau_refmult,
-                          fabs((*auau_jlm).Pt() - (*auau_jsm).Pt())/((*auau_jlm).Pt() + (*auau_jsm).Pt()));
+      h_auau_hard_aj->Fill(*auau_refmult,
+                           fabs((*auau_jl).Pt() - (*auau_js).Pt())/((*auau_jl).Pt() + (*auau_js).Pt()));
+      h_auau_match_aj->Fill(*auau_refmult,
+                            fabs((*auau_jlm).Pt() - (*auau_jsm).Pt())/((*auau_jlm).Pt() + (*auau_jsm).Pt()));
       
       
       // auau dphi
@@ -299,8 +367,8 @@ int main(int argc, char* argv[]) {
       while (dphi_rp > 2.0 * TMath::Pi())
         dphi_rp -= 2.0 * TMath::Pi();
       
-      auau_dphi->Fill(*auau_refmult, dphi);
-      auau_hard_lead_rp->Fill(*auau_cent, dphi_rp);
+      h_auau_dphi->Fill(*auau_refmult, dphi);
+      h_auau_hard_lead_rp->Fill(*auau_cent, dphi_rp);
       
     }
     
@@ -308,16 +376,16 @@ int main(int argc, char* argv[]) {
       if (pp_embedded) {
         
         // pp single jet pt
-        pp_hard_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jl).Pt());
-        pp_hard_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_js).Pt());
-        pp_match_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jlm).Pt());
-        pp_match_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jsm).Pt());
+        h_pp_hard_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jl).Pt());
+        h_pp_hard_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_js).Pt());
+        h_pp_match_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jlm).Pt());
+        h_pp_match_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jsm).Pt());
         
         // pp Aj
-        pp_hard_aj->Fill(*pp_refmult + *embed_refmult,
-                         fabs((*pp_jl).Pt() - (*pp_js).Pt())/((*pp_jl).Pt() + (*pp_js).Pt()));
-        pp_match_aj->Fill(*pp_refmult + *embed_refmult,
-                          fabs((*pp_jlm).Pt() - (*pp_jsm).Pt())/((*pp_jlm).Pt() + (*pp_jsm).Pt()));
+        h_pp_hard_aj->Fill(*pp_refmult + *embed_refmult,
+                           fabs((*pp_jl).Pt() - (*pp_js).Pt())/((*pp_jl).Pt() + (*pp_js).Pt()));
+        h_pp_match_aj->Fill(*pp_refmult + *embed_refmult,
+                            fabs((*pp_jlm).Pt() - (*pp_jsm).Pt())/((*pp_jlm).Pt() + (*pp_jsm).Pt()));
         
         // pp dphi
         double dphi = (*pp_jl).Phi() - (*pp_js).Phi();
@@ -327,21 +395,21 @@ int main(int argc, char* argv[]) {
         while (dphi > 2.0 * TMath::Pi())
           dphi -= 2.0 * TMath::Pi();
         
-        pp_dphi->Fill(*pp_refmult + *embed_refmult, dphi);
+        h_pp_dphi->Fill(*pp_refmult + *embed_refmult, dphi);
       }
       else {
         
         // pp single jet pt
-        pp_hard_lead_pt->Fill(*pp_refmult, (*pp_jl).Pt());
-        pp_hard_sub_pt->Fill(*pp_refmult, (*pp_js).Pt());
-        pp_match_lead_pt->Fill(*pp_refmult, (*pp_jlm).Pt());
-        pp_match_sub_pt->Fill(*pp_refmult, (*pp_jsm).Pt());
+        h_pp_hard_lead_pt->Fill(*pp_refmult, (*pp_jl).Pt());
+        h_pp_hard_sub_pt->Fill(*pp_refmult, (*pp_js).Pt());
+        h_pp_match_lead_pt->Fill(*pp_refmult, (*pp_jlm).Pt());
+        h_pp_match_sub_pt->Fill(*pp_refmult, (*pp_jsm).Pt());
         
         // pp Aj
-        pp_hard_aj->Fill(*pp_refmult,
-                         ((*pp_jl).Pt() - (*pp_js).Pt())/((*pp_jl).Pt() + (*pp_js).Pt()));
-        pp_match_aj->Fill(*pp_refmult,
-                          ((*pp_jlm).Pt() - (*pp_jsm).Pt())/((*pp_jlm).Pt() + (*pp_jsm).Pt()));
+        h_pp_hard_aj->Fill(*pp_refmult,
+                           ((*pp_jl).Pt() - (*pp_js).Pt())/((*pp_jl).Pt() + (*pp_js).Pt()));
+        h_pp_match_aj->Fill(*pp_refmult,
+                            ((*pp_jlm).Pt() - (*pp_jsm).Pt())/((*pp_jlm).Pt() + (*pp_jsm).Pt()));
         
         // pp dphi
         double dphi = (*pp_jl).Phi() - (*pp_js).Phi();
@@ -351,104 +419,132 @@ int main(int argc, char* argv[]) {
         while (dphi > 2.0 * TMath::Pi())
         dphi -= 2.0 * TMath::Pi();
         
-        pp_dphi->Fill(*pp_refmult, dphi);
+        h_pp_dphi->Fill(*pp_refmult, dphi);
       }
     }
     
     // print dphi
-    auau_dphi->Scale(1.0/auau_dphi->Integral());
-    pp_dphi->Scale(1.0/pp_dphi->Integral());
+    h_auau_dphi->Scale(1.0/h_auau_dphi->Integral());
+    h_pp_dphi->Scale(1.0/h_pp_dphi->Integral());
     
-    Overlay1D((TH1D*)auau_dphi->ProjectionY(), (TH1D*)pp_dphi->ProjectionY(),
+    Overlay1D((TH1D*)h_auau_dphi->ProjectionY(), (TH1D*)h_pp_dphi->ProjectionY(),
               "Au+Au d#phi lead-sub", "P+P d#phi lead-sub",
               out_loc, "auau_pp_dphi", "", "d#phi", "fraction", false, false, false, "");
-    Print2DSimple(auau_hard_lead_rp, out_loc, "auau_dphi_rp", "AuAu d#phi lead jet - rp",
+    Print2DSimple(h_auau_hard_lead_rp, out_loc, "auau_dphi_rp", "AuAu d#phi lead jet - rp",
                   "Centrality", "d#phi(lead-rp)", false, false, false);
-    std::vector<TH1D*> rp_by_cent = SplitByBin(auau_hard_lead_rp);
-    for (int i = 0; i < rp_by_cent.size(); ++i) {
-      rp_by_cent[i]->Scale(1.0/rp_by_cent[i]->Integral());
-      rp_by_cent[i]->RebinX(4);
+    std::vector<TH1D*> h_rp_by_cent = SplitByBin(h_auau_hard_lead_rp);
+    for (int i = 0; i < h_rp_by_cent.size(); ++i) {
+      h_rp_by_cent[i]->Scale(1.0/h_rp_by_cent[i]->Integral());
+      h_rp_by_cent[i]->RebinX(4);
     }
-    Overlay1D(rp_by_cent, refcent_alt_string, out_loc, "auau_cent_rp", "",
+    Overlay1D(h_rp_by_cent, refcent_alt_string, out_loc, "auau_cent_rp", "",
               "d#phi", "fraction", false, false, true, "Centrality");
-    Overlay1D(rp_by_cent[0], rp_by_cent[1], "0-5%", "5-10%", out_loc, "auau_cent_rp_restricted", "",
+    Overlay1D(h_rp_by_cent[0], h_rp_by_cent[1], "0-5%", "5-10%", out_loc, "auau_cent_rp_restricted", "",
               "d#phi", "fraction", false, false, true, "Centrality");
     
     // extract pt spectra in centrality bins
-    std::vector<TH1D*> auau_hard_lead_pt_spectra = SplitByRefMult(auau_hard_lead_pt,
-                                                                  refcent_def);
-    std::vector<TH1D*> auau_hard_sub_pt_spectra = SplitByRefMult(auau_hard_sub_pt,
-                                                                 refcent_def);
-    std::vector<TH1D*> auau_match_lead_pt_spectra = SplitByRefMult(auau_match_lead_pt,
-                                                                   refcent_def);
-    std::vector<TH1D*> auau_match_sub_pt_spectra = SplitByRefMult(auau_match_sub_pt,
-                                                                  refcent_def);
-    std::vector<TH1D*> pp_hard_lead_pt_spectra = SplitByRefMult(pp_hard_lead_pt,
-                                                                refcent_def);
-    std::vector<TH1D*> pp_hard_sub_pt_spectra = SplitByRefMult(pp_hard_sub_pt,
-                                                               refcent_def);
-    std::vector<TH1D*> pp_match_lead_pt_spectra = SplitByRefMult(pp_match_lead_pt,
-                                                                 refcent_def);
-    std::vector<TH1D*> pp_match_sub_pt_spectra = SplitByRefMult(pp_match_sub_pt,
-                                                                refcent_def);
+    std::vector<TH1D*> h_auau_hard_lead_pt_spectra = SplitByRefMult(h_auau_hard_lead_pt,
+                                                                    refcent_def_5);
+    std::vector<TH1D*> h_auau_hard_sub_pt_spectra = SplitByRefMult(h_auau_hard_sub_pt,
+                                                                   refcent_def_5);
+    std::vector<TH1D*> h_auau_match_lead_pt_spectra = SplitByRefMult(h_auau_match_lead_pt,
+                                                                     refcent_def_5);
+    std::vector<TH1D*> h_auau_match_sub_pt_spectra = SplitByRefMult(h_auau_match_sub_pt,
+                                                                    refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_lead_pt_spectra = SplitByRefMult(h_pp_hard_lead_pt,
+                                                                  refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_sub_pt_spectra = SplitByRefMult(h_pp_hard_sub_pt,
+                                                                 refcent_def_5);
+    std::vector<TH1D*> h_pp_match_lead_pt_spectra = SplitByRefMult(h_pp_match_lead_pt,
+                                                                   refcent_def_5);
+    std::vector<TH1D*> h_pp_match_sub_pt_spectra = SplitByRefMult(h_pp_match_sub_pt,
+                                                                  refcent_def_5);
     
     // normalize pt spectra
-    for (int i = 0; i < auau_hard_lead_pt_spectra.size(); ++i) {
-      auau_hard_lead_pt_spectra[i]->Scale(1.0/auau_hard_lead_pt_spectra[i]->Integral());
-      auau_hard_sub_pt_spectra[i]->Scale(1.0/auau_hard_sub_pt_spectra[i]->Integral());
-      auau_match_lead_pt_spectra[i]->Scale(1.0/auau_match_lead_pt_spectra[i]->Integral());
-      auau_match_sub_pt_spectra[i]->Scale(1.0/auau_match_sub_pt_spectra[i]->Integral());
-      pp_hard_lead_pt_spectra[i]->Scale(1.0/pp_hard_lead_pt_spectra[i]->Integral());
-      pp_hard_sub_pt_spectra[i]->Scale(1.0/pp_hard_sub_pt_spectra[i]->Integral());
-      pp_match_lead_pt_spectra[i]->Scale(1.0/pp_match_lead_pt_spectra[i]->Integral());
-      pp_match_sub_pt_spectra[i]->Scale(1.0/pp_match_sub_pt_spectra[i]->Integral());
+    for (int i = 0; i < h_auau_hard_lead_pt_spectra.size(); ++i) {
+      h_auau_hard_lead_pt_spectra[i]->Scale(1.0/h_auau_hard_lead_pt_spectra[i]->Integral());
+      h_auau_hard_sub_pt_spectra[i]->Scale(1.0/h_auau_hard_sub_pt_spectra[i]->Integral());
+      h_auau_match_lead_pt_spectra[i]->Scale(1.0/h_auau_match_lead_pt_spectra[i]->Integral());
+      h_auau_match_sub_pt_spectra[i]->Scale(1.0/h_auau_match_sub_pt_spectra[i]->Integral());
+      h_pp_hard_lead_pt_spectra[i]->Scale(1.0/h_pp_hard_lead_pt_spectra[i]->Integral());
+      h_pp_hard_sub_pt_spectra[i]->Scale(1.0/h_pp_hard_sub_pt_spectra[i]->Integral());
+      h_pp_match_lead_pt_spectra[i]->Scale(1.0/h_pp_match_lead_pt_spectra[i]->Integral());
+      h_pp_match_sub_pt_spectra[i]->Scale(1.0/h_pp_match_sub_pt_spectra[i]->Integral());
     }
     
     // print pt spectra
-    Overlay1D(auau_hard_lead_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_auau_hard_lead_pt_spectra, refcent_def_5_string, out_loc,
               "auau_hard_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(auau_hard_sub_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_auau_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
               "auau_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(auau_match_lead_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_auau_match_lead_pt_spectra, refcent_def_5_string, out_loc,
               "auau_match_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(auau_match_sub_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_auau_match_sub_pt_spectra, refcent_def_5_string, out_loc,
               "auau_match_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(pp_hard_lead_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_pp_hard_lead_pt_spectra, refcent_def_5_string, out_loc,
               "pp_hard_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(pp_hard_sub_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_pp_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
               "pp_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(pp_match_lead_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_pp_match_lead_pt_spectra, refcent_def_5_string, out_loc,
               "pp_match_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(pp_match_sub_pt_spectra, refcent_string, out_loc,
+    Overlay1D(h_pp_match_sub_pt_spectra, refcent_def_5_string, out_loc,
               "pp_match_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
     
     // for Aj
-    std::vector<TH1D*> auau_hard_aj_spectra = SplitByRefMult(auau_hard_aj, refcent_def);
-    std::vector<TH1D*> auau_match_aj_spectra = SplitByRefMult(auau_match_aj, refcent_def);
-    std::vector<TH1D*> pp_hard_aj_spectra = SplitByRefMult(pp_hard_aj, refcent_def);
-    std::vector<TH1D*> pp_match_aj_spectra = SplitByRefMult(pp_match_aj, refcent_def);
+    std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByRefMult(h_auau_hard_aj, refcent_def_5);
+    std::vector<TH1D*> h_auau_match_aj_spectra = SplitByRefMult(h_auau_match_aj, refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_aj_spectra = SplitByRefMult(h_pp_hard_aj, refcent_def_5);
+    std::vector<TH1D*> h_pp_match_aj_spectra = SplitByRefMult(h_pp_match_aj, refcent_def_5);
     
     // normalize
-    for (int i = 0; i < auau_hard_aj_spectra.size(); ++i) {
-      auau_hard_aj_spectra[i]->RebinX(2);
-      auau_match_aj_spectra[i]->RebinX(2);
-      pp_hard_aj_spectra[i]->RebinX(2);
-      pp_match_aj_spectra[i]->RebinX(2);
-      auau_hard_aj_spectra[i]->Scale(1.0/auau_hard_aj_spectra[i]->Integral());
-      auau_match_aj_spectra[i]->Scale(1.0/auau_match_aj_spectra[i]->Integral());
-      pp_hard_aj_spectra[i]->Scale(1.0/pp_hard_aj_spectra[i]->Integral());
-      pp_match_aj_spectra[i]->Scale(1.0/pp_match_aj_spectra[i]->Integral());
+    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
+      h_auau_hard_aj_spectra[i]->RebinX(2);
+      h_auau_match_aj_spectra[i]->RebinX(2);
+      h_pp_hard_aj_spectra[i]->RebinX(2);
+      h_pp_match_aj_spectra[i]->RebinX(2);
+      h_auau_hard_aj_spectra[i]->Scale(1.0/h_auau_hard_aj_spectra[i]->Integral());
+      h_auau_match_aj_spectra[i]->Scale(1.0/h_auau_match_aj_spectra[i]->Integral());
+      h_pp_hard_aj_spectra[i]->Scale(1.0/h_pp_hard_aj_spectra[i]->Integral());
+      h_pp_match_aj_spectra[i]->Scale(1.0/h_pp_match_aj_spectra[i]->Integral());
     }
-    Overlay1D(auau_hard_aj_spectra, refcent_string, out_loc, "auau_hard_aj", "",
+    Overlay1D(h_auau_hard_aj_spectra, refcent_def_5_string, out_loc, "auau_hard_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
-    Overlay1D(auau_match_aj_spectra, refcent_string, out_loc, "auau_match_aj", "",
+    Overlay1D(h_auau_match_aj_spectra, refcent_def_5_string, out_loc, "auau_match_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
-    Overlay1D(pp_hard_aj_spectra, refcent_string, out_loc, "pp_hard_aj", "",
+    Overlay1D(h_pp_hard_aj_spectra, refcent_def_5_string, out_loc, "pp_hard_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
-    Overlay1D(pp_match_aj_spectra, refcent_string, out_loc, "pp_match_aj", "",
+    Overlay1D(h_pp_match_aj_spectra, refcent_def_5_string, out_loc, "pp_match_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     
+    // add the containers to the dictionaries
+    auau_hard_lead_pt_cent.insert({key, h_auau_hard_lead_pt_spectra});
+    auau_hard_sub_pt_cent.insert({key, h_auau_hard_sub_pt_spectra});
+    auau_match_lead_pt_cent.insert({key, h_auau_match_lead_pt_spectra});
+    auau_match_sub_pt_cent.insert({key, h_auau_match_sub_pt_spectra});
+    pp_hard_lead_pt_cent.insert({key, h_pp_hard_lead_pt_spectra});
+    pp_hard_sub_pt_cent.insert({key, h_pp_hard_sub_pt_spectra});
+    pp_match_lead_pt_cent.insert({key, h_pp_match_lead_pt_spectra});
+    pp_match_sub_pt_cent.insert({key, h_pp_match_sub_pt_spectra});
+    auau_hard_aj_cent.insert({key, h_auau_hard_aj_spectra});
+    auau_match_aj_cent.insert({key, h_auau_match_aj_spectra});
+    auau_hard_aj_cent.insert({key, h_pp_hard_aj_spectra});
+    auau_match_aj_cent.insert({key, h_pp_match_aj_spectra});
+    
+    // now, printing some comparisons
+    // make a folder for each centrality
+    // make output directory
+    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
+      std::string out_loc_cent = out_loc + "/cent_" + std::to_string(i);
+      boost::filesystem::path dir(out_loc_cent.c_str());
+      boost::filesystem::create_directories(dir);
+      
+      Overlay1D(h_auau_hard_aj_spectra[i], h_pp_hard_aj_spectra[i], "AuAu hard A_{J}", "PP hard A_{J}",
+                out_loc_cent.c_str(), "aj_hard", "", "A_{J}", "fraction", false, false, true, "A_{J}");
+      Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], "AuAu matched A_{J}", "PP matched A_{J}",
+                out_loc_cent.c_str(), "aj_match", "", "A_{J}", "fraction", false, false, true, "A_{J}");
+    }
   }
   
   return 0;
 }
+
