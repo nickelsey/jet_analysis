@@ -420,6 +420,7 @@ int main(int argc, char* argv[]) {
   
   
   // for logging/debugging
+  std::cout << "trigger data is " << (opts.trig_is_pp ? "PP" : "AuAu") << std::endl;
   std::cout << "efficiency corrections " << (opts.trig_effic || opts.embed_effic ?
                                              "enabled" : "disabled") << std::endl;
   std::cout << "efficiency corrections for trigger data: ";
