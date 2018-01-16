@@ -608,7 +608,6 @@ int main(int argc, char* argv[]) {
         
         // now add the trigger data to the input - if efficiency
         // smearing smearing is turned on, that is done here
-        std::cout <<"trigger efficiency : " << std::endl;
         switch (trigger_efficiency) {
           case efficiencyType::AuAu : {
             for (auto vec : primary_particles) {
