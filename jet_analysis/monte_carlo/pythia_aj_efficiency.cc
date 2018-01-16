@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--ptLow", &opts.pt_low) ||
         ParseStrFlag(string(argv[i]), "--ptHigh", &opts.pt_high) ||
         ParseIntFlag(string(argv[i]), "--eventsPerBin", &opts.ev) ||
+        ParseIntFlag(string(argv[i]), "--nbkg", &opts.n_bkg) ||
         ParseIntFlag(string(argv[i]), "--id", &opts.id)) continue;
     std::cerr << "unknown command line option: " << argv[i] << std::endl;
     return 1;
