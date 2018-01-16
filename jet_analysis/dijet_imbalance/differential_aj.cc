@@ -596,9 +596,10 @@ int main(int argc, char* argv[]) {
             // for the embedding
             int tmp = header->GetReferenceMultiplicity() + header_embed->GetReferenceMultiplicity();
             for (unsigned i = 0; i < refcent_def.size(); ++i)
-              if (tmp > refcent_def[i])
+              if (tmp > refcent_def[i]) {
                 centrality = i;
                 break;
+              }
           }
           else
             centrality = rand() % 11;
@@ -608,7 +609,7 @@ int main(int argc, char* argv[]) {
         // now add the trigger data to the input - if efficiency
         // smearing smearing is turned on, that is done here
         switch (trigger_efficiency) {
-          case efficiencyType::AuAu :
+          case efficiencyType::AuAu : {
             for (auto vec : primary_particles) {
               double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference);
               auau_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
@@ -616,20 +617,20 @@ int main(int argc, char* argv[]) {
                 input.push_back(vec);
             }
             break;
-            
-          case efficiencyType::PP :
-            if (eff_corr_embed_cent >= 0) {
-              for (auto vec : primary_particles) {
-                double ratio = efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent);
-                pp_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
-                if (ratio > flat_probability(gen))
-                  input.push_back(vec);
-              }
+          }
+          case efficiencyType::PP : {
+            for (auto vec : primary_particles) {
+              double ratio = efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent);
+              pp_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
+              if (ratio > flat_probability(gen))
+                input.push_back(vec);
             }
-            
-          case efficiencyType::None :
+            break;
+          }
+          case efficiencyType::None : {
             input.insert(input.end(), primary_particles.begin(), primary_particles.end());
             break;
+          }
         }
         
         // run the worker
