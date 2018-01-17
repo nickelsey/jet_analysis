@@ -398,13 +398,13 @@ int main(int argc, char* argv[]) {
   
   TProfile2D* pp_eff_ratio = new TProfile2D("pp_eff_ratio",
                                             "average pp efficiency ratio;p_{T};centrality;ratio",
-                                            200, 0, 10, -0.5, 8.5);
+                                            200, 0, 5, 10, -0.5, 8.5);
   TProfile2D* auau_eff_ratio  = new TProfile2D("auau_eff_ratio",
                                                "average auau efficiency ratio;p_{T};centrality;ratio",
-                                               200, 0, 10, -0.5, 8.5);
+                                               200, 0, 5, 10, -0.5, 8.5);
   TProfile2D* embed_eff_ratio  = new TProfile2D("embed_eff_ratio",
                                                 "average embed efficiency ratio;p_{T};centrality;ratio",
-                                                200, 0, 10, -0.5, 8.5);
+                                                200, 0, 5, 10, -0.5, 8.5);
   
   for (auto key : keys) {
     // create a unique histogram name for each key
