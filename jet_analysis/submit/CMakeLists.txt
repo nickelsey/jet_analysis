@@ -3,6 +3,7 @@
 install(PROGRAMS qwrap.sh DESTINATION submit)
 install(FILES pbs_submit_dijet_imbalance.py DESTINATION submit)
 install(FILES pbs_submit_basic_dijet_imbalance.py DESTINATION submit)
+install(FILES pbs_submit_check_refmult.py DESTINATION submit)
 install(FILES y6_bad_tower.txt DESTINATION submit)
 install(FILES y7_y6_bad_tower.txt DESTINATION submit)
 install(FILES y14_y6_bad_tower.txt DESTINATION submit)
