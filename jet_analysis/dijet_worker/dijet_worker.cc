@@ -196,7 +196,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
       lead_match_bkg_est = std::make_shared<fastjet::JetMedianBackgroundEstimator>(lead->MatchedJetDef().BackgroundSelector(),
                                                                                    lead->MatchedJetDef().BackgroundJetDef(),
                                                                                    lead->MatchedJetDef().BackgroundAreaDef());
-      sublead_match_bkg_est = lead_hard_bkg_est;
+      sublead_match_bkg_est = lead_match_bkg_est;
       lead_match_bkg_est->set_particles(lead->MatchedJetDef().ConstituentSelector()(input));
       fastjet::Subtractor bkgdSubtractor(&(*lead_match_bkg_est));
       lead_subtracted_jets = fastjet::sorted_by_pt(bkgdSubtractor(cl_match_lead->inclusive_jets()));
