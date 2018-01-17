@@ -25,12 +25,12 @@
 using std::string;
 struct Options {
   string pt_low  = "25";    /* lower pt */
-  string pt_high = "100";   /* upper pt */
+  string pt_high = "35";   /* upper pt */
   string out_dir = "tmp";   /* location to place output */
   string name    = "job";   /* name of job */
   int id         = 0;       /* which job, if being submitted concurrently */
-  int ev         = 2e3;     /* number of events per efficiency bin */
-  int n_bkg      = 400;     /* number of background particles per event */
+  int ev         = 2e4;     /* number of events per efficiency bin */
+  int n_bkg      = 0;     /* number of background particles per event */
 };
 
 int main(int argc, char* argv[]) {
@@ -93,6 +93,7 @@ int main(int argc, char* argv[]) {
   pythia.readString(pt_high_string);
   pythia.readString("Random:setSeed = On");
   pythia.readString("Random:seed = 0");
+  pythia.readString("HadronLevel:Decay = on");
   
   pythia.init();
   
@@ -116,8 +117,10 @@ int main(int argc, char* argv[]) {
   fastjet::Selector particle_selector = fastjet::SelectorPtMin(0.2) && fastjet::SelectorAbsRapMax(1.0);
   
   // define the efficiencies we'll use
-  std::vector<double> efficiencies{1.0, 0.9, 0.8, 0.7, 0.6, 0.5};
-  std::vector<string> eff_string{"100%", "90%", "80%", "70%", "60%", "50%"};
+  //std::vector<double> efficiencies{1.0, 0.9, 0.8, 0.7, 0.6, 0.5};
+  //std::vector<string> eff_string{"100%", "90%", "80%", "70%", "60%", "50%"};
+  std::vector<double> efficiencies{1.0};
+  std::vector<string>eff_string{"100"};
   
   // define histograms for the efficiencies
   std::vector<TH1D*> h_Aj;

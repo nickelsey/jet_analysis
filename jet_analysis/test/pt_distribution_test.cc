@@ -33,7 +33,6 @@ int main() {
 
   if (f->GetChisquare()/f->GetNDF() > 2.0)
     return 1;
-  
-  
+    
   return 0;
 }
