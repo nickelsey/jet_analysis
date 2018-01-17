@@ -73,9 +73,8 @@ void Overlay1D(const std::vector<TH1D*>& h,
   TCanvas c;
   
   // pick a set of colors to use
-  int chooseColor[11] = {kBlack, kRed, kBlue, kGreen, kCyan, kYellow,
-                        kMagenta, kOrange, kRed+2, kGreen+3,
-                        kBlue-7};
+  int chooseColor[11] = {kBlack, kRed, kBlue, kGreen, kCyan, kMagenta,
+                         kOrange, kYellow, kRed+2, kGreen+3, kBlue-7};
   
   // print histograms, giving them some nominal settings to differentiate them
   for (int i = 0; i < h.size(); ++i) {
@@ -190,7 +189,8 @@ void Print2DSimple(TH2D* h,
                    std::string y_axis_label,
                    bool logx,
                    bool logy,
-                   bool logz) {
+                   bool logz,
+                   std::string opt = "COLZ") {
   // we assume the output location exists, so create
   // the final output string that will be used for pdf creation
   std::string canvas_name = output_loc + "/" + output_name + ".pdf";
@@ -207,6 +207,6 @@ void Print2DSimple(TH2D* h,
   if (logz)
     c.SetLogz();
   
-  h->Draw("COLZ");
+  h->Draw(opt.c_str());
   c.SaveAs(canvas_name.c_str());
 }

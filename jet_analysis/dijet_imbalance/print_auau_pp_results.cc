@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
   
   // now we'll get the trees from the files, ignoring any objects
   // in the file that don't conform to the naming conventions from
-  // the DijetWorker
+  // the DijetWorker. There are also coincidence histograms to save
   std::vector<string> keys;
   std::unordered_map<std::string, TTree*> auau_trees;
   std::unordered_map<std::string, TTree*> pp_trees;
@@ -137,6 +137,18 @@ int main(int argc, char* argv[]) {
     if (pp_trees.find(entry.first) != pp_trees.end()) {
       keys.push_back(entry.first);
     }
+  }
+  
+  std::unordered_map<std::string, TH1D*> auau_lead_count;
+  std::unordered_map<std::string, TH1D*> auau_sub_count;
+  std::unordered_map<std::string, TH1D*> pp_lead_count;
+  std::unordered_map<std::string, TH1D*> pp_sub_count;
+  
+  for (auto key : keys) {
+    auau_lead_count.insert({key, (TH1D*) auau_file.Get(MakeString(key, "_lead_count").c_str())});
+    auau_sub_count.insert({key, (TH1D*) auau_file.Get(MakeString(key, "_sublead_count").c_str())});
+    pp_lead_count.insert({key, (TH1D*) pp_file.Get(MakeString(key, "_lead_count").c_str())});
+    pp_sub_count.insert({key, (TH1D*) pp_file.Get(MakeString(key, "_sublead_count").c_str())});
   }
 
  
@@ -151,8 +163,12 @@ int main(int argc, char* argv[]) {
                                          "70-80%"};
   
   // create a refcent def for larger bins
-  std::vector<int> refcent_def_5{364, 276, 156, 68, 0};
-  std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-100%"};
+  //std::vector<int> refcent_def_5{364, 276, 156, 68, 0};
+  //std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-100%"};
+  
+  // another definition to split out the last bin
+  std::vector<int> refcent_def_5{364, 276, 156, 68, 28, 0};
+  std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-80%", "80-100%"};
   
   // save all histograms so we can do comparisons
   // between different keys
@@ -185,6 +201,49 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_cent;
   std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_cent;
   
+  std::unordered_map<string, TH2D*> auau_hard_lead_rho;
+  std::unordered_map<string, TH2D*> auau_hard_sub_rho;
+  std::unordered_map<string, TH2D*> auau_match_lead_rho;
+  std::unordered_map<string, TH2D*> auau_match_sub_rho;
+  std::unordered_map<string, TH2D*> pp_hard_lead_rho;
+  std::unordered_map<string, TH2D*> pp_hard_sub_rho;
+  std::unordered_map<string, TH2D*> pp_match_lead_rho;
+  std::unordered_map<string, TH2D*> pp_match_sub_rho;
+  
+  std::unordered_map<string, TH2D*> auau_hard_lead_sig;
+  std::unordered_map<string, TH2D*> auau_hard_sub_sig;
+  std::unordered_map<string, TH2D*> auau_match_lead_sig;
+  std::unordered_map<string, TH2D*> auau_match_sub_sig;
+  std::unordered_map<string, TH2D*> pp_hard_lead_sig;
+  std::unordered_map<string, TH2D*> pp_hard_sub_sig;
+  std::unordered_map<string, TH2D*> pp_match_lead_sig;
+  std::unordered_map<string, TH2D*> pp_match_sub_sig;
+  
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_lead_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_sub_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_lead_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_sub_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_lead_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_sub_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_lead_rho_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_sub_rho_cent;
+  
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_lead_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_hard_sub_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_lead_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> auau_match_sub_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_lead_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_sub_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_lead_sig_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_sub_sig_cent;
+  
+  std::unordered_map<string, TH2D*> auau_npart;
+  std::unordered_map<string, TH2D*> pp_npart;
+  
+  std::unordered_map<string, std::vector<TH1D*>> auau_npart_cent;
+  std::unordered_map<string, std::vector<TH1D*>> pp_npart_cent;
+  
+  
   // count which key we are on
   int entry = -1;
   // loop over all matched trees
@@ -204,6 +263,25 @@ int main(int argc, char* argv[]) {
     // and create the file name prefix
     string file_prefix = out_loc + "/" + opts.out_prefix;
     
+    // create coincidence measurement
+    TH1D* auau_coincidence1 = auau_lead_count[key];
+    TH1D* auau_coincidence2 = auau_sub_count[key];
+    TH1D* pp_coincidence1 = pp_lead_count[key];
+    TH1D* pp_coincidence2 = pp_sub_count[key];
+    
+    auau_coincidence1->RebinX(40);
+    auau_coincidence2->RebinX(40);
+    auau_coincidence2->Divide(auau_coincidence1);
+    pp_coincidence1->RebinX(40);
+    pp_coincidence2->RebinX(40);
+    pp_coincidence2->Divide(pp_coincidence1);
+    std::cout <<"pp coincidence: " << pp_coincidence2->GetBinContent(1) << std::endl;
+    Overlay1D(auau_coincidence2, pp_coincidence2, "Au+Au", "P+P w/ efficiency",
+              file_prefix, "dijet_coincidence", "refmult", "fraction", "", false,
+              false, true, "Coincidence Rate");
+
+    // process the trees
+    
     TTree* auau_tree = auau_trees[key];
     TTree* pp_tree = pp_trees[key];
     
@@ -222,6 +300,7 @@ int main(int argc, char* argv[]) {
     TTreeReaderValue<double> auau_zdcrate(auau_reader, "zdcrate");
     TTreeReaderValue<double> auau_rp(auau_reader, "rp");
     TTreeReaderValue<int> auau_nglobal(auau_reader, "nglobal");
+    TTreeReaderValue<int> auau_nprt(auau_reader, "npart");
     TTreeReaderValue<TLorentzVector> auau_jl(auau_reader, "jl");
     TTreeReaderValue<TLorentzVector> auau_js(auau_reader, "js");
     TTreeReaderValue<TLorentzVector> auau_jlm(auau_reader, "jlm");
@@ -250,6 +329,7 @@ int main(int argc, char* argv[]) {
     TTreeReaderValue<double> pp_zdcrate(pp_reader, "zdcrate");
     TTreeReaderValue<double> pp_rp(pp_reader, "rp");
     TTreeReaderValue<int> pp_nglobal(pp_reader, "nglobal");
+    TTreeReaderValue<int> pp_nprt(pp_reader, "npart");
     TTreeReaderValue<TLorentzVector> pp_jl(pp_reader, "jl");
     TTreeReaderValue<TLorentzVector> pp_js(pp_reader, "js");
     TTreeReaderValue<TLorentzVector> pp_jlm(pp_reader, "jlm");
@@ -276,6 +356,7 @@ int main(int argc, char* argv[]) {
     TTreeReaderValue<int> embed_runid(pp_reader, "embed_runid");
     TTreeReaderValue<int> embed_refmult(pp_reader, "embed_refmult");
     TTreeReaderValue<int> embed_grefmult(pp_reader, "embed_grefmult");
+    TTreeReaderValue<int> embed_nprt(pp_reader, "embed_npart");
     TTreeReaderValue<double> embed_refmultcorr(pp_reader, "embed_refmultcorr");
     TTreeReaderValue<double> embed_grefmultcorr(pp_reader, "embed_grefmultcorr");
     TTreeReaderValue<int> embed_cent(pp_reader, "embed_cent");
@@ -325,6 +406,46 @@ int main(int argc, char* argv[]) {
     TH2D* h_auau_hard_lead_rp = new TH2D(MakeString(key_prefix, "auauhardleaddphi").c_str(),
                                          "phi - rp", 9, -0.5, 8.5, 100, 0, 2*TMath::Pi());
     
+    // rho and sigma
+    TH2D* h_auau_hard_lead_rho = new TH2D(MakeString(key_prefix, "auauhardleadrho").c_str(),
+                                          "auau hard lead rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_hard_lead_sig = new TH2D(MakeString(key_prefix, "auauhardleadsig").c_str(),
+                                          "auau hard lead sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_auau_hard_sub_rho = new TH2D(MakeString(key_prefix, "auauhardsubrho").c_str(),
+                                         "auau hard sub rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_hard_sub_sig = new TH2D(MakeString(key_prefix, "auauhardsubsig").c_str(),
+                                         "auau hard sub sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_auau_match_lead_rho = new TH2D(MakeString(key_prefix, "auaumatchleadrho").c_str(),
+                                           "auau match lead rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_match_lead_sig = new TH2D(MakeString(key_prefix, "auaumatchleadsig").c_str(),
+                                           "auau match lead sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_auau_match_sub_rho = new TH2D(MakeString(key_prefix, "auaumatchsubrho").c_str(),
+                                          "auau match sub rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_auau_match_sub_sig = new TH2D(MakeString(key_prefix, "auaumatchsubsig").c_str(),
+                                          "auau match sub sig", 800, 0.5, 800.5, 100, 0, 20);
+    
+    TH2D* h_pp_hard_lead_rho = new TH2D(MakeString(key_prefix, "pphardleadrho").c_str(),
+                                        "pp hard lead rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_hard_lead_sig = new TH2D(MakeString(key_prefix, "pphardleadsig").c_str(),
+                                        "pp hard lead sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_pp_hard_sub_rho = new TH2D(MakeString(key_prefix, "pphardsubrho").c_str(),
+                                       "pp hard sub rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_hard_sub_sig = new TH2D(MakeString(key_prefix, "pphardsubsig").c_str(),
+                                       "pp hard sub sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_pp_match_lead_rho = new TH2D(MakeString(key_prefix, "ppmatchleadrho").c_str(),
+                                         "pp match lead rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_match_lead_sig = new TH2D(MakeString(key_prefix, "ppmatchleadsig").c_str(),
+                                         "pp match lead sig", 800, 0.5, 800.5, 100, 0, 20);
+    TH2D* h_pp_match_sub_rho = new TH2D(MakeString(key_prefix, "ppmatchsubrho").c_str(),
+                                        "pp match sub rho", 800, 0.5, 800.5, 100, 0, 100);
+    TH2D* h_pp_match_sub_sig = new TH2D(MakeString(key_prefix, "ppmatchsubsig").c_str(),
+                                        "pp match sub sig", 800, 0.5, 800.5, 100, 0, 20);
+    
+    TH2D* h_auau_npart = new TH2D(MakeString(key_prefix, "auaunpart").c_str(), ";refmult;nPart",
+                                  800, 0.5, 800.5, 100, 0.5, 2500.5);
+    TH2D* h_pp_npart = new TH2D(MakeString(key_prefix, "ppnpart").c_str(), ";refmult;nPart",
+                                800, 0.5, 800.5, 100, 0.5, 2500.5);
+    
     // insert into the dictionaries
     auau_hard_lead_pt.insert({key, h_auau_hard_lead_pt});
     auau_hard_sub_pt.insert({key, h_auau_hard_lead_pt});
@@ -334,17 +455,50 @@ int main(int argc, char* argv[]) {
     pp_hard_sub_pt.insert({key, h_pp_hard_sub_pt});
     pp_match_lead_pt.insert({key, h_pp_match_lead_pt});
     pp_match_sub_pt.insert({key, h_pp_match_sub_pt});
+    auau_hard_aj.insert({key, h_auau_hard_aj});
+    auau_match_aj.insert({key, h_auau_match_aj});
+    pp_hard_aj.insert({key, h_pp_hard_aj});
+    pp_match_aj.insert({key, h_pp_match_aj});
+    auau_dphi.insert({key, h_auau_dphi});
+    pp_dphi.insert({key, h_pp_dphi});
+    auau_hard_lead_rp.insert({key, h_auau_hard_lead_rp});
     
-    auau_hard_lead_pt.insert({key, h_auau_hard_lead_pt});
+    auau_hard_lead_rho.insert({key, h_auau_hard_lead_rho});
+    auau_hard_lead_sig.insert({key, h_auau_hard_lead_sig});
+    auau_hard_sub_rho.insert({key, h_auau_hard_sub_rho});
+    auau_hard_sub_sig.insert({key, h_auau_hard_sub_sig});
+    auau_match_lead_rho.insert({key, h_auau_match_lead_rho});
+    auau_match_lead_sig.insert({key, h_auau_match_lead_sig});
+    auau_match_sub_rho.insert({key, h_auau_match_sub_rho});
+    auau_match_sub_sig.insert({key, h_auau_match_sub_sig});
+    pp_hard_lead_rho.insert({key, h_pp_hard_lead_rho});
+    pp_hard_lead_sig.insert({key, h_pp_hard_lead_sig});
+    pp_hard_sub_rho.insert({key, h_pp_hard_sub_rho});
+    pp_hard_sub_sig.insert({key, h_pp_hard_sub_sig});
+    pp_match_lead_rho.insert({key, h_pp_match_lead_rho});
+    pp_match_lead_sig.insert({key, h_pp_match_lead_sig});
+    pp_match_sub_rho.insert({key, h_pp_match_sub_rho});
+    pp_match_sub_sig.insert({key, h_pp_match_sub_sig});
+    
+    auau_npart.insert({key, h_auau_npart});
+    pp_npart.insert({key, h_pp_npart});
     
     // loop over the data & fill histograms
     while (auau_reader.Next()) {
       
       // auau jet pt
       h_auau_hard_lead_pt->Fill(*auau_refmult, (*auau_jl).Pt());
+      h_auau_hard_lead_rho->Fill(*auau_refmult, *auau_jlrho);
+      h_auau_hard_lead_sig->Fill(*auau_refmult, *auau_jlsig);
       h_auau_hard_sub_pt->Fill(*auau_refmult, (*auau_js).Pt());
+      h_auau_hard_sub_rho->Fill(*auau_refmult, *auau_jsrho);
+      h_auau_hard_sub_sig->Fill(*auau_refmult, *auau_jssig);
       h_auau_match_lead_pt->Fill(*auau_refmult,(*auau_jlm).Pt());
+      h_auau_match_lead_rho->Fill(*auau_refmult, *auau_jlmrho);
+      h_auau_match_lead_sig->Fill(*auau_refmult, *auau_jlmsig);
       h_auau_match_sub_pt->Fill(*auau_refmult, (*auau_jsm).Pt());
+      h_auau_match_sub_rho->Fill(*auau_refmult, *auau_jsmrho);
+      h_auau_match_sub_sig->Fill(*auau_refmult, *auau_jsmsig);
       
       // auau Aj
       h_auau_hard_aj->Fill(*auau_refmult,
@@ -370,6 +524,9 @@ int main(int argc, char* argv[]) {
       h_auau_dphi->Fill(*auau_refmult, dphi);
       h_auau_hard_lead_rp->Fill(*auau_cent, dphi_rp);
       
+      // and refmult/npart
+      h_auau_npart->Fill(*auau_refmult, *auau_nprt);
+      
     }
     
     while (pp_reader.Next()) {
@@ -377,9 +534,17 @@ int main(int argc, char* argv[]) {
         
         // pp single jet pt
         h_pp_hard_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jl).Pt());
+        h_pp_hard_lead_rho->Fill(*pp_refmult+ *embed_refmult, *pp_jlrho);
+        h_pp_hard_lead_sig->Fill(*pp_refmult+ *embed_refmult, *pp_jlsig);
         h_pp_hard_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_js).Pt());
+        h_pp_hard_sub_rho->Fill(*pp_refmult+ *embed_refmult, *pp_jsrho);
+        h_pp_hard_sub_sig->Fill(*pp_refmult+ *embed_refmult, *pp_jssig);
         h_pp_match_lead_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jlm).Pt());
+        h_pp_match_lead_rho->Fill(*pp_refmult+ *embed_refmult, *pp_jlmrho);
+        h_pp_match_lead_sig->Fill(*pp_refmult+ *embed_refmult, *pp_jlmsig);
         h_pp_match_sub_pt->Fill(*pp_refmult + *embed_refmult, (*pp_jsm).Pt());
+        h_pp_match_sub_rho->Fill(*pp_refmult+ *embed_refmult, *pp_jsmrho);
+        h_pp_match_sub_sig->Fill(*pp_refmult+ *embed_refmult, *pp_jsmsig);
         
         // pp Aj
         h_pp_hard_aj->Fill(*pp_refmult + *embed_refmult,
@@ -396,14 +561,25 @@ int main(int argc, char* argv[]) {
           dphi -= 2.0 * TMath::Pi();
         
         h_pp_dphi->Fill(*pp_refmult + *embed_refmult, dphi);
+        
+        // npart
+        h_pp_npart->Fill(*pp_refmult + *embed_refmult, *pp_nprt + *embed_nprt);
       }
       else {
         
         // pp single jet pt
         h_pp_hard_lead_pt->Fill(*pp_refmult, (*pp_jl).Pt());
+        h_pp_hard_lead_rho->Fill(*pp_refmult, *pp_jlrho);
+        h_pp_hard_lead_sig->Fill(*pp_refmult, *pp_jlsig);
         h_pp_hard_sub_pt->Fill(*pp_refmult, (*pp_js).Pt());
+        h_pp_hard_sub_rho->Fill(*pp_refmult, *pp_jsrho);
+        h_pp_hard_sub_sig->Fill(*pp_refmult, *pp_jssig);
         h_pp_match_lead_pt->Fill(*pp_refmult, (*pp_jlm).Pt());
+        h_pp_match_lead_rho->Fill(*pp_refmult, *pp_jlmrho);
+        h_pp_match_lead_sig->Fill(*pp_refmult, *pp_jlmsig);
         h_pp_match_sub_pt->Fill(*pp_refmult, (*pp_jsm).Pt());
+        h_pp_match_sub_rho->Fill(*pp_refmult, *pp_jsmrho);
+        h_pp_match_sub_sig->Fill(*pp_refmult, *pp_jsmsig);
         
         // pp Aj
         h_pp_hard_aj->Fill(*pp_refmult,
@@ -420,6 +596,9 @@ int main(int argc, char* argv[]) {
         dphi -= 2.0 * TMath::Pi();
         
         h_pp_dphi->Fill(*pp_refmult, dphi);
+        
+        // npart
+        h_pp_npart->Fill(*pp_refmult, *pp_nprt);
       }
     }
     
@@ -442,6 +621,20 @@ int main(int argc, char* argv[]) {
     Overlay1D(h_rp_by_cent[0], h_rp_by_cent[1], "0-5%", "5-10%", out_loc, "auau_cent_rp_restricted", "",
               "d#phi", "fraction", false, false, true, "Centrality");
     
+    // extract nPart in centrality bins
+    std::vector<TH1D*> h_auau_npart_spectra = SplitByRefMult(h_auau_npart, refcent_def_5);
+    std::vector<TH1D*> h_pp_npart_spectra = SplitByRefMult(h_pp_npart, refcent_def_5);
+    
+    for (int i = 0; i < h_auau_npart_spectra.size(); ++i) {
+      h_auau_npart_spectra[i]->Scale(1.0/h_auau_npart_spectra[i]->Integral());
+      h_pp_npart_spectra[i]->Scale(1.0/h_pp_npart_spectra[i]->Integral());
+    }
+    
+    Overlay1D(h_auau_npart_spectra, refcent_def_5_string, out_loc, "auau_npart_spec",
+              "", "npart", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_npart_spectra, refcent_def_5_string, out_loc, "pp_npart_spec",
+              "", "npart", "fraction", false, false, true, "Centrality");
+    
     // extract pt spectra in centrality bins
     std::vector<TH1D*> h_auau_hard_lead_pt_spectra = SplitByRefMult(h_auau_hard_lead_pt,
                                                                     refcent_def_5);
@@ -460,7 +653,26 @@ int main(int argc, char* argv[]) {
     std::vector<TH1D*> h_pp_match_sub_pt_spectra = SplitByRefMult(h_pp_match_sub_pt,
                                                                   refcent_def_5);
     
-    // normalize pt spectra
+    // extract rho & sigma in centrality bins
+    std::vector<TH1D*> h_auau_hard_lead_rho_spectra = SplitByRefMult(h_auau_hard_lead_rho, refcent_def_5);
+    std::vector<TH1D*> h_auau_hard_lead_sig_spectra = SplitByRefMult(h_auau_hard_lead_sig, refcent_def_5);
+    std::vector<TH1D*> h_auau_hard_sub_rho_spectra = SplitByRefMult(h_auau_hard_sub_rho, refcent_def_5);
+    std::vector<TH1D*> h_auau_hard_sub_sig_spectra = SplitByRefMult(h_auau_hard_sub_sig, refcent_def_5);
+    std::vector<TH1D*> h_auau_match_lead_rho_spectra = SplitByRefMult(h_auau_match_lead_rho, refcent_def_5);
+    std::vector<TH1D*> h_auau_match_lead_sig_spectra = SplitByRefMult(h_auau_match_lead_sig, refcent_def_5);
+    std::vector<TH1D*> h_auau_match_sub_rho_spectra = SplitByRefMult(h_auau_match_sub_rho, refcent_def_5);
+    std::vector<TH1D*> h_auau_match_sub_sig_spectra = SplitByRefMult(h_auau_match_sub_sig, refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_lead_rho_spectra = SplitByRefMult(h_pp_hard_lead_rho, refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_lead_sig_spectra = SplitByRefMult(h_pp_hard_lead_sig, refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_sub_rho_spectra = SplitByRefMult(h_pp_hard_sub_rho, refcent_def_5);
+    std::vector<TH1D*> h_pp_hard_sub_sig_spectra = SplitByRefMult(h_pp_hard_sub_sig, refcent_def_5);
+    std::vector<TH1D*> h_pp_match_lead_rho_spectra = SplitByRefMult(h_pp_match_lead_rho, refcent_def_5);
+    std::vector<TH1D*> h_pp_match_lead_sig_spectra = SplitByRefMult(h_pp_match_lead_sig, refcent_def_5);
+    std::vector<TH1D*> h_pp_match_sub_rho_spectra = SplitByRefMult(h_pp_match_sub_rho, refcent_def_5);
+    std::vector<TH1D*> h_pp_match_sub_sig_spectra = SplitByRefMult(h_pp_match_sub_sig, refcent_def_5);
+    
+    
+    // normalize pt spectra & rho & sig
     for (int i = 0; i < h_auau_hard_lead_pt_spectra.size(); ++i) {
       h_auau_hard_lead_pt_spectra[i]->Scale(1.0/h_auau_hard_lead_pt_spectra[i]->Integral());
       h_auau_hard_sub_pt_spectra[i]->Scale(1.0/h_auau_hard_sub_pt_spectra[i]->Integral());
@@ -470,6 +682,24 @@ int main(int argc, char* argv[]) {
       h_pp_hard_sub_pt_spectra[i]->Scale(1.0/h_pp_hard_sub_pt_spectra[i]->Integral());
       h_pp_match_lead_pt_spectra[i]->Scale(1.0/h_pp_match_lead_pt_spectra[i]->Integral());
       h_pp_match_sub_pt_spectra[i]->Scale(1.0/h_pp_match_sub_pt_spectra[i]->Integral());
+      
+      h_auau_hard_lead_rho_spectra[i]->Scale(1.0/h_auau_hard_lead_rho_spectra[i]->Integral());
+      h_auau_hard_lead_sig_spectra[i]->Scale(1.0/h_auau_hard_lead_sig_spectra[i]->Integral());
+      h_auau_hard_sub_rho_spectra[i]->Scale(1.0/h_auau_hard_sub_rho_spectra[i]->Integral());
+      h_auau_hard_sub_sig_spectra[i]->Scale(1.0/h_auau_hard_sub_sig_spectra[i]->Integral());
+      h_auau_match_lead_rho_spectra[i]->Scale(1.0/h_auau_match_lead_rho_spectra[i]->Integral());
+      h_auau_match_lead_sig_spectra[i]->Scale(1.0/h_auau_match_lead_sig_spectra[i]->Integral());
+      h_auau_match_sub_rho_spectra[i]->Scale(1.0/h_auau_match_sub_rho_spectra[i]->Integral());
+      h_auau_match_sub_sig_spectra[i]->Scale(1.0/h_auau_match_sub_sig_spectra[i]->Integral());
+      
+      h_pp_hard_lead_rho_spectra[i]->Scale(1.0/h_pp_hard_lead_rho_spectra[i]->Integral());
+      h_pp_hard_lead_sig_spectra[i]->Scale(1.0/h_pp_hard_lead_sig_spectra[i]->Integral());
+      h_pp_hard_sub_rho_spectra[i]->Scale(1.0/h_pp_hard_sub_rho_spectra[i]->Integral());
+      h_pp_hard_sub_sig_spectra[i]->Scale(1.0/h_pp_hard_sub_sig_spectra[i]->Integral());
+      h_pp_match_lead_rho_spectra[i]->Scale(1.0/h_pp_match_lead_rho_spectra[i]->Integral());
+      h_pp_match_lead_sig_spectra[i]->Scale(1.0/h_pp_match_lead_sig_spectra[i]->Integral());
+      h_pp_match_sub_rho_spectra[i]->Scale(1.0/h_pp_match_sub_rho_spectra[i]->Integral());
+      h_pp_match_sub_sig_spectra[i]->Scale(1.0/h_pp_match_sub_sig_spectra[i]->Integral());
     }
     
     // print pt spectra
@@ -478,21 +708,57 @@ int main(int argc, char* argv[]) {
     Overlay1D(h_auau_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
               "auau_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
     Overlay1D(h_auau_match_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_match_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
+              "auau_match_lead_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
     Overlay1D(h_auau_match_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_match_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
+              "auau_match_sub_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
     Overlay1D(h_pp_hard_lead_pt_spectra, refcent_def_5_string, out_loc,
               "pp_hard_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
     Overlay1D(h_pp_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
               "pp_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
     Overlay1D(h_pp_match_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_match_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
+              "pp_match_lead_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
     Overlay1D(h_pp_match_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_match_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
+              "pp_match_sub_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
+    
+    // print rho & sig
+    Overlay1D(h_auau_hard_lead_rho_spectra, refcent_def_5_string, out_loc,
+              "auau_hard_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_hard_lead_sig_spectra, refcent_def_5_string, out_loc,
+              "auau_hard_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_hard_sub_rho_spectra, refcent_def_5_string, out_loc,
+              "auau_hard_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_hard_sub_sig_spectra, refcent_def_5_string, out_loc,
+              "auau_hard_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_match_lead_rho_spectra, refcent_def_5_string, out_loc,
+              "auau_match_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_match_lead_sig_spectra, refcent_def_5_string, out_loc,
+              "auau_match_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_match_sub_rho_spectra, refcent_def_5_string, out_loc,
+              "auau_match_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_match_sub_sig_spectra, refcent_def_5_string, out_loc,
+              "auau_match_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    
+    Overlay1D(h_pp_hard_lead_rho_spectra, refcent_def_5_string, out_loc,
+              "pp_hard_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_hard_lead_sig_spectra, refcent_def_5_string, out_loc,
+              "pp_hard_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_hard_sub_rho_spectra, refcent_def_5_string, out_loc,
+              "pp_hard_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_hard_sub_sig_spectra, refcent_def_5_string, out_loc,
+              "pp_hard_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_match_lead_rho_spectra, refcent_def_5_string, out_loc,
+              "pp_match_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_match_lead_sig_spectra, refcent_def_5_string, out_loc,
+              "pp_match_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_match_sub_rho_spectra, refcent_def_5_string, out_loc,
+              "pp_match_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_match_sub_sig_spectra, refcent_def_5_string, out_loc,
+              "pp_match_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
     
     // for Aj
     std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByRefMult(h_auau_hard_aj, refcent_def_5);
     std::vector<TH1D*> h_auau_match_aj_spectra = SplitByRefMult(h_auau_match_aj, refcent_def_5);
+    
     std::vector<TH1D*> h_pp_hard_aj_spectra = SplitByRefMult(h_pp_hard_aj, refcent_def_5);
     std::vector<TH1D*> h_pp_match_aj_spectra = SplitByRefMult(h_pp_match_aj, refcent_def_5);
     
@@ -507,6 +773,7 @@ int main(int argc, char* argv[]) {
       h_pp_hard_aj_spectra[i]->Scale(1.0/h_pp_hard_aj_spectra[i]->Integral());
       h_pp_match_aj_spectra[i]->Scale(1.0/h_pp_match_aj_spectra[i]->Integral());
     }
+    
     Overlay1D(h_auau_hard_aj_spectra, refcent_def_5_string, out_loc, "auau_hard_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(h_auau_match_aj_spectra, refcent_def_5_string, out_loc, "auau_match_aj", "",
@@ -529,6 +796,24 @@ int main(int argc, char* argv[]) {
     auau_match_aj_cent.insert({key, h_auau_match_aj_spectra});
     auau_hard_aj_cent.insert({key, h_pp_hard_aj_spectra});
     auau_match_aj_cent.insert({key, h_pp_match_aj_spectra});
+    
+    auau_hard_lead_rho_cent.insert({key, h_auau_hard_lead_rho_spectra});
+    auau_hard_lead_sig_cent.insert({key, h_auau_hard_lead_sig_spectra});
+    auau_hard_sub_rho_cent.insert({key, h_auau_hard_sub_rho_spectra});
+    auau_hard_sub_sig_cent.insert({key, h_auau_hard_sub_sig_spectra});
+    auau_match_lead_rho_cent.insert({key, h_auau_match_lead_rho_spectra});
+    auau_match_lead_sig_cent.insert({key, h_auau_match_lead_sig_spectra});
+    auau_match_sub_rho_cent.insert({key, h_auau_match_sub_rho_spectra});
+    auau_match_sub_sig_cent.insert({key, h_auau_match_sub_sig_spectra});
+    
+    pp_hard_lead_rho_cent.insert({key, h_pp_hard_lead_rho_spectra});
+    pp_hard_lead_sig_cent.insert({key, h_pp_hard_lead_sig_spectra});
+    pp_hard_sub_rho_cent.insert({key, h_pp_hard_sub_rho_spectra});
+    pp_hard_sub_sig_cent.insert({key, h_pp_hard_sub_sig_spectra});
+    pp_match_lead_rho_cent.insert({key, h_pp_match_lead_rho_spectra});
+    pp_match_lead_sig_cent.insert({key, h_pp_match_lead_sig_spectra});
+    pp_match_sub_rho_cent.insert({key, h_pp_match_sub_rho_spectra});
+    pp_match_sub_sig_cent.insert({key, h_pp_match_sub_sig_spectra});
     
     // now, printing some comparisons
     // make a folder for each centrality
