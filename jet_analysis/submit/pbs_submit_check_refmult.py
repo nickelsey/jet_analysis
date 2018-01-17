@@ -122,9 +122,6 @@ def main(args) :
       outstream = "log/" + args.name + str(i) + ".log"
       errstream = "log/" + args.name + str(i) + ".err"
 
-      ## select embedding data randomly
-      embed_choice = random.choice(embedding_list)
-
       ## build our qsub execution string
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
