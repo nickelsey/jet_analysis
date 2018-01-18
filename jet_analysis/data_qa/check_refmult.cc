@@ -96,6 +96,10 @@ int main(int argc, char* argv[]) {
   TH1D* h_refmult_14 = new TH1D("refmult14", "refmult14;refmult;counts", 800, 0.5, 800.5);
   TH1D* h_refmult_15 = new TH1D("refmult15", "refmult15;refmult;counts", 800, 0.5, 800.5);
   
+  TH1D* h_refmult_vpd30 = new TH1D("refmultvpd30", "refmultvpd30;refmult;counts", 800, 0.5, 800.5);
+  TH1D* h_refmult_vpd5 = new TH1D("refmultvpd5", "refmultvpd5;refmult;counts", 800, 0.5, 800.5);
+  TH1D* h_refmult_mbmon = new TH1D("refmultmb", "refmultmb;refmult;counts", 800, 0.5, 800.5);
+  
   
   try {
     while (reader->NextEvent()) {
@@ -106,17 +110,20 @@ int main(int argc, char* argv[]) {
       // headers for convenience
       TStarJetPicoEventHeader* header = reader->GetEvent()->GetHeader();
       
-      // check if event fired a trigger we will use
-      if (triggers.size() != 0) {
-        bool use_event = false;
-        for (auto trigger : triggers)
-          if (header->HasTriggerId(trigger))
-            use_event = true;
-        if (!use_event) continue;
-      }
-      
       int refmult = header->GetReferenceMultiplicity();
       int grefmult = header->GetGReferenceMultiplicity();
+      
+      if (header->HasTriggerId(450008) ||
+          header->HasTriggerId(450018))
+        h_refmult_vpd5->Fill(refmult);
+      
+      if (header->HasTriggerId(450010) ||
+          header->HasTriggerId(450020))
+        h_refmult_vpd30->Fill(refmult);
+      
+      if (header->HasTriggerId(450011) ||
+          header->HasTriggerId(450021))
+        h_refmult_mbmon->Fill(refmult);
       
       // fill these two
       h_refmult->Fill(refmult);
