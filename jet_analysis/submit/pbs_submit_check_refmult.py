@@ -126,7 +126,7 @@ def main(args) :
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
       clargs = clargs  + ' --towList=' + args.badTowers + ' --triggers=' + args.triggers
-      
+      clargs = clargs + ' --beginRun=' + args.beginRun + ' --endRun=' + args.endRun
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
       qsub = qsub + ':ppn=' + str(args.ppn) + ' -q ' + str(args.queue) + ' -o ' + outstream
       qsub = qsub + ' -e ' + errstream + ' -N ' + args.name + str(i) + ' -- '
@@ -166,6 +166,7 @@ if __name__ == "__main__":
   parser.add_argument('--badRuns', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_runs.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='/nfs/rhi/STAR/Data/P17id/qa_results/bad_towers.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
-  
+  parser.add_argument('--beginRun', default='15076101', help=' reject runs with runNumber < beginRun')
+  parser.add_argument('--endRun', default='15167014', help=' reject runs with runNumber > endRun')
   args = parser.parse_args()
   main( args )
