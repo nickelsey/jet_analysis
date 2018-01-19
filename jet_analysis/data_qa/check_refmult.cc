@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseIntFlag(string(argv[i]), "--beginRun", &opts.begin_run) ||
-        ParseIntFlag(string(argv[i]), "--endRun", &opts.end_run) ||) continue;
+        ParseIntFlag(string(argv[i]), "--endRun", &opts.end_run)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
   }
@@ -114,8 +114,8 @@ int main(int argc, char* argv[]) {
       // headers for convenience
       TStarJetPicoEventHeader* header = reader->GetEvent()->GetHeader();
       
-      if (header->GetRunNumber() < opts.begin_run ||
-          header->GetRunNumber() > opts.end_run)
+      if (header->GetRunId() < opts.begin_run ||
+          header->GetRunId() > opts.end_run)
         continue;
       
       int refmult = header->GetReferenceMultiplicity();
