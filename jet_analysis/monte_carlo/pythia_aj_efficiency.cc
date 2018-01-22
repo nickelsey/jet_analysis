@@ -25,12 +25,12 @@
 using std::string;
 struct Options {
   string pt_low  = "25";    /* lower pt */
-  string pt_high = "35";   /* upper pt */
+  string pt_high = "";   /* upper pt */
   string out_dir = "tmp";   /* location to place output */
   string name    = "job";   /* name of job */
   int id         = 0;       /* which job, if being submitted concurrently */
   int ev         = 2e4;     /* number of events per efficiency bin */
-  int n_bkg      = 0;     /* number of background particles per event */
+  int n_bkg      = 1000;     /* number of background particles per event */
 };
 
 int main(int argc, char* argv[]) {
