@@ -183,6 +183,9 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_vz = new TH2D(MakeString(prefix, "zdcvz").c_str(), ";ZDC Rate[kHz];V_{z}[cm]",
                           100, 0, 100,
                           140, -35, 35);
+  TH2D* zdc_vzvpdvz = new TH2D(MakeString().c_str(), ";ZDC Rate[kHz];V_{z} - VPD V_{z}[cm]",
+                               100, 0, 100,
+                               100, -3, 3);
   
   // coincidence rate
   TH2D* runID_zdc = new TH2D(MakeString(prefix, "runidzdc").c_str(), ";runID;ZDC Rate[kHz]",
@@ -309,6 +312,7 @@ int main(int argc, char* argv[]) {
     vx_vz->Fill(header->GetPrimaryVertexX(), header->GetPrimaryVertexZ());
     vy_vz->Fill(header->GetPrimaryVertexY(), header->GetPrimaryVertexZ());
     zdc_vz->Fill(zdc_khz, header->GetPrimaryVertexZ());
+    zdc_vzvpdvz->Fill(zdc_khz, header->GetPrimaryVertexZ() - header->GetVpdVz());
     runID_zdc->Fill(runidxmap, zdc_khz);
     
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {

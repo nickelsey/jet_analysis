@@ -168,14 +168,32 @@ int main(int argc, char* argv[]) {
   Overlay1D(lumi_refmult_bins, lumi_refmult_bin_names, opts.out_dir, "lumirefmult", "",
             "refMult", "fraction", false, true, true, "ZDC Rate");
   
-  
+  // vz, vx, vy
   TH2D* runid_vz_full = (TH2D*) runid_vz["pre"]->Clone("vz_full_clone");
   runid_vz_full->Add(runid_vz["low"]);
   runid_vz_full->Add(runid_vz["mid"]);
   runid_vz_full->Add(runid_vz["high"]);
   TProfile* vz_prof = (TProfile*) runid_vz_full->ProfileX("vz_runid_profile");
+  PrettyPrint1D(vz_prof, "", opts.out_dir, "run_avg_vz", "", "runID", "<V_{z}>",
+                false, false, false, "");
   
+  TH2D* runid_vx_full = (TH2D*) runid_vx["pre"]->Clone("vx_full_clone");
+  runid_vx_full->Add(runid_vx["low"]);
+  runid_vx_full->Add(runid_vx["mid"]);
+  runid_vx_full->Add(runid_vx["high"]);
+  TProfile* vx_prof = (TProfile*) runid_vx_full->ProfileX("vx_runid_profile");
+  PrettyPrint1D(vx_prof, "", opts.out_dir, "run_avg_vx", "", "runID", "<V_{x}>",
+                false, false, false, "");
   
+  TH2D* runid_vy_full = (TH2D*) runid_vy["pre"]->Clone("vy_full_clone");
+  runid_vy_full->Add(runid_vy["low"]);
+  runid_vy_full->Add(runid_vy["mid"]);
+  runid_vy_full->Add(runid_vy["high"]);
+  TProfile* vy_prof = (TProfile*) runid_vy_full->ProfileX("vy_runid_profile");
+  PrettyPrint1D(vy_prof, "", opts.out_dir, "run_avg_vy", "", "runID", "<V_{y}>",
+                false, false, false, "");
+  
+
   // barrel calorimeter
   // ------------------
   

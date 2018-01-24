@@ -43,7 +43,7 @@ void PrettyPrint1D(H* h,
   h->GetXaxis()->SetTitleSize(0.075);
   h->GetXaxis()->SetTitleOffset(0.80);
   h->GetYaxis()->SetTitle(y_axis_label.c_str());
-  h->GetYaxis()->SetLabelSize(0.06);
+  h->GetYaxis()->SetLabelSize(0.055);
   h->GetYaxis()->SetTitleSize(0.075);
   h->GetYaxis()->SetTitleOffset(0.80);
   h->GetYaxis()->CenterTitle(true);
@@ -136,7 +136,7 @@ void Overlay1D(const std::vector<H*>& h,
   h[0]->GetXaxis()->SetTitleSize(0.075);
   h[0]->GetXaxis()->SetTitleOffset(0.80);
   h[0]->GetYaxis()->SetTitle(y_axis_label.c_str());
-  h[0]->GetYaxis()->SetLabelSize(0.06);
+  h[0]->GetYaxis()->SetLabelSize(0.055);
   h[0]->GetYaxis()->SetTitleSize(0.075);
   h[0]->GetYaxis()->SetTitleOffset(0.80);
   h[0]->GetYaxis()->CenterTitle(true);
@@ -233,7 +233,7 @@ void Overlay1D(H* h1,
   h1->GetYaxis()->SetTitle(y_axis_label.c_str());
   h1->GetYaxis()->SetTitleSize(0.075);
   h1->GetYaxis()->SetTitleOffset(0.80);
-  h1->GetYaxis()->SetLabelSize(0.06);
+  h1->GetYaxis()->SetLabelSize(0.055);
   
   h1->SetLineWidth(2);
   h1->SetLineColor(kBlack);
@@ -288,7 +288,7 @@ void Print2DSimple(H* h,
   h->GetXaxis()->SetTitleSize(0.075);
   h->GetXaxis()->SetTitleOffset(0.80);
   h->GetYaxis()->SetTitle(y_axis_label.c_str());
-  h->GetYaxis()->SetLabelSize(0.06);
+  h->GetYaxis()->SetLabelSize(0.055);
   h->GetYaxis()->SetTitleSize(0.075);
   h->GetYaxis()->SetTitleOffset(0.80);
   h->GetYaxis()->CenterTitle(true);
