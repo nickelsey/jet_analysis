@@ -154,6 +154,9 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_grefmult = new TH2D(MakeString(prefix, "zdcgrefmult").c_str(), ";zdc[khz];gRefMult",
                                 100, 0, 100,
                                 800, 0, 800);
+  TH2D* vz_refmult = new TH2D(MakeString(prefix, "vzrefmult").c_str(), ";V_{z};refMult",
+                              100, -30, 30,
+                              800, 0, 800);
   TH2D* ref_gref = new TH2D(MakeString(prefix, "refgrefmult").c_str(), ";gRefMult;refMult",
                             800, 0, 800,
                             800, 0, 800);
@@ -183,7 +186,7 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_vz = new TH2D(MakeString(prefix, "zdcvz").c_str(), ";ZDC Rate[kHz];V_{z}[cm]",
                           100, 0, 100,
                           140, -35, 35);
-  TH2D* zdc_vzvpdvz = new TH2D(MakeString().c_str(), ";ZDC Rate[kHz];V_{z} - VPD V_{z}[cm]",
+  TH2D* zdc_vzvpdvz = new TH2D(MakeString(prefix, "vzvpdvz").c_str(), ";ZDC Rate[kHz];V_{z} - VPD V_{z}[cm]",
                                100, 0, 100,
                                100, -3, 3);
   
@@ -303,6 +306,7 @@ int main(int argc, char* argv[]) {
     runID_grefmult->Fill(runidxmap, header->GetGReferenceMultiplicity());
     zdc_refmult->Fill(zdc_khz, header->GetReferenceMultiplicity());
     zdc_grefmult->Fill(zdc_khz, header->GetGReferenceMultiplicity());
+    vz_refmult->Fill(header->GetPrimaryVertexZ(), header->GetReferenceMultiplicity());
     ref_gref->Fill(header->GetReferenceMultiplicity(), header->GetGReferenceMultiplicity());
     prim_glob->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
     runID_vx->Fill(runidxmap, header->GetPrimaryVertexX());

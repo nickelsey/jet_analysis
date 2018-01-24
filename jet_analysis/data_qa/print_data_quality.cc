@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> runid_grefmult;
   std::unordered_map<string, TH2D*> zdc_refmult;
   std::unordered_map<string, TH2D*> zdc_grefmult;
+  std::unordered_map<string, TH2D*> vz_refmult;
   std::unordered_map<string, TH2D*> refmult_grefmult;
   std::unordered_map<string, TH2D*> prim_glob;
   std::unordered_map<string, TH2D*> runid_vx;
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> vx_vz;
   std::unordered_map<string, TH2D*> vy_vz;
   std::unordered_map<string, TH2D*> zdc_vz;
+  std::unordered_map<string, TH2D*> zdc_vzvpdvz;
   std::unordered_map<string, TH2D*> runid_zdc;
   std::unordered_map<string, TH2D*> runid_px;
   std::unordered_map<string, TH2D*> runid_py;
@@ -114,6 +116,7 @@ int main(int argc, char* argv[]) {
     runid_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidgrefmult").c_str())});
     zdc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcrefmult").c_str())});
     zdc_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcgrefmult").c_str())});
+    vz_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "vzrefmult").c_str())});
     refmult_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "refgrefmult").c_str())});
     prim_glob.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "primglob").c_str())});
     runid_vx.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidvx").c_str())});
@@ -123,6 +126,7 @@ int main(int argc, char* argv[]) {
     vx_vz.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "vxvz").c_str())});
     vy_vz.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "vyvz").c_str())});
     zdc_vz.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcvz").c_str())});
+    zdc_vzvpdvz.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "vzvpdvz").c_str())});
     runid_zdc.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidzdc").c_str())});
     runid_px.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidpx").c_str())});
     runid_py.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidpy").c_str())});
