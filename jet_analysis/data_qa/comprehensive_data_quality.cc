@@ -130,6 +130,9 @@ int main(int argc, char* argv[]) {
   // define histograms
   // -----------------
   
+  // change to output file
+  out.cd();
+  
   // Histograms will calculate gaussian errors
   TH1::SetDefaultSumw2();
   TH2::SetDefaultSumw2();
@@ -145,27 +148,27 @@ int main(int argc, char* argv[]) {
   TH2D* runID_grefmult = new TH2D(MakeString(prefix, "runidgrefmult").c_str(), ";runID;gRefMult",
                                   runID_bin_width, runID_low_edge, runID_high_edge,
                                   800, 0, 800);
-  TH2D* zdc_refmult = new TH2D(MakeString(prefix, "runidrefmult").c_str(), ";zdc[khz];refMult",
-                               runID_bin_width, runID_low_edge, runID_high_edge,
+  TH2D* zdc_refmult = new TH2D(MakeString(prefix, "zdcrefmult").c_str(), ";zdc[khz];refMult",
+                               100, 0, 100,
                                800, 0, 800);
-  TH2D* zdc_grefmult = new TH2D(MakeString(prefix, "runidgrefmult").c_str(), ";zdc[khz];gRefMult",
-                                runID_bin_width, runID_low_edge, runID_high_edge,
+  TH2D* zdc_grefmult = new TH2D(MakeString(prefix, "zdcgrefmult").c_str(), ";zdc[khz];gRefMult",
+                                100, 0, 100,
                                 800, 0, 800);
   TH2D* ref_gref = new TH2D(MakeString(prefix, "refgrefmult").c_str(), ";gRefMult;refMult",
                             800, 0, 800,
                             800, 0, 800);
   TH2D* prim_glob = new TH2D(MakeString(prefix, "primglob").c_str(), ";N_{global};N_{primary}",
-                             800, 0, 800,
-                             800, 0, 800);
+                             400, 0, 4000,
+                             400, 0, 2000);
   
   // vertex
   TH2D* runID_vx = new TH2D(MakeString(prefix, "runidvx").c_str(), ";runID;V_{x}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
                             100, -3, 3);
-  TH2D* runID_vy = new TH2D(MakeString(prefix, "runidvx").c_str(), ";runID;V_{y}",
+  TH2D* runID_vy = new TH2D(MakeString(prefix, "runidvy").c_str(), ";runID;V_{y}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
                             100, -3, 3);
-  TH2D* runID_vz = new TH2D(MakeString(prefix, "runidvx").c_str(), ";runID;V_{z}",
+  TH2D* runID_vz = new TH2D(MakeString(prefix, "runidvz").c_str(), ";runID;V_{z}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
                             140, -35, 35);
   TH2D* vx_vy = new TH2D(MakeString(prefix, "vxvy").c_str(), ";V_{x};V_{y}",
@@ -189,28 +192,28 @@ int main(int argc, char* argv[]) {
   // tracks
   TH2D* runID_px = new TH2D(MakeString(prefix, "runidpx").c_str(), ";runID;p_{x}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
-                            200, 0, 30);
+                            200, -15, 15);
   TH2D* runID_py = new TH2D(MakeString(prefix, "runidpy").c_str(), ";runID;p_{y}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
-                            200, 0, 30);
+                            200, -15, 15);
   TH2D* runID_pz = new TH2D(MakeString(prefix, "runidpz").c_str(), ";runID;p_{z}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
-                            200, 0, 30);
+                            200, -15, 15);
   TH2D* runID_pt = new TH2D(MakeString(prefix, "runidpt").c_str(), ";runID;p_{t}",
                             runID_bin_width, runID_low_edge, runID_high_edge,
                             200, 0, 30);
   TH2D* px_py = new TH2D(MakeString(prefix, "pxpy").c_str(), ";p_{x};p_{y}",
-                         200, 0, 30,
-                         200, 0, 30);
+                         200, -15, 15,
+                         200, -15, 15);
   TH2D* zdc_px = new TH2D(MakeString(prefix, "zdcdpx").c_str(), ";ZDC Rate[kHz];p_{x}",
                           100, 0, 100,
-                          200, 0, 30);
+                          200, -15, 15);
   TH2D* zdc_py = new TH2D(MakeString(prefix, "zdcpy").c_str(), ";ZDC Rate[kHz];p_{y}",
                           100, 0, 100,
-                          200, 0, 30);
+                          200, -15, 15);
   TH2D* zdc_pz = new TH2D(MakeString(prefix, "zdcpz").c_str(), ";ZDC Rate[kHz];p_{z}",
                           100, 0, 100,
-                          200, 0, 30);
+                          200, -15, 15);
   TH2D* zdc_pt = new TH2D(MakeString(prefix, "zdcpt").c_str(), ";ZDC Rate[kHz];p_{t}",
                           100, 0, 100,
                           200, 0, 30);
@@ -267,6 +270,9 @@ int main(int argc, char* argv[]) {
     int runidxmap = 0;
     if(std::find(runids.begin(), runids.end(), runID) != runids.end()) {
       runidxmap = std::distance(runids.begin(),  std::find(runids.begin(), runids.end(), runID));
+    } else {
+      std::cerr << "run id not listed, skipping event" << std::endl;
+      continue;
     }
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
@@ -287,7 +293,7 @@ int main(int argc, char* argv[]) {
     TIter nextTower(towers);
     
     // get zdc rate in khz
-    double zdc_khz = header->GetZdcCoincidenceRate();
+    double zdc_khz = header->GetZdcCoincidenceRate()/1000.0;
     
     // fill event level histograms
     runID_refmult->Fill(runidxmap, header->GetReferenceMultiplicity());
@@ -295,7 +301,7 @@ int main(int argc, char* argv[]) {
     zdc_refmult->Fill(zdc_khz, header->GetReferenceMultiplicity());
     zdc_grefmult->Fill(zdc_khz, header->GetGReferenceMultiplicity());
     ref_gref->Fill(header->GetReferenceMultiplicity(), header->GetGReferenceMultiplicity());
-    prim_glob->Fill(header->GetNOfPrimaryTracks(), header->GetNGlobalTracks());
+    prim_glob->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
     runID_vx->Fill(runidxmap, header->GetPrimaryVertexX());
     runID_vy->Fill(runidxmap, header->GetPrimaryVertexY());
     runID_vz->Fill(runidxmap, header->GetPrimaryVertexZ());
@@ -336,6 +342,7 @@ int main(int argc, char* argv[]) {
   }
   
   out.Write();
+  out.Close();
   return 0;
 }
 
