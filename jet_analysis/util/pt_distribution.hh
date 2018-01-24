@@ -6,6 +6,10 @@
 // accuracy. Function is approximated by a parabola at each point, when
 // generating the random number.
 
+#ifndef PT_DISTRIBUTION_HH
+#define PT_DISTRIBUTION_HH
+
+
 #include <limits>
 #include <ostream>
 #include <istream>
@@ -165,3 +169,5 @@ _RealType pt_distribution<_RealType>::operator()(_RNG& __g, param_type& p) {
   
   return x;
 }
+
+#endif // PT_DISTRIBUTION_HH

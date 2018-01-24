@@ -143,10 +143,10 @@ int main(int argc, char* argv[]) {
   
   // reference multiplicity
   TH2D* runID_refmult = new TH2D(MakeString(prefix, "runidrefmult").c_str(), ";runID;refMult",
-                                 runID_bin_width, runID_low_edge, runID_high_edge,
+                                 runID_bins, runID_low_edge, runID_high_edge,
                                  800, 0, 800);
   TH2D* runID_grefmult = new TH2D(MakeString(prefix, "runidgrefmult").c_str(), ";runID;gRefMult",
-                                  runID_bin_width, runID_low_edge, runID_high_edge,
+                                  runID_bins, runID_low_edge, runID_high_edge,
                                   800, 0, 800);
   TH2D* zdc_refmult = new TH2D(MakeString(prefix, "zdcrefmult").c_str(), ";zdc[khz];refMult",
                                100, 0, 100,
@@ -163,13 +163,13 @@ int main(int argc, char* argv[]) {
   
   // vertex
   TH2D* runID_vx = new TH2D(MakeString(prefix, "runidvx").c_str(), ";runID;V_{x}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             100, -3, 3);
   TH2D* runID_vy = new TH2D(MakeString(prefix, "runidvy").c_str(), ";runID;V_{y}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             100, -3, 3);
   TH2D* runID_vz = new TH2D(MakeString(prefix, "runidvz").c_str(), ";runID;V_{z}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             140, -35, 35);
   TH2D* vx_vy = new TH2D(MakeString(prefix, "vxvy").c_str(), ";V_{x};V_{y}",
                          100, -3, 3,
@@ -186,21 +186,21 @@ int main(int argc, char* argv[]) {
   
   // coincidence rate
   TH2D* runID_zdc = new TH2D(MakeString(prefix, "runidzdc").c_str(), ";runID;ZDC Rate[kHz]",
-                             runID_bin_width, runID_low_edge, runID_high_edge,
+                             runID_bins, runID_low_edge, runID_high_edge,
                              100, 0, 100);
   
   // tracks
   TH2D* runID_px = new TH2D(MakeString(prefix, "runidpx").c_str(), ";runID;p_{x}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             200, -15, 15);
   TH2D* runID_py = new TH2D(MakeString(prefix, "runidpy").c_str(), ";runID;p_{y}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             200, -15, 15);
   TH2D* runID_pz = new TH2D(MakeString(prefix, "runidpz").c_str(), ";runID;p_{z}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             200, -15, 15);
   TH2D* runID_pt = new TH2D(MakeString(prefix, "runidpt").c_str(), ";runID;p_{t}",
-                            runID_bin_width, runID_low_edge, runID_high_edge,
+                            runID_bins, runID_low_edge, runID_high_edge,
                             200, 0, 30);
   TH2D* px_py = new TH2D(MakeString(prefix, "pxpy").c_str(), ";p_{x};p_{y}",
                          200, -15, 15,
@@ -218,27 +218,27 @@ int main(int argc, char* argv[]) {
                           100, 0, 100,
                           200, 0, 30);
   TH2D* runID_dca = new TH2D(MakeString(prefix, "runiddca").c_str(), ";runID;DCA[cm]",
-                             runID_bin_width, runID_low_edge, runID_high_edge,
+                             runID_bins, runID_low_edge, runID_high_edge,
                              50, 0, 3);
   TH2D* runID_fit = new TH2D(MakeString(prefix, "runidfit").c_str(), ";runID;fit points",
-                             runID_bin_width, runID_low_edge, runID_high_edge,
+                             runID_bins, runID_low_edge, runID_high_edge,
                              50, 0, 50);
   TH2D* runID_tracketa = new TH2D(MakeString(prefix, "tracketa").c_str(), ";runID;#eta",
-                                  runID_bin_width, runID_low_edge, runID_high_edge,
+                                  runID_bins, runID_low_edge, runID_high_edge,
                                   100, -1, 1);
   TH2D* runID_trackphi = new TH2D(MakeString(prefix, "trackphi").c_str(), ";runID;#phi",
-                                  runID_bin_width, runID_low_edge, runID_high_edge,
+                                  runID_bins, runID_low_edge, runID_high_edge,
                                   100, -TMath::Pi(), TMath::Pi());
   
   // calorimeter
   TH2D* runID_towe = new TH2D(MakeString(prefix, "runidtowe").c_str(), ";runID;E",
-                              runID_bin_width, runID_low_edge, runID_high_edge,
+                              runID_bins, runID_low_edge, runID_high_edge,
                               100, 0, 50);
   TH2D* runID_towet = new TH2D(MakeString(prefix, "runidtowet").c_str(), ";runID;E_{T}",
-                               runID_bin_width, runID_low_edge, runID_high_edge,
+                               runID_bins, runID_low_edge, runID_high_edge,
                                100, 0, 50);
   TH2D* runID_towadc = new TH2D(MakeString(prefix, "runidtowadc").c_str(), ";runID;ADC",
-                                runID_bin_width, runID_low_edge, runID_high_edge,
+                                runID_bins, runID_low_edge, runID_high_edge,
                                 100, 0, 1000);
   TH2D* zdc_towe = new TH2D(MakeString(prefix, "zdctowe").c_str(), ";ZDC Rate[kHz];E",
                               100, 0, 100,
