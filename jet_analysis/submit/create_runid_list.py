@@ -178,7 +178,7 @@ def main(args) :
   tree = ROOT.TTree("runid", "tree of runids")
 
   ## we will write an np array so that it gives us the address...
-  runid = np.zeros(0, dtype=np.dtype(uint))
+  runid = np.zeros(0, dtype=np.dtype(uint32))
   tree.Branch('runid', runid, 'runid/i')
   for id in runid_set :
     runid[0] = id
