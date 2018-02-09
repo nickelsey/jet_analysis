@@ -19,4 +19,6 @@ make install
 ```
 
 Default cmake install location is /usr/local, but since this isn't a system utility, I override the default
-and make the install location ${CMAKE_BINARY_DIR}/install
+and make the install location ${CMAKE_BINARY_DIR}/install, to keep system files clean
+
+Notes and readme files for the different routines can be found in docs/
