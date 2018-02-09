@@ -10,6 +10,7 @@ import subprocess
 import time
 import random
 import ROOT
+import numpy as np
 
 def checkstatus(jobstatus) :
   loop = False
@@ -171,9 +172,21 @@ def main(args) :
   for event in infile.runid :
     runid_set.add(event.runid)
 
-  print runid_set
+  ## fill a new TTree into the final output file
+  root_output_file_name = "runid.root"
+  outfile = ROOT.TFile.Open(root_output_file_name, "RECREATE")
+  tree = ROOT.TTree("runid", "tree of runids")
 
+  ## we will write an np array so that it gives us the address...
+  runid = np.zeros(0, dtype=uint)
+  tree.Branch('runid', runid, 'runid/i')
+  for id in runid_set :
+    runid[0] = id
+    tree.Fill()
 
+  outfile.Write()
+  outfile.Close()
+  
   print "completed processing runids: cleaning up and exiting"
   infile.Close()
   os.remove(root_tmp_file_name)
