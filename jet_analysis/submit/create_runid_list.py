@@ -156,7 +156,7 @@ def main(args) :
   ## first get list
   output_files = [os.path.join(args.output, args.name + str(i) + ".root") for i in range(len(files))]
   root_tmp_file_name = "runid_tmp.root"
-  proccommand = "hadd " + root_tmp_file_name + " " + " ".join(output_files)
+  proccommand = "hadd -f " + root_tmp_file_name + " " + " ".join(output_files)
   ret = subprocess.Popen(proccommand, shell=True)
   ret.wait()
   if ret.returncode != 0 :
