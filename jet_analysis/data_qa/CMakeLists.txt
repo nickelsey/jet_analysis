@@ -7,6 +7,13 @@ add_executable(check_refmult ${CHECK_REFMULT_SRCS})
 target_link_libraries(check_refmult ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(check_refmult PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## creates a list of all runIDs present in a data file
+set(GENERATE_RUNID_LIST_SRCS generate_runid_list)
+add_executable(generate_runid_list ${GENERATE_RUNID_LIST_SRCS})
+target_link_libraries(generate_runid_list ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(generate_runid_list PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+
 ## full data quality for event level, tracks level
 ## and calorimeter level QA
 set(COMPREHENSIVE_DQ_SRCS comprehensive_data_quality.cc)
@@ -26,5 +33,5 @@ set_target_properties(print_data_quality PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${C
 ## install targets
 install(TARGETS check_refmult comprehensive_data_quality
         DESTINATION bin/data_qa)
-install(TARGETS print_data_quality
+install(TARGETS print_data_quality generate_runid_list
         DESTINATION bin/data_qa)
