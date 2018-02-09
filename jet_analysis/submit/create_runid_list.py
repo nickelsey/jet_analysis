@@ -158,7 +158,7 @@ def main(args) :
   proccommand = "hadd " + root_tmp_file_name + " ".join(output_files)
   ret = subprocess.Popen(proccommand, shell=True)
   ret.wait()
-  if ret.returncode not 0 :
+  if ret.returncode != 0 :
     print "warning: hadd command failed, exiting"
     return
 
