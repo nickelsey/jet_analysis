@@ -178,7 +178,7 @@ def main(args) :
   tree = ROOT.TTree("runid", "tree of runids")
 
   ## we will write an np array so that it gives us the address...
-  runid = np.zeros(0, dtype=uint)
+  runid = np.zeros(0, dtype=np.dtype(uint))
   tree.Branch('runid', runid, 'runid/i')
   for id in runid_set :
     runid[0] = id
@@ -186,7 +186,7 @@ def main(args) :
 
   outfile.Write()
   outfile.Close()
-  
+
   print "completed processing runids: cleaning up and exiting"
   infile.Close()
   os.remove(root_tmp_file_name)
