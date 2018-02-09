@@ -777,11 +777,11 @@ int main(int argc, char* argv[]) {
     Overlay1D(h_auau_hard_aj_spectra, refcent_def_5_string, out_loc, "auau_hard_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(h_auau_match_aj_spectra, refcent_def_5_string, out_loc, "auau_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.3, 0.0);
     Overlay1D(h_pp_hard_aj_spectra, refcent_def_5_string, out_loc, "pp_hard_aj", "",
               "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
     Overlay1D(h_pp_match_aj_spectra, refcent_def_5_string, out_loc, "pp_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
+              "A_{J}", "fraction", false, false, true, "Centrality", 0.3, 0.0);
     
     // add the containers to the dictionaries
     auau_hard_lead_pt_cent.insert({key, h_auau_hard_lead_pt_spectra});
