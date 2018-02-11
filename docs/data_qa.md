@@ -36,3 +36,15 @@ This routine can be run like this:
 ```
 ./bin/data_qa/print_data_quality --output=output/location --input=hadded/root/file 
 ```
+
+### generate_runid_list
+Produces a list of all runIDs present in a single data file. Not super useful as is, but when run over multiple data files with submit/create_runid_list.py,
+it will do the same procedure for all data files given as input, then combine them all, and produce a single list that does not have any duplicates.
+This is useful before running my comprehensive data qa scripts, which plot many things as a function of runID. Submitted with
+```
+python submit/create_runid_list.py /path/to/data/files/*
+```
+### print_compare_pp
+Used to compare results from comprehensive_data_quality for two pp data sets (initially used for y12 & y6). Prints results to an output location
+that can be specified using the --output command line flag. --prefixy6 and --prefixy12 can be used to specify if a histogram prefix was specified for
+one or both of the data sets when running comprehensive_data_quality.

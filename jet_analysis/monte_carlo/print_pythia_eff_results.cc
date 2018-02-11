@@ -27,6 +27,10 @@ int main(int argc, char* argv[]) {
   std::vector<string> eff_strings{"100%", "90%", "80%", "70%", "60%",
                                   "50%", "40%", "30%", "20%", "10%"};
   
+  // create histogram options
+  histogramOpts hOpts;
+  canvasOpts cOpts;
+  
   // Histograms will calculate gaussian errors
   // -----------------------------------------
   TH1::SetDefaultSumw2( );
@@ -78,11 +82,11 @@ int main(int argc, char* argv[]) {
   
   
   
-  Overlay1D(h_aj, eff_strings, opts.out_dir,
-            "aj", "", "A_{J}", "fraction", false, false, true, "efficiency");
-  Overlay1D(h_count1, eff_strings, opts.out_dir,
-            "ncount_after", "", "nPart", "fraction", false, false, true, "nPart after efficiency");
-  Overlay1D(h_count2, eff_strings, opts.out_dir,
-            "ncount_before", "", "nPart", "fraction", false, false, true, "nPart before efficiency");
+  Overlay1D(h_aj, eff_strings,  hOpts, cOpts, opts.out_dir,
+            "aj", "", "A_{J}", "fraction", "efficiency");
+  Overlay1D(h_count1, eff_strings, hOpts, cOpts, opts.out_dir,
+            "ncount_after", "", "nPart", "fraction", "nPart after efficiency");
+  Overlay1D(h_count2, eff_strings, hOpts, cOpts, opts.out_dir,
+            "ncount_before", "", "nPart", "fraction", "nPart before efficiency");
   return 0;
 }

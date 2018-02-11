@@ -94,6 +94,10 @@ int main(int argc, char* argv[]) {
   gStyle->SetHatchesSpacing(1.0);
   gStyle->SetHatchesLineWidth(2);
   
+  // create histogram options
+  histogramOpts hOpts;
+  canvasOpts cOpts;
+  
   Options opts;
   for (int i = 1; i < argc; ++i) {
     if (ParseStrFlag(string(argv[i]), "--auau", &opts.auau_file) ||
@@ -277,8 +281,7 @@ int main(int argc, char* argv[]) {
     pp_coincidence2->Divide(pp_coincidence1);
     std::cout <<"pp coincidence: " << pp_coincidence2->GetBinContent(1) << std::endl;
     Overlay1D(auau_coincidence2, pp_coincidence2, "Au+Au", "P+P w/ efficiency",
-              file_prefix, "dijet_coincidence", "refmult", "fraction", "", false,
-              false, true, "Coincidence Rate");
+              hOpts, cOpts, file_prefix, "dijet_coincidence", "refmult", "fraction", "", "Coincidence Rate");
 
     // process the trees
     
@@ -607,19 +610,19 @@ int main(int argc, char* argv[]) {
     h_pp_dphi->Scale(1.0/h_pp_dphi->Integral());
     
     Overlay1D((TH1D*)h_auau_dphi->ProjectionY(), (TH1D*)h_pp_dphi->ProjectionY(),
-              "Au+Au d#phi lead-sub", "P+P d#phi lead-sub",
-              out_loc, "auau_pp_dphi", "", "d#phi", "fraction", false, false, false, "");
-    Print2DSimple(h_auau_hard_lead_rp, out_loc, "auau_dphi_rp", "AuAu d#phi lead jet - rp",
-                  "Centrality", "d#phi(lead-rp)", false, false, false);
+              "Au+Au d#phi lead-sub", "P+P d#phi lead-sub", hOpts, cOpts,
+              out_loc, "auau_pp_dphi", "", "d#phi", "fraction", "");
+    Print2DSimple(h_auau_hard_lead_rp, hOpts, cOpts, out_loc, "auau_dphi_rp", "AuAu d#phi lead jet - rp",
+                  "Centrality", "d#phi(lead-rp)");
     std::vector<TH1D*> h_rp_by_cent = SplitByBin(h_auau_hard_lead_rp);
     for (int i = 0; i < h_rp_by_cent.size(); ++i) {
       h_rp_by_cent[i]->Scale(1.0/h_rp_by_cent[i]->Integral());
       h_rp_by_cent[i]->RebinX(4);
     }
-    Overlay1D(h_rp_by_cent, refcent_alt_string, out_loc, "auau_cent_rp", "",
-              "d#phi", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_rp_by_cent[0], h_rp_by_cent[1], "0-5%", "5-10%", out_loc, "auau_cent_rp_restricted", "",
-              "d#phi", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_rp_by_cent, refcent_alt_string, hOpts, cOpts, out_loc, "auau_cent_rp", "",
+              "d#phi", "fraction", "Centrality");
+    Overlay1D(h_rp_by_cent[0], h_rp_by_cent[1], "0-5%", "5-10%", hOpts, cOpts, out_loc, "auau_cent_rp_restricted", "",
+              "d#phi", "fraction", "Centrality");
     
     // extract nPart in centrality bins
     std::vector<TH1D*> h_auau_npart_spectra = SplitByRefMult(h_auau_npart, refcent_def_5);
@@ -630,10 +633,10 @@ int main(int argc, char* argv[]) {
       h_pp_npart_spectra[i]->Scale(1.0/h_pp_npart_spectra[i]->Integral());
     }
     
-    Overlay1D(h_auau_npart_spectra, refcent_def_5_string, out_loc, "auau_npart_spec",
-              "", "npart", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_npart_spectra, refcent_def_5_string, out_loc, "pp_npart_spec",
-              "", "npart", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_npart_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "auau_npart_spec",
+              "", "npart", "fraction", "Centrality");
+    Overlay1D(h_pp_npart_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "pp_npart_spec",
+              "", "npart", "fraction", "Centrality");
     
     // extract pt spectra in centrality bins
     std::vector<TH1D*> h_auau_hard_lead_pt_spectra = SplitByRefMult(h_auau_hard_lead_pt,
@@ -703,57 +706,57 @@ int main(int argc, char* argv[]) {
     }
     
     // print pt spectra
-    Overlay1D(h_auau_hard_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(h_auau_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(h_auau_match_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_match_lead_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_match_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "auau_match_sub_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_hard_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_lead_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(h_pp_hard_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_sub_pt", "", "p_{T}", "fraction", false, true, true, "Centrality");
-    Overlay1D(h_pp_match_lead_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_match_lead_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_match_sub_pt_spectra, refcent_def_5_string, out_loc,
-              "pp_match_sub_pt", "", "p_{T}", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_hard_lead_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_lead_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_auau_hard_sub_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_sub_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_auau_match_lead_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_lead_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_auau_match_sub_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_sub_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_lead_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_lead_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_sub_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_sub_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_pp_match_lead_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_lead_pt", "", "p_{T}", "fraction", "Centrality");
+    Overlay1D(h_pp_match_sub_pt_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_sub_pt", "", "p_{T}", "fraction", "Centrality");
     
     // print rho & sig
-    Overlay1D(h_auau_hard_lead_rho_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_hard_lead_sig_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_hard_sub_rho_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_hard_sub_sig_spectra, refcent_def_5_string, out_loc,
-              "auau_hard_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_match_lead_rho_spectra, refcent_def_5_string, out_loc,
-              "auau_match_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_match_lead_sig_spectra, refcent_def_5_string, out_loc,
-              "auau_match_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_match_sub_rho_spectra, refcent_def_5_string, out_loc,
-              "auau_match_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_auau_match_sub_sig_spectra, refcent_def_5_string, out_loc,
-              "auau_match_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_auau_hard_lead_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_lead_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_auau_hard_lead_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_lead_sig", "", "#sigma", "fraction", "Centrality");
+    Overlay1D(h_auau_hard_sub_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_sub_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_auau_hard_sub_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_hard_sub_sig", "", "#sigma", "fraction", "Centrality");
+    Overlay1D(h_auau_match_lead_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_lead_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_auau_match_lead_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_lead_sig", "", "#sigma", "fraction", "Centrality");
+    Overlay1D(h_auau_match_sub_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_sub_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_auau_match_sub_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "auau_match_sub_sig", "", "#sigma", "fraction", "Centrality");
     
-    Overlay1D(h_pp_hard_lead_rho_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_hard_lead_sig_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_hard_sub_rho_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_hard_sub_sig_spectra, refcent_def_5_string, out_loc,
-              "pp_hard_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_match_lead_rho_spectra, refcent_def_5_string, out_loc,
-              "pp_match_lead_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_match_lead_sig_spectra, refcent_def_5_string, out_loc,
-              "pp_match_lead_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_match_sub_rho_spectra, refcent_def_5_string, out_loc,
-              "pp_match_sub_rho", "", "#rho", "fraction", false, false, true, "Centrality");
-    Overlay1D(h_pp_match_sub_sig_spectra, refcent_def_5_string, out_loc,
-              "pp_match_sub_sig", "", "#sigma", "fraction", false, false, true, "Centrality");
+    Overlay1D(h_pp_hard_lead_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_lead_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_lead_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_lead_sig", "", "#sigma", "fraction","Centrality");
+    Overlay1D(h_pp_hard_sub_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_sub_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_sub_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_hard_sub_sig", "", "#sigma", "fraction", "Centrality");
+    Overlay1D(h_pp_match_lead_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_lead_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_pp_match_lead_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_lead_sig", "", "#sigma", "fraction", "Centrality");
+    Overlay1D(h_pp_match_sub_rho_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_sub_rho", "", "#rho", "fraction", "Centrality");
+    Overlay1D(h_pp_match_sub_sig_spectra, refcent_def_5_string, hOpts, cOpts, out_loc,
+              "pp_match_sub_sig", "", "#sigma", "fraction", "Centrality");
     
     // for Aj
     std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByRefMult(h_auau_hard_aj, refcent_def_5);
@@ -774,14 +777,14 @@ int main(int argc, char* argv[]) {
       h_pp_match_aj_spectra[i]->Scale(1.0/h_pp_match_aj_spectra[i]->Integral());
     }
     
-    Overlay1D(h_auau_hard_aj_spectra, refcent_def_5_string, out_loc, "auau_hard_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
-    Overlay1D(h_auau_match_aj_spectra, refcent_def_5_string, out_loc, "auau_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.3, 0.0);
-    Overlay1D(h_pp_hard_aj_spectra, refcent_def_5_string, out_loc, "pp_hard_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.22, 0.0);
-    Overlay1D(h_pp_match_aj_spectra, refcent_def_5_string, out_loc, "pp_match_aj", "",
-              "A_{J}", "fraction", false, false, true, "Centrality", 0.3, 0.0);
+    Overlay1D(h_auau_hard_aj_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "auau_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_auau_match_aj_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "auau_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_aj_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "pp_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_pp_match_aj_spectra, refcent_def_5_string, hOpts, cOpts, out_loc, "pp_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
     
     // add the containers to the dictionaries
     auau_hard_lead_pt_cent.insert({key, h_auau_hard_lead_pt_spectra});
@@ -824,9 +827,9 @@ int main(int argc, char* argv[]) {
       boost::filesystem::create_directories(dir);
       
       Overlay1D(h_auau_hard_aj_spectra[i], h_pp_hard_aj_spectra[i], "AuAu hard A_{J}", "PP hard A_{J}",
-                out_loc_cent.c_str(), "aj_hard", "", "A_{J}", "fraction", false, false, true, "A_{J}");
+                 hOpts, cOpts, out_loc_cent, "aj_hard", "", "A_{J}", "fraction", "A_{J}");
       Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], "AuAu matched A_{J}", "PP matched A_{J}",
-                out_loc_cent.c_str(), "aj_match", "", "A_{J}", "fraction", false, false, true, "A_{J}");
+                 hOpts, cOpts, out_loc_cent, "aj_match", "", "A_{J}", "fraction", "A_{J}");
     }
   }
   

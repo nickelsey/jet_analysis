@@ -108,3 +108,7 @@ REQUIREMENT: needs a Tfile with a ttree of all run IDs present in the data set P
 --trigger             which triggers to accept: discard all other events
 ```
 
+### create_runid_list.py
+Submits a job for every data file given in the input that will produce a TTree of all runIDs in that file. Once all the jobs are completed,
+they are combined and a single TTree that has had all duplicate runIDs removed is produced in runID.root. This should be used before
+pbs_submit_comprehensive_dq.py
