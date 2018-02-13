@@ -22,16 +22,23 @@ def checkstatus(jobstatus) :
 def updatestatus(jobstatus, outdir, name) :
   print "Updating job status"
   print "Total: " + str(len(jobstatus))
+  
+  ## get the qstat job listing
+  proccommand = 'qstat | grep dx5412`
+  proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
+  qstat_result = proc.stdout.read()
+  
   for i in range(len(jobstatus)) :
     ## if the job has completed successfully, continue
     if jobstatus[i] == 2 :
       continue
     
     ## check if the job is still underway
-    proccommand = 'qstat | grep dx5412 | grep \' ' + name + str(i) + ' \' | wc -l '
-    proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
-    jobinprocess = int(proc.stdout.read())
-    if jobinprocess >= 1 :
+    ##proccommand = 'qstat | grep dx5412 | grep \' ' + name + str(i) + ' \' | wc -l '
+    ##proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
+    ##jobinprocess = int(proc.stdout.read())
+    jobinprocess = qstat_result.find(name + str(i))
+    if jobinprocess >= 0 :
       jobstatus[i] = 1
       continue
     
