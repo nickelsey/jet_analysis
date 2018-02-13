@@ -24,7 +24,7 @@ def updatestatus(jobstatus, outdir, name) :
   print "Total: " + str(len(jobstatus))
   
   ## get the qstat job listing
-  proccommand = 'qstat | grep dx5412`
+  proccommand = 'qstat | grep dx5412'
   proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
   qstat_result = proc.stdout.read()
   
