@@ -40,7 +40,8 @@ struct Options {
   string out_dir     = "tmp";    /* directory to save output in */
   string tow_list    = "";       /* list of hot towers to remove */
   string run_list    = "";       /* list of runs to remove */
-  string triggers    = "";       /* triggers to consider (see trigger_lookup.hh) */
+  string triggers    = "";       /* triggers to analyze (see trigger_lookup.hh) */
+  string alt_trig    = "";       /* for more control, can pass a comma separated list of trigger IDs */
   string runid_in    = "";       /* root file containing ttree of runids */
   string lumi_str    = "";       /* prefix for histograms to separate different luminosities */
 };
@@ -82,6 +83,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--towList", &opts.tow_list) ||
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
+        ParseStrFlag(string(argv[i]), "--triggerIDs", &opts.alt_trig) ||
         ParseStrFlag(string(argv[i]), "--runIDs", &opts.runid_in) ||
         ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
@@ -116,6 +118,9 @@ int main(int argc, char* argv[]) {
   
   // get the triggers IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);
+  std::set<unsigned> alt_triggers = ParseArgString<unsigned>(opts.alt_trig);
+  for (auto trig : alt_triggers)
+    triggers.insert(trig);
   
   // sort runids
   TFile* runid_file = new TFile(opts.runid_in.c_str(), "READ");

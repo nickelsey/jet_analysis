@@ -28,10 +28,18 @@ add_executable(print_data_quality ${DQ_PRINT_SRCS})
 target_link_libraries(print_data_quality ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(print_data_quality PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## print routines to make comparisons between pp data sets
+set(DQ_PP_PRINT_SRCS print_compare_pp.cc)
+add_executable(print_pp_compare ${DQ_PP_PRINT_SRCS})
+target_link_libraries(print_pp_compare ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(print_pp_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
 
 #########################################
 ## install targets
 install(TARGETS check_refmult comprehensive_data_quality
         DESTINATION bin/data_qa)
 install(TARGETS print_data_quality generate_runid_list
+        DESTINATION bin/data_qa)
+install(TARGETS print_pp_compare
         DESTINATION bin/data_qa)

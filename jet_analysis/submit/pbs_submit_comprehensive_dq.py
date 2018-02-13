@@ -127,6 +127,7 @@ def main(args) :
       clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
       clargs = clargs  + ' --towList=' + args.badTowers + ' --triggers=' + args.triggers
       clargs = clargs + ' --runIDs=' + args.runIDs + ' --histPrefix=' + args.histPrefix
+      clargs = clargs + ' --triggerIDs=' + args.triggerIDs
 
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
       qsub = qsub + ':ppn=' + str(args.ppn) + ' -q ' + str(args.queue) + ' -o ' + outstream
@@ -166,7 +167,8 @@ if __name__ == "__main__":
   parser.add_argument('--output', default='out/tmp', help=' directory for output root files' )
   parser.add_argument('--badRuns', default=' ', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='submit/empty_list.txt', help=' csv file containing towers to mask')
-  parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
+  parser.add_argument('--triggerString', default=' ', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
+  parser.add_argument('--triggerIDs', default=' ', help=' a comma separated list of individual trigger IDs for more control')
   parser.add_argument('--runIDs', default='submit/y14_runids.root', help=' a ROOT file containing a tree of the run IDs that the user wants to be included in the analysis')
   parser.add_argument('--histPrefix', default='', help=' a string identifier to help separate different data sets while adding ROOT files')
   args = parser.parse_args()
