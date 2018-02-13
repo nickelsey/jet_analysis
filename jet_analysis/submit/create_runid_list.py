@@ -1,4 +1,4 @@
-## pbs_submit_dijet_imbalance.py
+## create_runid_list.py
 
 ## convenience script to batch submit and monitor
 ## job status, automatically resubmitting jobs that
