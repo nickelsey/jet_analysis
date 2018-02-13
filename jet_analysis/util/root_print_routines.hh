@@ -26,7 +26,7 @@ struct histogramOpts {
   bool   center_title_y;
   
   int line_width;
-  int marker_size;
+  double marker_size;
   
   // pick a set of colors and markers
   int current;
@@ -40,13 +40,13 @@ struct histogramOpts {
     title_size_x = 0.075;
     title_offset_x = 0.800;
     center_title_x = false;
-    label_size_x = 0.055;
-    title_size_x = 0.075;
-    title_offset_x = 0.780;
-    center_title_x = true;
+    label_size_y = 0.055;
+    title_size_y = 0.075;
+    title_offset_y = 0.800;
+    center_title_y = true;
     current = 0;
     line_width = 2;
-    marker_size = 1;
+    marker_size = 1.5;
   }
   
   template <typename H>
@@ -86,9 +86,9 @@ struct canvasOpts {
   bool log_z;
   
   canvasOpts() {
-    left_margin = 0.12;
+    left_margin = 0.13;
     bottom_margin = 0.15;
-    right_margin = 0.10;
+    right_margin = 0.08;
     upper_margin = 0.10;
     
     do_legend = true;
@@ -248,6 +248,9 @@ void Overlay1D(H* h1,
   copts.SetMargins(&c);
   copts.SetLogScale(&c);
   
+  h1->Draw();
+  h2->Draw("SAME");
+  
   TLegend* leg = copts.Legend();
   if (leg != nullptr) {
     leg->SetHeader(legend_title.c_str());
@@ -286,6 +289,90 @@ void Print2DSimple(H* h,
   h->Draw(opt.c_str());
   c.SaveAs(canvas_name.c_str());
 }
+
+// print histograms & their ratios
+template <typename H>
+void PrintWithRatio(H* h1,
+                    H* h2,
+                    std::string h1_title,
+                    std::string h2_title,
+                    histogramOpts hopts,
+                    canvasOpts copts,
+                    std::string output_loc,
+                    std::string output_name,
+                    std::string canvas_title,
+                    std::string x_axis_label,
+                    std::string y_axis_label,
+                    std::string legend_title = "") {
+  
+  // we assume the output location exists, so create
+  // the final output string that will be used for pdf creation
+  std::string canvas_name = output_loc + "/" + output_name + ".pdf";
+  
+  TCanvas c;
+  TPad* pad1 = new TPad("pad1", "pad1", 0, 0.35, 1.0, 1.0);
+  copts.SetMargins(pad1);
+  pad1->SetBottomMargin(0.0);
+  copts.SetLogScale(pad1);
+  pad1->Draw();
+  pad1->cd();
+  
+  // set histograms
+  hopts.SetHistogram(h1);
+  h1->GetXaxis()->SetTitle("");
+  h1->GetYaxis()->SetTitle(y_axis_label.c_str());
+  h1->SetTitle(canvas_title.c_str());
+  h1->Draw();
+  
+  hopts.SetHistogram(h2);
+  h2->Draw("SAME");
+  
+  TLegend* leg = copts.Legend();
+  if (leg != nullptr) {
+    leg->SetTextSize(0.04);
+    leg->SetHeader(legend_title.c_str());
+    leg->AddEntry(h1, h1_title.c_str(), "lep");
+    leg->AddEntry(h2, h2_title.c_str(), "lep");
+    leg->Draw();
+  }
+  
+  // lower pad
+  c.cd();
+  TPad* pad2 = new TPad("pad2", "pad2", 0, 0.0, 1, 0.35);
+  copts.SetMargins(pad2);
+  pad2->SetTopMargin(0.0);
+  pad2->SetBottomMargin(0.35);
+  copts.SetLogScale(pad2);
+  pad2->SetLogy(false);
+  pad2->Draw();
+  pad2->cd();
+  
+  TH1D* tmp = (TH1D*) h1->Clone();
+  tmp->Divide(h2);
+  hopts.SetHistogram(tmp);
+  
+  tmp->GetYaxis()->SetRangeUser(0, 2);
+  tmp->GetYaxis()->SetNdivisions(4);
+  tmp->GetXaxis()->SetTitle(x_axis_label.c_str());
+  tmp->GetYaxis()->SetTitle("Ratio");
+  tmp->SetLineColor(h1->GetLineColor());
+  tmp->SetMarkerColor(h1->GetMarkerColor());
+  tmp->SetMarkerStyle(h1->GetMarkerStyle());
+  
+  tmp->GetXaxis()->SetLabelSize(hopts.label_size_x*2);
+  tmp->GetXaxis()->SetTitleSize(hopts.title_size_x*2);
+  tmp->GetXaxis()->SetTitleOffset(hopts.title_offset_x);
+  tmp->GetXaxis()->CenterTitle(hopts.center_title_x);
+  tmp->GetYaxis()->SetLabelSize(hopts.label_size_y*2);
+  tmp->GetYaxis()->SetTitleSize(hopts.title_size_y*2);
+  tmp->GetYaxis()->SetTitleOffset(hopts.title_offset_y/2);
+  tmp->GetYaxis()->CenterTitle(hopts.center_title_y);
+  
+  tmp->Draw("ep");
+  
+  c.SaveAs(canvas_name.c_str());
+}
+
 
 // print histograms & their ratios
 template <typename H>
@@ -346,6 +433,7 @@ void PrintWithRatios(H* ref,
   }
   
   // lower pad
+  c.cd();
   TPad* pad2 = new TPad("pad2", "pad2", 0, 0.05, 1, 0.3);
   copts.SetMargins(pad2);
   pad2->SetTopMargin(0.0);
