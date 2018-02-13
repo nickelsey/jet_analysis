@@ -29,8 +29,10 @@ def updatestatus(jobstatus, outdir, name) :
   qstat_result = proc.stdout.read()
   
   for i in range(len(jobstatus)) :
-    ## if the job has completed successfully, continue
-    if jobstatus[i] == 2 :
+    
+    ## if job has not been submitted, is complete, or has failed, we don't need
+    ## to check again
+    if jobstatus[i] != 1 :
       continue
     
     ## check if the job is still underway
@@ -54,7 +56,7 @@ def updatestatus(jobstatus, outdir, name) :
       outputfile = ROOT.TFile(filename, "READ")
       if outputfile.IsZombie() :
         print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit"
-        jobstatus[i] = -1
+        jobstatus[i] = 0
         os.remove(filename)
       elif outputfile.IsOpen() :
         print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy"
@@ -63,7 +65,7 @@ def updatestatus(jobstatus, outdir, name) :
         outputfile.Close()
       else :
         print "job " + str(i+1) + " of " + str(len(jobstatus)) + " undefined file status, resubmit"
-        jobstatus[i] = -1
+        jobstatus[i] = 0
     else :
       print "undefined status: job " + str(i+1) + " of " + str(len(jobstatus)) + " marked for submission"
       jobstatus[i] = 0
@@ -91,8 +93,7 @@ def main(args) :
   ## for when  job is active and when it
   ## has completed successfully
   
-  ## 0 not submitted, 1 for running, 2 for complete,
-  ## and -1 for failed - resubmit
+  ## 0 not submitted/failed, 1 for running, 2 for complete,
   jobstatus = [0 for i in range(len(files))]
   
   ## count the number of qsub submission failures
