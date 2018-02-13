@@ -125,7 +125,7 @@ def main(args) :
       ## build our qsub execution string
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
-      clargs = clargs  + ' --towList=' + args.badTowers + ' --triggers=' + args.triggers
+      clargs = clargs  + ' --towList=' + args.badTowers + ' --triggerString=' + args.triggers
       clargs = clargs + ' --runIDs=' + args.runIDs + ' --histPrefix=' + args.histPrefix
       clargs = clargs + ' --triggerIDs=' + args.triggerIDs
 
