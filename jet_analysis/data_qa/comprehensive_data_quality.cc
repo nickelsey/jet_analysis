@@ -156,6 +156,9 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_refmult = new TH2D(MakeString(prefix, "zdcrefmult").c_str(), ";zdc[khz];refMult",
                                100, 0, 100,
                                800, 0, 800);
+  TH2D* bbc_refmult = new TH2D(MakeString(prefix, "bbcrefmult").c_str(), ";BBC [kHz];refMult",
+                               100, 0, 1000,
+                               800, 0, 800);
   TH2D* zdc_grefmult = new TH2D(MakeString(prefix, "zdcgrefmult").c_str(), ";zdc[khz];gRefMult",
                                 100, 0, 100,
                                 800, 0, 800);
@@ -199,6 +202,9 @@ int main(int argc, char* argv[]) {
   TH2D* runID_zdc = new TH2D(MakeString(prefix, "runidzdc").c_str(), ";runID;ZDC Rate[kHz]",
                              runID_bins, runID_low_edge, runID_high_edge,
                              100, 0, 100);
+  TH2D* runID_bbc = new TH2D(MakeString(prefix, "runidbbc").c_str(), ";runID;BBC Rate[kHz]",
+                             runID_bins, runID_low_edge, runID_high_edge,
+                             100, 0, 1000);
   
   // tracks
   TH2D* runID_px = new TH2D(MakeString(prefix, "runidpx").c_str(), ";runID;p_{x}",
@@ -305,11 +311,13 @@ int main(int argc, char* argv[]) {
     
     // get zdc rate in khz
     double zdc_khz = header->GetZdcCoincidenceRate()/1000.0;
+    double bbc_khz = header->GetBbcCoincidenceRate()/1000.0;
     
     // fill event level histograms
     runID_refmult->Fill(runidxmap, header->GetReferenceMultiplicity());
     runID_grefmult->Fill(runidxmap, header->GetGReferenceMultiplicity());
     zdc_refmult->Fill(zdc_khz, header->GetReferenceMultiplicity());
+    bbc_refmult->Fill(bbc_khz, header->GetReferenceMultiplicity());
     zdc_grefmult->Fill(zdc_khz, header->GetGReferenceMultiplicity());
     vz_refmult->Fill(header->GetPrimaryVertexZ(), header->GetReferenceMultiplicity());
     ref_gref->Fill(header->GetReferenceMultiplicity(), header->GetGReferenceMultiplicity());
@@ -323,6 +331,7 @@ int main(int argc, char* argv[]) {
     zdc_vz->Fill(zdc_khz, header->GetPrimaryVertexZ());
     zdc_vzvpdvz->Fill(zdc_khz, header->GetPrimaryVertexZ() - header->GetVpdVz());
     runID_zdc->Fill(runidxmap, zdc_khz);
+    runID_bbc->Fill(runidxmap, bbc_khz);
     
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
       runID_px->Fill(runidxmap, track->GetPx());
