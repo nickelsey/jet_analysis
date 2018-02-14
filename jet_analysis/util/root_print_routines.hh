@@ -145,6 +145,8 @@ void PrettyPrint1D(H* h,
   
   // and axis labels, and title
   hopts.SetHistogram(h);
+  h->GetXaxis()->SetTitle(x_axis_label.c_str());
+  h->GetYaxis()->SetTitle(y_axis_label.c_str());
   
   // generate a canvas
   TCanvas c;

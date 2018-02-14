@@ -246,6 +246,9 @@ int main(int argc, char* argv[]) {
   TH2D* runID_trackphi = new TH2D(MakeString(prefix, "trackphi").c_str(), ";runID;#phi",
                                   runID_bins, runID_low_edge, runID_high_edge,
                                   100, -TMath::Pi(), TMath::Pi());
+  TH2D* tracketa_phi = new TH2D(MakeString(prefix, "tracketaphi").c_str(), ";#eta;#phi",
+                                100, -1.0, 1.0,
+                                100, -TMath::Pi(), TMath::Pi());
   
   // calorimeter
   TH2D* runID_towe = new TH2D(MakeString(prefix, "runidtowe").c_str(), ";runID;E",
@@ -275,6 +278,9 @@ int main(int argc, char* argv[]) {
   TH2D* tow_towadc = new TH2D(MakeString(prefix, "towtowadc").c_str(), ";towerID;ADC",
                               4800, 0.5, 4800.5,
                               100, 0, 1000);
+  TH2D* tow_etaphi = new TH2D(MakeString(prefix, "towetaphi").c_str(), ";#eta;#phi",
+                              40, -1, 1,
+                              120, -TMath::Pi(), TMath::Pi());
   
   // start the event loop
   // --------------------
@@ -347,6 +353,7 @@ int main(int argc, char* argv[]) {
       runID_fit->Fill(runidxmap, track->GetNOfFittedHits());
       runID_tracketa->Fill(runidxmap, track->GetEta());
       runID_trackphi->Fill(runidxmap, track->GetPhi());
+      tracketa_phi->Fill(track->GetEta(), track->GetPhi());
     }
     
     while(TStarJetPicoTower* tower = (TStarJetPicoTower*) nextTower()) {
@@ -359,6 +366,7 @@ int main(int argc, char* argv[]) {
       tow_towe->Fill(tower->GetId(), tower->GetEnergy());
       tow_towet->Fill(tower->GetId(), tower->GetEt());
       tow_towadc->Fill(tower->GetId(), tower->GetADC());
+      tow_etaphi->Fill(tower->GetEta(), tower->GetPhi());
     }
     
   }

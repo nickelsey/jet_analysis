@@ -108,6 +108,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> runid_fit;
   std::unordered_map<string, TH2D*> runid_eta;
   std::unordered_map<string, TH2D*> runid_phi;
+  std::unordered_map<string, TH2D*> track_etaphi;
   std::unordered_map<string, TH2D*> runid_towe;
   std::unordered_map<string, TH2D*> runid_towet;
   std::unordered_map<string, TH2D*> runid_towadc;
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> tow_towe;
   std::unordered_map<string, TH2D*> tow_towet;
   std::unordered_map<string, TH2D*> tow_towadc;
+  std::unordered_map<string, TH2D*> tow_etaphi;
   
   // read histograms in from input
   for (auto prefix : prefixes) {
@@ -150,6 +152,7 @@ int main(int argc, char* argv[]) {
     runid_fit.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidfit").c_str())});
     runid_eta.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runideta").c_str())});
     runid_phi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidphi").c_str())});
+    track_etaphi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "tracketaphi").c_str())});
     runid_towe.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowe").c_str())});
     runid_towet.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowet").c_str())});
     runid_towadc.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowadc").c_str())});
@@ -159,6 +162,7 @@ int main(int argc, char* argv[]) {
     tow_towe.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowe").c_str())});
     tow_towet.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowet").c_str())});
     tow_towadc.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowadc").c_str())});
+    tow_etaphi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towetaphi").c_str())});
   }
   
   

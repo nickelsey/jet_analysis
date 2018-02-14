@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> runid_fit;
   std::unordered_map<string, TH2D*> runid_eta;
   std::unordered_map<string, TH2D*> runid_phi;
+  std::unordered_map<string, TH2D*> track_etaphi;
   std::unordered_map<string, TH2D*> runid_towe;
   std::unordered_map<string, TH2D*> runid_towet;
   std::unordered_map<string, TH2D*> runid_towadc;
@@ -125,13 +126,14 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> tow_towe;
   std::unordered_map<string, TH2D*> tow_towet;
   std::unordered_map<string, TH2D*> tow_towadc;
+  std::unordered_map<string, TH2D*> tow_etaphi;
   
   // read histograms in from input
   for (auto prefix : prefixes) {
     runid_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidrefmult").c_str())});
     runid_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidgrefmult").c_str())});
     zdc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcrefmult").c_str())});
-    zdc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "bbcrefmult").c_str())});
+    bbc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "bbcrefmult").c_str())});
     zdc_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcgrefmult").c_str())});
     vz_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "vzrefmult").c_str())});
     refmult_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "refgrefmult").c_str())});
@@ -158,6 +160,7 @@ int main(int argc, char* argv[]) {
     runid_fit.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidfit").c_str())});
     runid_eta.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runideta").c_str())});
     runid_phi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidphi").c_str())});
+    track_etaphi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "tracketaphi").c_str())});
     runid_towe.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowe").c_str())});
     runid_towet.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowet").c_str())});
     runid_towadc.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidtowadc").c_str())});
@@ -167,6 +170,7 @@ int main(int argc, char* argv[]) {
     tow_towe.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowe").c_str())});
     tow_towet.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowet").c_str())});
     tow_towadc.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towtowadc").c_str())});
+    tow_etaphi.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "towetaphi").c_str())});
   }
   
   // printing routines
@@ -186,6 +190,21 @@ int main(int argc, char* argv[]) {
   Overlay1D(zdc_rate_1, zdc_rate_2, opts.name1, opts.name2, hOpts, cOpts,
             opts.out_dir, "zdcrate", "", "ZDC Rate [kHz]", "fraction");
   
+  // bbc rates
+  
+  TH2D* bbc_refmult_1 = (TH2D*) bbc_refmult[opts.hist_prefix1]->Clone("bbc_refmult_clone_1");
+  TH2D* bbc_refmult_2 = (TH2D*) bbc_refmult[opts.hist_prefix2]->Clone("bbc_refmult_clone_2");
+  
+  TH1D* bbc_rate_1 = (TH1D*) bbc_refmult_1->ProjectionX();
+  TH1D* bbc_rate_2 = (TH1D*) bbc_refmult_2->ProjectionX();
+  
+  bbc_rate_1->Scale(1.0/bbc_rate_1->Integral());
+  bbc_rate_1->GetXaxis()->SetRange(1, bbc_rate_1->FindLastBinAbove(0));
+  bbc_rate_2->Scale(1.0/bbc_rate_2->Integral());
+  
+  Overlay1D(bbc_rate_1, bbc_rate_2, opts.name1, opts.name2, hOpts, cOpts,
+            opts.out_dir, "bbcrate", "", "BBC Rate [kHz]", "fraction");
+  
   // zdc as a function of runid
   TH2D* runid_zdc_1 = (TH2D*) runid_zdc[opts.hist_prefix1]->Clone("runid_zdc_clone_1");
   TH2D* runid_zdc_2 = (TH2D*) runid_zdc[opts.hist_prefix2]->Clone("runid_zdc_clone_2");
@@ -199,6 +218,21 @@ int main(int argc, char* argv[]) {
                 MakeString("run_avg_zdc_", opts.name1).c_str(), "", "runID", "<ZDC Rate [kHz]>");
   PrettyPrint1D(runid_zdc_profile_2, hOpts, cOptsNoLeg, "", opts.out_dir,
                 MakeString("run_avg_zdc_", opts.name2).c_str(), "", "runID", "<ZDC Rate [kHz]>");
+  
+  // bbc as a function of runid
+  TH2D* runid_bbc_1 = (TH2D*) runid_bbc[opts.hist_prefix1]->Clone("runid_bbc_clone_1");
+  TH2D* runid_bbc_2 = (TH2D*) runid_bbc[opts.hist_prefix2]->Clone("runid_bbc_clone_2");
+  
+  TProfile* runid_bbc_profile_1 = (TProfile*) runid_bbc_1->ProfileX("runid_bbc_clone_1_profx",
+                                                                    1, -1, "s");
+  TProfile* runid_bbc_profile_2 = (TProfile*) runid_bbc_2->ProfileX("runid_bbc_clone_2_profx",
+                                                                    1, -1, "s");
+  
+  PrettyPrint1D(runid_bbc_profile_1, hOpts, cOptsNoLeg, "", opts.out_dir,
+                MakeString("run_avg_bbc_", opts.name1).c_str(), "", "runID", "<BBC Rate [kHz]>");
+  PrettyPrint1D(runid_bbc_profile_2, hOpts, cOptsNoLeg, "", opts.out_dir,
+                MakeString("run_avg_bbc_", opts.name2).c_str(), "", "runID", "<BBC Rate [kHz]>");
+  
   
   // refmult
   TH1D* refmult_1 = (TH1D*) zdc_refmult_1->ProjectionY();
@@ -393,6 +427,8 @@ int main(int argc, char* argv[]) {
             "et", "", "E_{T}", "fraction");
   PrintWithRatio(et_1, et_2, opts.name1, opts.name2, hOpts, cOptsLogy, opts.out_dir,
                  "et_ratio", "", "E_{T}", "fraction");
+  
+  // print eta x phi for the barrel calorimeter
   
   return 0;
 };
