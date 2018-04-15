@@ -6,6 +6,9 @@
 #include "jet_analysis/util/trigger_lookup.hh"
 #include "jet_analysis/util/reader_util.hh"
 #include "jet_analysis/util/string_util.hh"
+#include "jet_analysis/efficiency/run14_eff.hh"
+#include "jet_analysis/efficiency/run7_eff.hh"
+
 
 #include <string>
 
@@ -44,6 +47,10 @@ struct Options {
   string alt_trig    = "";       /* for more control, can pass a comma separated list of trigger IDs */
   string runid_in    = "";       /* root file containing ttree of runids */
   string lumi_str    = "";       /* prefix for histograms to separate different luminosities */
+  string effcurves   = "";       /* file holding y14 efficiency curves */
+  string y7effcurves = "";       /* file holding y7 efficiency curves */
+  bool useY14Eff     = false;    /* use y14 efficiency curves when doing efficiency corrections */
+  bool useY7Eff      = false;    /* use y7 efficiency curves when doing efficiency corrections */
 };
 
 // creates a sorted vector of unique runids from a
@@ -83,8 +90,6 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--towList", &opts.tow_list) ||
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
-        ParseStrFlag(string(argv[i]), "--triggerIDs", &opts.alt_trig) ||
-        ParseStrFlag(string(argv[i]), "--runIDs", &opts.runid_in) ||
         ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
@@ -130,6 +135,27 @@ int main(int argc, char* argv[]) {
   double runID_low_edge  = 0.5;
   double runID_high_edge = runID_low_edge + runID_bin_width * runID_bins;
 
+  // load efficiency classes
+  if (opts.useY7Eff && opts.useY14Eff) {
+    std::cerr << "error: cant use both y14 and y7 efficiency corrections, exiting" << std::endl;
+    return 1;
+  }
+  Run14Eff* run14Eff;
+  if (opts.useY14Eff) {
+    run14Eff = new Run14Eff();
+    run14Eff->loadFile(opts.effcurves);
+  }
+  
+  Run7Eff* run7Eff;
+  if (opts.useY7Eff) {
+    run7Eff = new Run7Eff();
+    run7Eff->loadFile(opts.y7effcurves);
+  }
+  
+  // define default y14 centrality cuts
+  std::vector<int> y14_refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
+  std::vector<int> y7_refcent_def{269};
+  // define default y7 centrality cuts
   
   
   // define histograms
@@ -234,6 +260,9 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_pt = new TH2D(MakeString(prefix, "zdcpt").c_str(), ";ZDC Rate[kHz];p_{t}",
                           100, 0, 100,
                           200, 0, 30);
+  TH2D* zdc_ptcorr = new TH2D(MakeString(prefix, "zdcptcorr").c_str(), ";ZDC Rate[kHz];p_{t}",
+                          100, 0, 100,
+                          200, 0, 30);
   TH2D* runID_dca = new TH2D(MakeString(prefix, "runiddca").c_str(), ";runID;DCA[cm]",
                              runID_bins, runID_low_edge, runID_high_edge,
                              50, 0, 3);
@@ -319,6 +348,21 @@ int main(int argc, char* argv[]) {
     double zdc_khz = header->GetZdcCoincidenceRate()/1000.0;
     double bbc_khz = header->GetBbcCoincidenceRate()/1000.0;
     
+    int refmult = header->GetReferenceMultiplicity();
+    int cent = -1;
+    if (opts.useY14Eff) {
+      for (unsigned i = 0; i < y14_refcent_def.size(); ++i) {
+        if (refmult > y14_refcent_def[i]) {
+          cent = i;
+          break;
+        }
+      }
+    }
+    else if (opts.useY7Eff) {
+      if (refmult > y7_refcent_def[0])
+        cent = 0;
+    }
+    
     // fill event level histograms
     runID_refmult->Fill(runidxmap, header->GetReferenceMultiplicity());
     runID_grefmult->Fill(runidxmap, header->GetGReferenceMultiplicity());
@@ -349,6 +393,15 @@ int main(int argc, char* argv[]) {
       zdc_py->Fill(zdc_khz, track->GetPy());
       zdc_pz->Fill(zdc_khz, track->GetPz());
       zdc_pt->Fill(zdc_khz, track->GetPt());
+      if (opts.useY14Eff) {
+        zdc_ptcorr->Fill(zdc_khz, track->GetPt(), run14Eff->AuAuEff(track->GetPt(), track->GetEta(),
+                                                                    cent,
+                                                                    header->GetZdcCoincidenceRate()));
+      }
+      else if (opts.useY7Eff) {
+        if (cent < 3)
+        zdc_ptcorr->Fill(zdc_khz, track->GetPt(), run7Eff->AuAuEff020Avg(track->GetPt(), track->GetEta()));
+      }
       runID_dca->Fill(runidxmap, track->GetDCA());
       runID_fit->Fill(runidxmap, track->GetNOfFittedHits());
       runID_tracketa->Fill(runidxmap, track->GetEta());

@@ -18,7 +18,7 @@ set_target_properties(generate_runid_list PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${
 ## and calorimeter level QA
 set(COMPREHENSIVE_DQ_SRCS comprehensive_data_quality.cc)
 add_executable(comprehensive_data_quality ${COMPREHENSIVE_DQ_SRCS})
-target_link_libraries(comprehensive_data_quality ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(comprehensive_data_quality ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency)
 set_target_properties(comprehensive_data_quality PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 ## print routines to make comparisons between luminosities
@@ -34,6 +34,11 @@ add_executable(print_pp_compare ${DQ_PP_PRINT_SRCS})
 target_link_libraries(print_pp_compare ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(print_pp_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## generate efficiency curves
+set(GEN_EFF_SRCS generate_y14_efficiency.cc)
+add_executable(generate_y14_efficiency ${GEN_EFF_SRCS})
+target_link_libraries(generate_y14_efficiency ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(generate_y14_efficiency PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 #########################################
 ## install targets
@@ -41,5 +46,5 @@ install(TARGETS check_refmult comprehensive_data_quality
         DESTINATION bin/data_qa)
 install(TARGETS print_data_quality generate_runid_list
         DESTINATION bin/data_qa)
-install(TARGETS print_pp_compare
+install(TARGETS print_pp_compare generate_y14_efficiency
         DESTINATION bin/data_qa)
