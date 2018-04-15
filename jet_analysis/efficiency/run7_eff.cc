@@ -31,9 +31,6 @@ void Run7Eff::loadFile(std::string filename) {
     file->Close();
   file = new TFile(filename.c_str(), "READ");
   
-  std::cout << "FILE: " << file << std::endl;
-  
-  
   loadCurves();
 }
 
