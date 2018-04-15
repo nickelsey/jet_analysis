@@ -91,6 +91,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--runIDs", &opts.runid_in) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
+        ParseStrFlag(string(argv[i]), "triggerIDs", &opts.alt_trig) ||
         ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str) ||
         ParseStrFlag(string(argv[i]), "--y14Eff", &opts.effcurves) ||
         ParseStrFlag(string(argv[i]), "--y7Eff", &opts.y7effcurves)) continue;
