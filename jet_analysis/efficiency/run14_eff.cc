@@ -1,5 +1,7 @@
 // run14_eff.cc
 
+#include <iostream>
+
 #include "run14_eff.hh"
 
 Run14Eff::Run14Eff() : file(nullptr), maxPt(4.5) {
@@ -32,6 +34,12 @@ double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
     zdcBin = 1;
   else
     zdcBin = 2;
+  
+  std::cout << "getting pt: " << pt << std::endl;
+  std::cout << "zdc bin: " << zdcBin << std::endl;
+  std::cout << "cent bin: " << cent << std::endl;
+  std::cout << "max zdc size: " << curves.size() << std::endl;
+  std::cout << "max cent size: " << curves[0].size() << std::endl;
   
   int bin = curves[zdcBin][cent]->FindBin(pt, eta);
   return curves[zdcBin][cent]->GetBinContent(bin);
