@@ -273,9 +273,6 @@ int main(int argc, char* argv[]) {
   TH2D* zdc_pt = new TH2D(MakeString(prefix, "zdcpt").c_str(), ";ZDC Rate[kHz];p_{t}",
                           100, 0, 100,
                           200, 0, 30);
-  TH2D* zdc_ptcorr = new TH2D(MakeString(prefix, "zdcptcorr").c_str(), ";ZDC Rate[kHz];p_{t}",
-                          100, 0, 100,
-                          200, 0, 30);
   TH2D* runID_dca = new TH2D(MakeString(prefix, "runiddca").c_str(), ";runID;DCA[cm]",
                              runID_bins, runID_low_edge, runID_high_edge,
                              50, 0, 3);
@@ -291,6 +288,9 @@ int main(int argc, char* argv[]) {
   TH2D* tracketa_phi = new TH2D(MakeString(prefix, "tracketaphi").c_str(), ";#eta;#phi",
                                 100, -1.0, 1.0,
                                 100, -TMath::Pi(), TMath::Pi());
+  TH2D* ref_ptcorr = new TH2D(MakeString(prefix, "refmultptcorr").c_str(), ";refmult;p_{t}",
+                              100, 0, 100,
+                              200, 0, 30);
   
   // calorimeter
   TH2D* runID_towe = new TH2D(MakeString(prefix, "runidtowe").c_str(), ";runID;E",
@@ -407,13 +407,13 @@ int main(int argc, char* argv[]) {
       zdc_pz->Fill(zdc_khz, track->GetPz());
       zdc_pt->Fill(zdc_khz, track->GetPt());
       if (opts.useY14Eff) {
-        zdc_ptcorr->Fill(zdc_khz, track->GetPt(), run14Eff->AuAuEff(track->GetPt(), track->GetEta(),
+        ref_ptcorr->Fill(refmult, track->GetPt(), run14Eff->AuAuEff(track->GetPt(), track->GetEta(),
                                                                     cent,
                                                                     header->GetZdcCoincidenceRate()));
       }
       else if (opts.useY7Eff) {
         if (cent < 3)
-        zdc_ptcorr->Fill(zdc_khz, track->GetPt(), run7Eff->AuAuEff020Avg(track->GetPt(), track->GetEta()));
+        ref_ptcorr->Fill(refmult, track->GetPt(), run7Eff->AuAuEff020Avg(track->GetPt(), track->GetEta()));
       }
       runID_dca->Fill(runidxmap, track->GetDCA());
       runID_fit->Fill(runidxmap, track->GetNOfFittedHits());
