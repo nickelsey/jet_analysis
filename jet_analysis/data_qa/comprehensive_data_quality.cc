@@ -365,7 +365,7 @@ int main(int argc, char* argv[]) {
     int cent = -1;
     if (opts.useY14Eff) {
       for (unsigned i = 0; i < y14_refcent_def.size(); ++i) {
-        if (refmult > y14_refcent_def[i]) {
+        if (refmult >= y14_refcent_def[i]) {
           cent = i;
           break;
         }
