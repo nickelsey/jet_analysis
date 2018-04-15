@@ -90,10 +90,21 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--towList", &opts.tow_list) ||
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
-        ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str)) continue;
+        ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str) ||
+        ParseStrFlag(string(argv[i]), "--y14Eff", &opts.effcurves) ||
+        ParseStrFlag(string(argv[i]), "--y7Eff", &opts.y7effcurves)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
   }
+  
+  if (opts.y7effcurves != "" && opts.effcurves != "") {
+    std::cerr << "cant use both y7 and y14 efficiency curves: exiting" << std::endl;
+    return 1;
+  }
+  if (opts.y7effcurves != "")
+    opts.useY7Eff = true;
+  else if (opts.effcurves != "")
+    opts.useY14Eff = true;
   
   // initialization
   // --------------
