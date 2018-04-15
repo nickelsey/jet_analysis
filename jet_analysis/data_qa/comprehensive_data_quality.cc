@@ -89,6 +89,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--outDir", &opts.out_dir) ||
         ParseStrFlag(string(argv[i]), "--towList", &opts.tow_list) ||
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
+        ParseStrFlag(string(argv[i]), "--runIDs", &opts.runid_in) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseStrFlag(string(argv[i]), "--histPrefix", &opts.lumi_str) ||
         ParseStrFlag(string(argv[i]), "--y14Eff", &opts.effcurves) ||
