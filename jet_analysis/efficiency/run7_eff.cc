@@ -2,11 +2,11 @@
 
 #include "run7_eff.hh"
 
-Run7Eff::Run7Eff() : maxPt(5.0), maxPtpp(9.0) {
+Run7Eff::Run7Eff() : file(nullptr), maxPt(5.0), maxPtpp(9.0) {
   
 }
 
-Run7Eff::Run7Eff(std::string filename) : maxPt(5.0), maxPtpp(9.0) {
+Run7Eff::Run7Eff(std::string filename) : file(nullptr), maxPt(5.0), maxPtpp(9.0) {
   loadFile(filename);
 }
 
@@ -30,6 +30,9 @@ void Run7Eff::loadFile(std::string filename) {
   if (file)
     file->Close();
   file = new TFile(filename.c_str(), "READ");
+  
+  std::cout << "FILE: " << file << std::endl;
+  
   
   loadCurves();
 }
