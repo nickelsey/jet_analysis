@@ -89,7 +89,7 @@ def main(args) :
   eff_corr_arg = ''
   if args.y14eff is not None:
     eff_corr_arg = ' --y14Eff=' + args.y14eff
-  else if args.y7eff is not None:
+  elif args.y7eff is not None:
     eff_corr_arg = ' --y7eff=' + args.y7eff
 
   ## we need to do our own book keeping
