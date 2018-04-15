@@ -90,7 +90,7 @@ def main(args) :
   if args.y14eff is not None:
     eff_corr_arg = ' --y14Eff=' + args.y14eff
   elif args.y7eff is not None:
-    eff_corr_arg = ' --y7eff=' + args.y7eff
+    eff_corr_arg = ' --y7Eff=' + args.y7eff
 
   ## we need to do our own book keeping
   ## for when  job is active and when it
@@ -178,8 +178,8 @@ if __name__ == "__main__":
   parser.add_argument('--output', default='out/tmp', help=' directory for output root files' )
   parser.add_argument('--badRuns', default=' ', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='submit/empty_list.txt', help=' csv file containing towers to mask')
-  parser.add_argument('--y14Eff', default=None, help=' root file containing properly formatted efficiency curves for y14')
-  parser.add_argument('--y7Eff', default=None, help=' root file containing properly formatted efficiency curves for y7')
+  parser.add_argument('--y14eff', default=None, help=' root file containing properly formatted efficiency curves for y14')
+  parser.add_argument('--y7eff', default=None, help=' root file containing properly formatted efficiency curves for y7')
   parser.add_argument('--triggerString', default=' ', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
   parser.add_argument('--triggerIDs', default=' ', help=' a comma separated list of individual trigger IDs for more control')
   parser.add_argument('--runIDs', default='submit/y14_runids.root', help=' a ROOT file containing a tree of the run IDs that the user wants to be included in the analysis')
