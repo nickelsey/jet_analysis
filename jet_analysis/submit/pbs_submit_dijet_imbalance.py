@@ -205,7 +205,7 @@ def main(args) :
         qsubfail = qsubfail + 1
       njobs = njobs - 1
     
-    if qsubfail > 100 :
+    if qsubfail > args.max_failures :
       print "qsub failure too many times - exiting"
       return
     
@@ -218,6 +218,7 @@ def main(args) :
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs via PBS & resubmit if necessary')
   parser.add_argument('strings', metavar='S', nargs='*', help=' input files ')
+  parser.add_argument('--max_failures', default=200, help=' number of job submissions that can fail before forcing an exit')
   parser.add_argument('--name', default='job_', help=' job name (identifier for qsub)')
   parser.add_argument('--mem', type=int, default=2, help=' memory required per job [GB]')
   parser.add_argument('--nodes', type=int, default=1, help=' number of nodes required per job')
