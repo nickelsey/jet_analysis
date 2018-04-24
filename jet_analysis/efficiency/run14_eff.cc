@@ -4,8 +4,8 @@
 
 #include "run14_eff.hh"
 
-Run14Eff::Run14Eff(std::string filename) : maxPt(4.5) {
-  if (filename.c_str())
+Run14Eff::Run14Eff(std::string filename) :, file(nullptr), maxPt(4.5) {
+  if (!filename.empty())
     loadFile(filename);
 }
 
@@ -16,6 +16,7 @@ Run14Eff::~Run14Eff() {
 void Run14Eff::loadFile(std::string filename) {
   if (file)
     file->Close();
+  
   file = new TFile(filename.c_str(), "READ");
   loadCurves();
   
