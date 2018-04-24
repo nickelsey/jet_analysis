@@ -187,7 +187,7 @@ def main(args) :
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
       clargs = clargs + ' --readerSetting=' + reader + ' --embedReaderSetting='
       clargs = clargs + embedReader + ' --reuseTrigger=' + str(args.reuseTrigger)
-      clargs = clargs  + ' --embed=' + embed_choice + ' --efficFile=' + args.efficiencyFile
+      clargs = clargs + ' --efficFile=' + args.efficiencyFile + ' --embed=' + embed_choice
 
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
