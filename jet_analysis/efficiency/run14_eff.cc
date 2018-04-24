@@ -4,7 +4,7 @@
 
 #include "run14_eff.hh"
 
-Run14Eff::Run14Eff(std::string filename) :, file(nullptr), maxPt(4.5) {
+Run14Eff::Run14Eff(std::string filename) : file(nullptr), maxPt(4.5) {
   if (!filename.empty())
     loadFile(filename);
 }
