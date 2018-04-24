@@ -4,12 +4,9 @@
 
 #include "run14_eff.hh"
 
-Run14Eff::Run14Eff() : file(nullptr), maxPt(4.5) {
-  
-}
-
-Run14Eff::Run14Eff(std::string filename) : file(nullptr), maxPt(4.5) {
-  loadFile(filename);
+Run14Eff::Run14Eff(std::string filename) : maxPt(4.5) {
+  if (filename.c_str())
+    loadFile(filename);
 }
 
 Run14Eff::~Run14Eff() {

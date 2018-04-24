@@ -14,7 +14,6 @@
 
 class Run14Eff {
 public:
-  Run14Eff();
   Run14Eff(std::string filename = "submit/y14_effic.root");
   
   ~Run14Eff();
