@@ -226,6 +226,7 @@ if __name__ == "__main__":
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
+  parser.add_argument('--efficiencyFile', default='/wsu/home/dx/dx54/dx5412/analysis/jet_analysis/build/install/submit/y14_effic.root', help=' root file containing run 14 efficiency curves for Run14Effic')
   parser.add_argument('--triggerEfficiency', dest='triggerEfficiency', action='store_true', help='turn on relative efficiency corrections for trigger data (wrt central AuAu)')
   parser.add_argument('--no-triggerEfficiency', dest='triggerEfficiency', action='store_false', help='turn off relative efficiency corrections for trigger data')
   parser.set_defaults(triggerEfficiency=False)
