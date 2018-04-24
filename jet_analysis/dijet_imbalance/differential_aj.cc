@@ -462,7 +462,7 @@ int main(int argc, char* argv[]) {
       break;
   }
   // initialize the efficiency class
-  Run14Eff efficiency;
+  Run14Eff efficiency(opts.effic_file);
   
   // for now, use hard coded centrality definition for run 14
   //std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
