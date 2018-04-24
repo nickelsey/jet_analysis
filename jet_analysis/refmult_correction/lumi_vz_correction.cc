@@ -21,6 +21,7 @@
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
 #include "TStyle.h"
+#include "TCanvas.h"
 
 using std::string;
 struct Options {
@@ -129,6 +130,8 @@ int main(int argc, char* argv[]) {
                                                 100, 0, 1e5);
   TH1D* lumi_corr_refmult = new TH1D("lumi_corr_refmult", ";refMult;counts",
                                      800, 0, 800);
+  TH2D* lumi_corr_refmult_lumi = new TH2D("lumi_corr_refmult_lumi", ";refmult;zdc",
+                                          800, 0, 800, 100, 0, 1e5);
   
   // for vz corrections, we need vz/refmult distributions
   TH2D* lumi_corr_vz_refmult = new TH2D("lumi_corr_vz_refmult",
@@ -152,7 +155,9 @@ int main(int argc, char* argv[]) {
     lumi_corr_lumi_prof->Fill(*lumi, corr_refmult);
     lumi_corr_refmult->Fill(corr_refmult);
     lumi_corr_vz_refmult->Fill(*vz, corr_refmult);
+    lumi_corr_refmult_lumi->Fill(corr_refmult, *lumi);
   }
+
   
   // fit the corrected distribution with a straight line
   TF1* lumi_corr_lumi_fit = new TF1("lumi_corr_lumi_fit", "[0] + [1]*x", 0, 1e5);

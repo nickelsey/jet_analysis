@@ -6,20 +6,24 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "TH2.h"
+#include "TF2.h"
 #include "TFile.h"
 
 class Run14Eff {
 public:
   Run14Eff();
-  Run14Eff(std::string filename);
+  Run14Eff(std::string filename = "submit/y14_effic.root");
   
   ~Run14Eff();
   
   void loadFile(std::string filename);
   
   double AuAuEff(double pt, double eta, int cent, double zdcrate);
+  double pp6Eff(double pt, double eta);
+  double ratio(double pt, double eta, int cent, double zdcrate);
   
 private:
   
@@ -28,7 +32,8 @@ private:
   TFile* file;
   
   std::vector<std::vector<TH2D*>> curves;
-  
+  std::shared_ptr<TF2> effY06; // Run 6 parameterization
+                
   double maxPt;
   
 };

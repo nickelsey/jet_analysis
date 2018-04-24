@@ -11,7 +11,7 @@
 #include "jet_analysis/util/trigger_lookup.hh"
 #include "jet_analysis/util/reader_util.hh"
 #include "jet_analysis/util/vector_conversion.hh"
-#include "jet_analysis/efficiency/run4_eff.hh"
+#include "jet_analysis/efficiency/run14_eff.hh"
 #include "jet_analysis/dijet_worker/dijet_worker.hh"
 
 #include "TTree.h"
@@ -460,11 +460,11 @@ int main(int argc, char* argv[]) {
       break;
   }
   // initialize the efficiency class
-  Run4Eff efficiency;
+  Run14Eff efficiency;
   
   // for now, use hard coded centrality definition for run 14
-  std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
-  
+  //std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
+  std::vector<int> refcent_def{406, 342, 241, 164, 106, 65, 37, 19, 9, 0};
   // when getting ratios of efficiencies, we need to specify the comparison bin
   // not offered as a command line option, because I don't see it changing from
   // the most central bin anytime soon
@@ -518,7 +518,7 @@ int main(int argc, char* argv[]) {
           break;
         }
       }
-      eff_corr_cent = (centrality > 8 ? 8 : centrality);
+      eff_corr_cent = (centrality > 10 ? 10 : centrality);
       
       // get the vector container
       TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
@@ -527,6 +527,9 @@ int main(int argc, char* argv[]) {
       
       // select tracks above the minimum pt threshold
       primary_particles = track_pt_min_selector(primary_particles);
+      
+      // we need zdcRate for efficiency calculations
+      double zdcrate = header->GetZdcCoincidenceRate();
       
       // now, we will loop over the same data opts.reuse times, using the same
       // triggered event. This will give us the ability to generate multiple
@@ -559,8 +562,11 @@ int main(int argc, char* argv[]) {
               break;
             }
           }
-          eff_corr_embed_cent = (embed_centrality > 8 ? 8 : embed_centrality);
-        
+          eff_corr_embed_cent = (embed_centrality > 10 ? 10 : embed_centrality);
+          
+          // get zdc rate for embedding event
+          zdcrate = header_embed->GetZdcCoincidenceRate();
+          
           // get the vector container for embedding
           TStarJetVectorContainer<TStarJetVector>* container_embed = reader_embed->GetOutputContainer();
           ConvertTStarJetVector(container_embed, embed_particles);
@@ -573,7 +579,8 @@ int main(int argc, char* argv[]) {
           // it is assumed that the embedding event is AuAu
           if (embed_efficiency == efficiencyType::AuAu) {
             for (auto vec : embed_particles) {
-              double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference);
+              //double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_embed_cent, refcent_reference);
+              double ratio = 1.0;
               embed_eff_ratio->Fill(vec.pt(), eff_corr_embed_cent, ratio);
               if (ratio > flat_probability(gen))
                 input.push_back(vec);
@@ -602,16 +609,17 @@ int main(int argc, char* argv[]) {
               }
           }
           else
-            centrality = rand() % 11;
+            centrality = rand() % 10;
         }
-        eff_corr_cent = (centrality > 8 ? 8 : centrality);
+        eff_corr_cent = (centrality > 10 ? 10 : centrality);
         
         // now add the trigger data to the input - if efficiency
         // smearing smearing is turned on, that is done here
         switch (trigger_efficiency) {
           case efficiencyType::AuAu : {
             for (auto vec : primary_particles) {
-              double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference);
+              //double ratio = efficiency.CentRatio(vec.pt(), vec.eta(), eff_corr_cent, refcent_reference);
+              double ratio = 1.0;
               auau_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
               if (ratio > flat_probability(gen))
                 input.push_back(vec);
@@ -620,7 +628,8 @@ int main(int argc, char* argv[]) {
           }
           case efficiencyType::PP : {
             for (auto vec : primary_particles) {
-              double ratio = efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent);
+              //double ratio = efficiency.AuAuPPRatio(vec.pt(), vec.eta(), eff_corr_cent);
+              double ratio = efficiency.ratio(vec.pt(), vec.eta(), eff_corr_cent, zdcrate);
               pp_eff_ratio->Fill(vec.pt(), eff_corr_cent, ratio);
               if (ratio > flat_probability(gen))
                 input.push_back(vec);

@@ -21,6 +21,11 @@ void Run14Eff::loadFile(std::string filename) {
     file->Close();
   file = new TFile(filename.c_str(), "READ");
   loadCurves();
+  
+  // load year 6
+  Double_t parset[] = {0.869233,0.0223402,0.44061,0.558762,0.145162,0.508033,110.008,-4.63659,1.73765,0.0452674,-0.101279,0.0081551,0.945287,-2.00949,1.61746,1.39352};
+  effY06 = std::make_shared<TF2>("ppEfficiency","[0]-0.06-[1]*exp([2]/x)+[3]*exp(-0.5*((x-[4])/[5])**2)/sqrt(2*pi*[5]*[5])-[6]*exp(-0.5*((x-[7])/[8])**2)/sqrt(2*pi*[8]*[8])+([9]-[10]*(y-[11])^2-[12]*(y-[11])^4-[13]*(y-[11])^6-[14]*(y-[11])^8)*exp(-[15]*x)",0.,10.,-1.,1.);
+  effY06->SetParameters(parset);
 }
 
 double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
@@ -38,6 +43,18 @@ double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
   int bin = curves[zdcBin][cent]->FindBin(pt, eta);
   return curves[zdcBin][cent]->GetBinContent(bin);
   
+}
+
+double Run14Eff::pp6Eff(double pt, double eta) {
+  if (abs(eta) > 1.0) 
+    std::cerr << "warning: efficiency curves only valid for |eta| < 1.0" << std::endl;
+  if (pt > 10.0)
+    pt = 10.0;
+  return effY06->Eval(pt, eta);
+}
+
+double Run14Eff::ratio(double pt, double eta, int cent, double zdcrate) {
+  return AuAuEff(pt, eta, cent, zdcrate) / pp6Eff(pt, eta);
 }
 
 void Run14Eff::loadCurves(int nBinsZDC, int nBinsCent) {
