@@ -72,6 +72,7 @@ struct Options {
   string sub_r       = "";    /* sublead jet radii */
   string lj_pt       = "";    /* leading hard jet pt cut */
   string sj_pt       = "";    /* subleading hard jet pt cut */
+  string effic_file  = "";    /* file containing efficiency curves for run 14 */
   bool trig_effic    = false; /* turn on efficiency corrections for trigger data */
   bool embed_effic   = false; /* turn on efficiency corrections for embedding data */
   bool trig_is_pp    = false; /* trigger data is PP*/
@@ -98,6 +99,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--runList", &opts.run_list) ||
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseStrFlag(string(argv[i]), "--embedTriggers", &opts.trigemb) ||
+        ParseStrFlag(string(argv[i]), "--efficFile", &opts.effic_file) ||
         ParseBoolFlag(string(argv[i]), "--efficiency", &opts.trig_effic) ||
         ParseBoolFlag(string(argv[i]), "--embedEfficiency", &opts.embed_effic) ||
         ParseBoolFlag(string(argv[i]), "--PP", &opts.trig_is_pp) ||
