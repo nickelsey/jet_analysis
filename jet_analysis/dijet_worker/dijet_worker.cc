@@ -165,6 +165,9 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::shared_ptr<fastjet::ClusterSequenceArea> cl_match_sub = nullptr;
     
     if (EquivalentClusterInput(lead->MatchedJetDef(), sub->MatchedJetDef())) {
+      std::cout <<"constituent selector MATCH: " << lead->InitialJetDef().ConstituentSelector().description() << std::endl;
+      std::cout <<"jet def MATCH: " << lead->InitialJetDef().description() << std::endl;
+      std::cout <<"area def MATCH: " << lead->InitialJetDef().AreaDefinition().description() << std::endl;
       cl_match_lead = std::make_shared<fastjet::ClusterSequenceArea>(lead->MatchedJetDef().ConstituentSelector()(input),
                                                                      lead->MatchedJetDef(),
                                                                      lead->MatchedJetDef().AreaDefinition());
@@ -186,6 +189,10 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     // get the resulting jets and make sure neither are zero length
     std::vector<fastjet::PseudoJet> lead_match_jets = fastjet::sorted_by_pt(lead->MatchedJetDef().JetSelector()(cl_match_lead->inclusive_jets()));
     std::vector<fastjet::PseudoJet> sublead_match_jets = fastjet::sorted_by_pt(sub->MatchedJetDef().JetSelector()(cl_match_sub->inclusive_jets()));
+    std::cout << "leading matched jet selector: " << lead->MatchedJetDef().JetSelector().description() << std::endl;
+    std::cout << "subleading matched jet selector: " << sub->MatchedJetDef().JetSelector().description() << std::endl;
+    std::cout << "leading matched jet count: " << lead_match_jets.size() << std::endl;
+    std::cout << "subleading matched jet count: " << sublead_match_jets.size() << std::endl;
     
     if (lead_match_jets.size() == 0 || sublead_match_jets.size() == 0) {
       cluster_result.insert({key, dijet_container});
