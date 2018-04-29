@@ -81,20 +81,6 @@ def main(args) :
   ## at a time
   maxjobs = args.maxjobs
   
-  ## read in embedding data file
-  ## create a list of embedding data if requested
-  embedding_list = []
-  if args.embed is not None :
-    with open(args.embed, 'r') as fp :
-      line = fp.readline()
-      while line :
-        embedding_list.append(line)
-        line = fp.readline()
-
-  ## if no valid embedding data was given, fill w/ empty
-  if not embedding_list:
-    embedding_list = ['']
-  
   ## some paths
   execpath = os.getcwd()
   executable = './bin/dijet_imbalance/dijet_imbalance_pp'
@@ -113,8 +99,11 @@ def main(args) :
   qsubfail = 0
 
   reader = ''
+embedReader = ''
   if args.readerSetting is not None :
     reader = args.readerSetting
+  if args.embedReaderSetting is not None :
+    embedReader = args.readerSetting
   
   while checkstatus(jobstatus) :
     
@@ -151,12 +140,13 @@ def main(args) :
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name
       clargs = clargs + ' --runList=' + args.badRuns + ' --towList=' + args.badTowers + ' --triggers='
-      clargs = clargs + args.triggers + ' --constEta=' + args.constEta
+      clargs = clargs + args.triggers + ' --embedTriggers=' + embedTrig + ' --constEta=' + args.constEta
       clargs = clargs + ' --leadConstPt=' + args.leadConstPt + ' --subConstPt=' + args.subConstPt
       clargs = clargs + ' --leadConstPtMatch=' + args.leadConstPtMatch + ' --subConstPtMatch='
       clargs = clargs + args.subConstPtMatch + ' --leadR=' + args.leadR + ' --subR=' + args.subR
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
-      clargs = clargs + ' --readerSetting=' + reader
+      clargs = clargs + ' --readerSetting=' + reader + ' --embedReaderSetting=' + embedReader
+      clargs = clargs + ' --efficFile=' + args.efficiencyFile + ' --embed=' args.embedFile
       
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
@@ -196,10 +186,14 @@ if __name__ == "__main__":
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
+  parser.add_argument('--embedFile', default='submit/y14_mb_file_list.txt', help=' file containing list of root files for embedding events')
+  parser.add_argument('--efficiencyFile', default='submit/y14_effic_dca1.root', help=' root file containing run 14 efficiency curves')
   parser.add_argument('--badRuns', default='submit/y14_bad_run.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='submit/y14_y6_bad_tower.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
+  parser.add_argument('--embedTriggers', default='y14vpdmb30', help=' event triggers to consider for embedding data (see above for options)')
   parser.add_argument('--readerSetting', default=None, help='can specify non-default reader settings in a text tile')
+  parser.add_argument('--embedReaderSetting', default=None, help='can specify non-default reader settings for embedding data in text file')
   parser.add_argument('--constEta', default='1.0', help='list of constituent eta ranges to use during jetfinding')
   parser.add_argument('--leadConstPt', default='2.0', help='list of leading hard jet constituent pt cuts to use during jetfinding')
   parser.add_argument('--leadConstPtMatch', default='0.2', help='list of leading matched jet constituent pt cuts to use during jetfinding')
