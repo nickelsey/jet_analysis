@@ -109,15 +109,15 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     // now, using the highest pT jet as the leading jet, try to find a
     // subleading jet that satisfies the dPhi cut
     fastjet::PseudoJet leading_hard_jet = lead_hard_jets[0];
-    //fastjet::Selector recoil_selector = !fastjet::SelectorRectangle(2.1, TMath::Pi() - dijet_def.second->dPhi);
-    //recoil_selector.set_reference(leading_hard_jet);
-    //std::vector<fastjet::PseudoJet> dphi_selected_recoil = fastjet::sorted_by_pt(recoil_selector(sublead_hard_jets));
+    fastjet::Selector recoil_selector = !fastjet::SelectorRectangle(2.1, TMath::Pi() - dijet_def.second->dPhi);
+    recoil_selector.set_reference(leading_hard_jet);
+    std::vector<fastjet::PseudoJet> dphi_selected_recoil = fastjet::sorted_by_pt(recoil_selector(sublead_hard_jets));
     
-    std::vector<fastjet::PseudoJet> dphi_selected_recoil;
-    for (auto jet : sublead_hard_jets) {
-      if (abs(leading_hard_jet.delta_phi_to(jet)) > TMath::Pi() - dijet_def.second->dPhi)
-        dphi_selected_recoil.push_back(jet);
-    }
+//    std::vector<fastjet::PseudoJet> dphi_selected_recoil;
+//    for (auto jet : sublead_hard_jets) {
+//      if (abs(leading_hard_jet.delta_phi_to(jet)) > TMath::Pi() - dijet_def.second->dPhi)
+//        dphi_selected_recoil.push_back(jet);
+//    }
     
     if (dphi_selected_recoil.size() == 0) {
       cluster_result.insert({key, dijet_container});
