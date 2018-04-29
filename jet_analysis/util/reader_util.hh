@@ -130,7 +130,7 @@ void InitReaderWithDefaults(TStarJetPicoReader* reader,
   reader->GetEventCuts()->SetMaxEventPtCut(30);          // Set Maximum track Pt
   reader->GetEventCuts()->SetMaxEventEtCut(30);          // Set Maximum tower Et
   reader->GetEventCuts()->SetVertexZCut(30);             // vertex z range (z = beam axis)
-  reader->GetEventCuts()->SetTriggerSelection("All");    // setting trigger selection - set to all, selected later
+  reader->GetEventCuts()->SetTriggerSelection("HT");    // setting trigger selection - set to all, selected later
   reader->GetEventCuts()->SetVertexZDiffCut(3);          // cut on Vz - VPD Vz
   
   // if a bad tower list is specified, add to tower cuts
