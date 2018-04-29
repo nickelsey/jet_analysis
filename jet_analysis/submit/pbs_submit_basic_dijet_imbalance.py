@@ -4,12 +4,13 @@
 ## job status, automatically resubmitting jobs that
 ## do not produce the expected output files
 
+from __future__ import print_function, division
+
 import os
 import argparse
 import subprocess
 import time
 import ROOT
-from __future__ import print_function, division
 
 def checkstatus(jobstatus) :
   loop = False
