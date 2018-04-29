@@ -351,7 +351,7 @@ void DijetMatrix::Initialize() {
                                                    && fastjet::SelectorPtMin(sub_const_pt_match);
             fastjet::Selector init_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max)
                                                 && fastjet::SelectorPtMin(sub_jet_pt);
-            fastjet::Selector match_jet_selector = fastjet::SelectorIdentity();
+            fastjet::Selector match_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max);
             fastjet::Selector bkg_selector = fastjet::SelectorAbsRapMax(sub_const_eta - bkg_R)
                                           && (!fastjet::SelectorNHardest(2));
               
