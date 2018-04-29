@@ -173,9 +173,9 @@ def main(args) :
         qsubfail = qsubfail + 1
       njobs = njobs - 1
         
-        if qsubfail > args.max_failures :
-          print("qsub failure too many times - exiting")
-          return
+    if qsubfail > args.max_failures :
+      print("qsub failure too many times - exiting")
+      return
   
     ## wait one minute before rechecking
     print("finished round of submissions: pausing")
