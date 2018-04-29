@@ -53,7 +53,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
   // if not, do so
   if (Size() == 0)
     Initialize();
-  
+  std::cout << "NEW EVENT: " << std::endl;
   // loop over all dijet definitions and cluster;
   // there is only one sanity check for optimization currently -
   // if the hard or matching leading/subleading have the
@@ -66,7 +66,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::string key = dijet_def.first;
     std::shared_ptr<MatchDef> lead = dijet_def.second->lead;
     std::shared_ptr<MatchDef> sub = dijet_def.second->sub;
-    
+    std::cout << "KEY: " << key << std::endl;
     // make sure the dijet definition is valid
     if (!lead->IsValid() || !sub->IsValid())
       continue;
@@ -77,6 +77,9 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::shared_ptr<fastjet::ClusterSequenceArea> cl_hard_lead = nullptr;
     std::shared_ptr<fastjet::ClusterSequenceArea> cl_hard_sub = nullptr;
     if (EquivalentClusterInput(lead->InitialJetDef(), sub->InitialJetDef())) {
+      std::cout <<"constituent selector HARD: " << lead->InitialJetDef().ConstituentSelector().description() << std::endl;
+      std::cout <<"jet def HARD: " << lead->InitialJetDef().description() << std::endl;
+      std::cout <<"area def HARD: " << lead->InitialJetDef().AreaDefinition().description() << std::endl;
       cl_hard_lead = std::make_shared<fastjet::ClusterSequenceArea>(lead->InitialJetDef().ConstituentSelector()(input),
                                                                     lead->InitialJetDef(),
                                                                     lead->InitialJetDef().AreaDefinition());
@@ -98,7 +101,10 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     // get output jets, and make sure neither are zero length
     std::vector<fastjet::PseudoJet> lead_hard_jets = fastjet::sorted_by_pt(lead->InitialJetDef().JetSelector()(cl_hard_lead->inclusive_jets()));
     std::vector<fastjet::PseudoJet> sublead_hard_jets = fastjet::sorted_by_pt(sub->InitialJetDef().JetSelector()(cl_hard_sub->inclusive_jets()));
-    
+    std::cout << "leading initial jet selector: " << lead->InitialJetDef().JetSelector().description() << std::endl;
+    std::cout << "subleading initial jet selector: " << sub->InitialJetDef().JetSelector().description() << std::endl;
+    std::cout << "leading jet count: " << lead_hard_jets.size() << std::endl;
+    std::cout << "subleading jet count: " << sublead_hard_jets.size() << std::endl;
     
     if (lead_hard_jets.size() == 0)
       continue;
@@ -112,14 +118,6 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     fastjet::Selector recoil_selector = !fastjet::SelectorRectangle(2.1, TMath::Pi() - dijet_def.second->dPhi);
     recoil_selector.set_reference(leading_hard_jet);
     std::vector<fastjet::PseudoJet> dphi_selected_recoil = fastjet::sorted_by_pt(recoil_selector(sublead_hard_jets));
-
-    
-    
-//    std::vector<fastjet::PseudoJet> dphi_selected_recoil;
-//    for (auto jet : sublead_hard_jets) {
-//      if (fabs(fabs(leading_hard_jet.delta_phi_to(jet)) - TMath::Pi()) < dijet_def.second->dPhi)
-//        dphi_selected_recoil.push_back(jet);
-//    }
     
     if (dphi_selected_recoil.size() == 0) {
       cluster_result.insert({key, dijet_container});
