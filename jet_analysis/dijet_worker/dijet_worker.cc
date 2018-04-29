@@ -114,8 +114,6 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
 //    std::vector<fastjet::PseudoJet> dphi_selected_recoil = fastjet::sorted_by_pt(recoil_selector(sublead_hard_jets));
 //
     
-    if (fabs(fabs(leading_hard_jet.delta_phi_to(sublead_hard_jets[1])) - TMath::Pi()) < dijet_def.second->dPhi)
-      continue;
     
     std::vector<fastjet::PseudoJet> dphi_selected_recoil;
     for (auto jet : sublead_hard_jets) {
