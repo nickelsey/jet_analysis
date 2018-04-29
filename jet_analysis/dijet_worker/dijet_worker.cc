@@ -165,9 +165,9 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     std::shared_ptr<fastjet::ClusterSequenceArea> cl_match_sub = nullptr;
     
     if (EquivalentClusterInput(lead->MatchedJetDef(), sub->MatchedJetDef())) {
-      std::cout <<"constituent selector MATCH: " << lead->InitialJetDef().ConstituentSelector().description() << std::endl;
-      std::cout <<"jet def MATCH: " << lead->InitialJetDef().description() << std::endl;
-      std::cout <<"area def MATCH: " << lead->InitialJetDef().AreaDefinition().description() << std::endl;
+      std::cout <<"constituent selector MATCH: " << lead->MatchedJetDef().ConstituentSelector().description() << std::endl;
+      std::cout <<"jet def MATCH: " << lead->MatchedJetDef().description() << std::endl;
+      std::cout <<"area def MATCH: " << lead->MatchedJetDef().AreaDefinition().description() << std::endl;
       cl_match_lead = std::make_shared<fastjet::ClusterSequenceArea>(lead->MatchedJetDef().ConstituentSelector()(input),
                                                                      lead->MatchedJetDef(),
                                                                      lead->MatchedJetDef().AreaDefinition());
