@@ -310,14 +310,14 @@ int main(int argc, char* argv[]) {
       // headers for convenience
       TStarJetPicoEventHeader* header = reader->GetEvent()->GetHeader();
       
-      // check if event fired a trigger we will use
-      if (triggers.size() != 0) {
-        bool use_event = false;
-        for (auto trigger : triggers)
-          if (header->HasTriggerId(trigger))
-            use_event = true;
-        if (!use_event) continue;
-      }
+//      // check if event fired a trigger we will use
+//      if (triggers.size() != 0) {
+//        bool use_event = false;
+//        for (auto trigger : triggers)
+//          if (header->HasTriggerId(trigger))
+//            use_event = true;
+//        if (!use_event) continue;
+//      }
       
       // get centrality for the event
       centrality.setEvent(header->GetRunId(), header->GetReferenceMultiplicity(),
