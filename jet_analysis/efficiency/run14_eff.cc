@@ -4,7 +4,8 @@
 
 #include "run14_eff.hh"
 
-Run14Eff::Run14Eff(std::string filename) : file(nullptr), maxPt(4.5) {
+Run14Eff::Run14Eff(std::string filename) : file(nullptr), max_pt_(4.5), sys_(TrackingUnc::NONE),
+auau_u_(0.07), pp_u_(0.0), cent_u_(0.04) {
   if (!filename.empty())
     loadFile(filename);
 }
@@ -13,12 +14,12 @@ Run14Eff::~Run14Eff() {
   
 }
 
-void Run14Eff::loadFile(std::string filename) {
-  if (file)
+void Run14Eff::loadFile(std::string filename, int nBinsZDC, int nBinsCent) {
+  if (file.get())
     file->Close();
   
-  file = new TFile(filename.c_str(), "READ");
-  loadCurves();
+  file = std::make_shared<TFile>(filename.c_str(), "READ");
+  loadCurves(nBinsZDC, nBinsCent);
   
   // load year 6
   Double_t parset[] = {0.869233,0.0223402,0.44061,0.558762,0.145162,0.508033,110.008,-4.63659,1.73765,0.0452674,-0.101279,0.0081551,0.945287,-2.00949,1.61746,1.39352};
@@ -27,8 +28,8 @@ void Run14Eff::loadFile(std::string filename) {
 }
 
 double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
-  if (pt > maxPt)
-    pt = maxPt;
+  if (pt > max_pt_)
+    pt = max_pt_;
   
   int zdcBin;
   if (zdcrate/1000.0 < 33.0)
@@ -38,8 +39,8 @@ double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
   else
     zdcBin = 2;
   
-  int bin = curves[zdcBin][cent]->FindBin(pt, eta);
-  return curves[zdcBin][cent]->GetBinContent(bin);
+  int bin = curves.at(zdcBin).at(cent)->FindBin(pt, eta);
+  return curves.at(zdcBin).at(cent)->GetBinContent(bin);
   
 }
 
@@ -52,7 +53,31 @@ double Run14Eff::pp6Eff(double pt, double eta) {
 }
 
 double Run14Eff::ratio(double pt, double eta, int cent, double zdcrate) {
-  return AuAuEff(pt, eta, cent, zdcrate) / pp6Eff(pt, eta);
+  double ratio_ = AuAuEff(pt, eta, cent, zdcrate) / pp6Eff(pt, eta);
+  
+  int sign_ = static_cast<int>(sys_);
+  if (sign_ == 0)
+    return ratio_;
+  
+  double systematic_ = sign_ * ratioUncertainty(pt, eta, cent, zdcrate);
+  
+  ratio_ = ratio_ + ratio_ * systematic_;
+  
+  if (ratio_ > 1.0)
+    return 1.0;
+  
+  return ratio_;
+}
+
+double Run14Eff::ratioUncertainty(double pt, double eta, int cent, double zdcrate) {
+  double auau_ = AuAuEff(pt, eta, cent, zdcrate);
+  double pp_ = pp6Eff(pt, eta);
+  double ratio_ = auau_ / pp_;
+  
+  double au_term_ = pow(auau_u_ / auau_, 2.0);
+  double pp_term_ = pow(pp_u_ / pp_, 2.0);
+  double cent_term_ = pow(cent_u_ / auau_, 2.0);
+  return sqrt(au_term_ + pp_term_ + cent_term_);
 }
 
 void Run14Eff::loadCurves(int nBinsZDC, int nBinsCent) {
