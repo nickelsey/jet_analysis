@@ -81,20 +81,6 @@ def main(args) :
   ## at a time
   maxjobs = args.maxjobs
   
-  ## read in embedding data file
-  ## create a list of embedding data if requested
-  embedding_list = []
-  if args.embed is not None :
-    with open(args.embed, 'r') as fp :
-      line = fp.readline()
-      while line :
-        embedding_list.append(line)
-        line = fp.readline()
-
-  ## if no valid embedding data was given, fill w/ empty
-  if not embedding_list:
-    embedding_list = ['']
-  
   ## some paths
   execpath = os.getcwd()
   executable = './bin/dijet_imbalance/dijet_imbalance_auau'
