@@ -187,12 +187,8 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     cluster_seq_sub_match.insert({key, cl_match_sub});
     
     // get the resulting jets and make sure neither are zero length
-    std::vector<fastjet::PseudoJet> lead_match_jets = fastjet::sorted_by_pt(lead->MatchedJetDef().JetSelector()(cl_match_lead->inclusive_jets()));
-    std::vector<fastjet::PseudoJet> sublead_match_jets = fastjet::sorted_by_pt(sub->MatchedJetDef().JetSelector()(cl_match_sub->inclusive_jets()));
-    std::cout << "leading matched jet selector: " << lead->MatchedJetDef().JetSelector().description() << std::endl;
-    std::cout << "subleading matched jet selector: " << sub->MatchedJetDef().JetSelector().description() << std::endl;
-    std::cout << "leading matched jet count: " << lead_match_jets.size() << std::endl;
-    std::cout << "subleading matched jet count: " << sublead_match_jets.size() << std::endl;
+    std::vector<fastjet::PseudoJet> lead_match_jets = fastjet::sorted_by_pt(cl_match_lead->inclusive_jets());
+    std::vector<fastjet::PseudoJet> sublead_match_jets = fastjet::sorted_by_pt(cl_match_sub->inclusive_jets());
     
     if (lead_match_jets.size() == 0 || sublead_match_jets.size() == 0) {
       cluster_result.insert({key, dijet_container});
@@ -230,6 +226,20 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
       sublead_subtracted_jets = fastjet::sorted_by_pt(sublead_subtractor(cl_match_sub->inclusive_jets()));
     }
   
+    // get the resulting jets and make sure neither are zero length
+    lead_subtracted_jets = fastjet::sorted_by_pt(lead->MatchedJetDef().JetSelector()(lead_subtracted_jets));
+    sublead_subtracted_jets = fastjet::sorted_by_pt(sub->MatchedJetDef().JetSelector()(sublead_subtracted_jets));
+    
+    std::cout << "leading matched jet selector: " << lead->MatchedJetDef().JetSelector().description() << std::endl;
+    std::cout << "subleading matched jet selector: " << sub->MatchedJetDef().JetSelector().description() << std::endl;
+    std::cout << "leading matched jet count: " << lead_subtracted_jets.size() << std::endl;
+    std::cout << "subleading matched jet count: " << sublead_subtracted_jets.size() << std::endl;
+    
+    if (lead_subtracted_jets.size() == 0 || sublead_subtracted_jets.size() == 0) {
+      cluster_result.insert({key, dijet_container});
+      continue;
+    }
+    
     // now match to the hard jets
     fastjet::Selector lead_circle_selector = fastjet::SelectorCircle(lead->dR());
     lead_circle_selector.set_reference(leading_hard_jet);
