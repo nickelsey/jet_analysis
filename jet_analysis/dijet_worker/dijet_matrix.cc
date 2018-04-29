@@ -300,7 +300,7 @@ void DijetMatrix::Initialize() {
                                                    && fastjet::SelectorPtMin(lead_const_pt_match);
             fastjet::Selector init_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max)
                                                 && fastjet::SelectorPtMin(lead_jet_pt);
-            fastjet::Selector match_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max);
+            fastjet::Selector match_jet_selector = fastjet::SelectorIdentity();
               
             fastjet::GhostedAreaSpec ghost_def(jet_eta_max + 2 * R, ghost_repeat, ghost_area,
                                                grid_scatter, pt_scatter, mean_ghost_pt);
@@ -351,7 +351,7 @@ void DijetMatrix::Initialize() {
                                                    && fastjet::SelectorPtMin(sub_const_pt_match);
             fastjet::Selector init_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max)
                                                 && fastjet::SelectorPtMin(sub_jet_pt);
-            fastjet::Selector match_jet_selector = fastjet::SelectorAbsRapMax(jet_eta_max);
+            fastjet::Selector match_jet_selector = fastjet::SelectorIdentity();
             fastjet::Selector bkg_selector = fastjet::SelectorAbsRapMax(sub_const_eta - bkg_R)
                                           && (!fastjet::SelectorNHardest(2));
               
