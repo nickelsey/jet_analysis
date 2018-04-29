@@ -9,6 +9,7 @@ import argparse
 import subprocess
 import time
 import ROOT
+from __future__ import print_function, division
 
 def checkstatus(jobstatus) :
   loop = False
@@ -19,8 +20,8 @@ def checkstatus(jobstatus) :
   return loop
 
 def updatestatus(jobstatus, outdir, name) :
-  print "Updating job status"
-  print "Total: " + str(len(jobstatus))
+  print("Updating job status")
+  print("Total: " + str(len(jobstatus)))
   
   ## get the qstat job listing
   proccommand = 'qstat | grep dx5412'
@@ -50,19 +51,19 @@ def updatestatus(jobstatus, outdir, name) :
     if os.path.isfile(filename) :
       outputfile = ROOT.TFile(filename, "READ")
       if outputfile.IsZombie() :
-        print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit"
+        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit")
         jobstatus[i] = 0
         os.remove(filename)
       elif outputfile.IsOpen() :
-        print "job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy"
-        print filename
+        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy")
+        print(filename)
         jobstatus[i] = 2
         outputfile.Close()
       else :
-        print "job " + str(i+1) + " of " + str(len(jobstatus)) + " undefined file status, resubmit"
+        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " undefined file status, resubmit")
         jobstatus[i] = 0
     else :
-      print "undefined status: job " + str(i+1) + " of " + str(len(jobstatus)) + " marked for submission"
+      print("undefined status: job " + str(i+1) + " of " + str(len(jobstatus)) + " marked for submission")
       jobstatus[i] = 0
 
   return jobstatus
@@ -118,7 +119,7 @@ def main(args) :
     ## then pause
     jobsactive = jobstatus.count(1)
     while jobsactive >= maxjobs :
-      print "reached max number of active jobs: pausing"
+      print("reached max number of active jobs: pausing")
       time.sleep(60)
       jobstatus = updatestatus(jobstatus, outdir, name)
       jobsactive = jobstatus.count(1)
@@ -143,26 +144,26 @@ def main(args) :
       qsub = qsub + ':ppn=' + str(ppn) + ' -q ' + str(queue) + ' -o ' + outstream
       qsub = qsub + ' -e ' + errstream + ' -N ' + name + str(i) + ' -- '
       qsub = qsub + qwrap + ' ' + execpath + ' ' + executable + ' ' + clargs
-      print "submitting job: "
-      print qsub
+      print("submitting job: ")
+      print(qsub)
       ret = subprocess.Popen( qsub, shell=True)
       ret.wait()
       if ret.returncode == 0 :
         jobstatus[i] = 1
       else :
-        print "warning: qsub submission failed"
+        print("warning: qsub submission failed")
         qsubfail = qsubfail + 1
       njobs = njobs - 1
     
     if qsubfail > 100 :
-      print "qsub failure too many times - exiting"
+      print("qsub failure too many times - exiting")
       return
     
     ## wait two minutes before rechecking
-    print "finished round of submissions: pausing"
+    print("finished round of submissions: pausing")
     time.sleep(120)
   
-  print "all jobs completed: exiting"
+  print("all jobs completed: exiting")
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs via PBS & resubmit if necessary')
