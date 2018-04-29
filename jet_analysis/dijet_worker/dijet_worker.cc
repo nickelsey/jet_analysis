@@ -115,7 +115,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     
     std::vector<fastjet::PseudoJet> dphi_selected_recoil;
     for (auto jet : sublead_hard_jets) {
-      if (abs(leading_hard_jet.delta_R(jet) - TMath::Pi()) < dijet_def.second->dPhi)
+      if (abs(leading_hard_jet.delta_phi_to(jet) - TMath::Pi()) < dijet_def.second->dPhi)
         dphi_selected_recoil.push_back(jet);
     }
     
@@ -127,7 +127,7 @@ std::unordered_map<std::string, ClusterOutput>& DijetWorker::Run(const std::vect
     // we have found a subleading jet that satisfies dPhi cuts
     dijet_container.found_sublead = true;
     
-    fastjet::PseudoJet subleading_hard_jet = dphi_selected_recoil[0];
+    fastjet::PseudoJet subleading_hard_jet = fastjet::sorted_by_pt(dphi_selected_recoil)[0];
     
     // now we will estimate the background for book-keeping
     // Energy density estimate from median ( pt_i / area_i )
