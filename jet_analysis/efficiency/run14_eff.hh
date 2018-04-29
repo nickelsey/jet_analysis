@@ -26,7 +26,7 @@ public:
   
 private:
   
-  void loadCurves(int nBinsZDC = 3, int nBinsCent = 11);
+  void loadCurves(int nBinsZDC = 3, int nBinsCent = 16);
   
   TFile* file;
   

@@ -158,10 +158,11 @@ int main(int argc, char* argv[]) {
  
 
   // for now, use hard coded centrality definition for run 14
-  std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
+  //std::vector<int> refcent_def{420, 364, 276, 212, 156, 108, 68, 44, 28, 12, 0};
+  std::vector<int> refcent_def{406, 342, 241, 164, 106, 65, 37, 19, 9, 0};
   std::vector<string> refcent_string{"0-5%", "5-10%", "10-20%", "20-30%",
                                      "30-40%", "40-50%", "50-60%", "60-70%",
-                                     "70-80%", "80-90%", "90-100%"};
+                                     "70-80%", "80-100%"};
   std::vector<string> refcent_alt_string{"0-5%", "5-10%", "10-20%", "20-30%",
                                          "30-40%", "40-50%", "50-60%", "60-70%",
                                          "70-80%"};
@@ -171,7 +172,8 @@ int main(int argc, char* argv[]) {
   //std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-100%"};
   
   // another definition to split out the last bin
-  std::vector<int> refcent_def_5{364, 276, 156, 68, 28, 0};
+  //std::vector<int> refcent_def_5{364, 276, 156, 68, 28, 0};
+  std::vector<int> refcent_def_5{342, 241, 106, 37, 9, 0};
   std::vector<string> refcent_def_5_string{"0-10%", "10-20%", "20-40%", "40-60%", "60-80%", "80-100%"};
   
   // save all histograms so we can do comparisons

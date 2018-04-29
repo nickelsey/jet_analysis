@@ -33,15 +33,15 @@ struct Options {
                                        prefixes) */
   string out_dir      = "tmp";      /* directory to save output in */
   int lumi_bins       = 3;          /* number of bins in luminosity */
-  int cent_bins       = 10;         /* number of bins in centrality */
+  int cent_bins       = 16;         /* number of bins in centrality */
   double max_pt       = 5.0;        /* maximum pt cutoff */
 };
 
 int main(int argc, char* argv[]) {
   
-  std::vector<string> refcent_string{"0-5%", "5-10%", "10-20%", "20-30%",
-    "30-40%", "40-50%", "50-60%", "60-70%",
-    "70-80%", "80-100%"};
+  std::vector<string> refcent_string{"0-5%", "5-10%", "10-15%", "15-20%",
+    "20-25%", "25-30%", "30-35%", "35-40%", "40-45%", "45-50%", "50-55%",
+    "55-60%", "60-65%", "65-70%", "70-75%", "75-80%"};
   std::vector<string> lumi_string{"0-33 khz", "33-66 khz", "66-100 khz"};
   
   // set drawing preferences for histograms and graphs
