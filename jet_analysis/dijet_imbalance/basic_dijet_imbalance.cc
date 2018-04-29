@@ -224,7 +224,7 @@ int main(int argc, char* argv[]) {
     leadptsoft->Fill(lead_soft.pt());
     subptsoft->Fill(sub_soft.pt());
     
-    if (header->GetReferenceMultiplicity() > 269) {
+    if (header->GetGReferenceMultiplicity() > 269) {
       ajhigh020->Fill(aj_hard);
       ajlow020->Fill(aj_soft);
     }
