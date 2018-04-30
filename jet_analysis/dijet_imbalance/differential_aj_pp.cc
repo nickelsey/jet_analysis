@@ -436,7 +436,7 @@ int main(int argc, char* argv[]) {
     case 1 :
       efficiency->setSystematicUncertainty(TrackingUnc::POSITIVE);
       break;
-    case 2 :
+    case -1 :
       efficiency->setSystematicUncertainty(TrackingUnc::NEGATIVE);
       break;
     default:
