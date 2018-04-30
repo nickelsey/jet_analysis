@@ -179,11 +179,11 @@ def main(args) :
       if key[1] == 'ptrack' :
         track_sys = 1
         outDir = outDir + '/tow_0_track_1'
-      if key[1] == 'mtrack' :
-        track_sys = -1
+      if key[1] == 'mtow' :
+        tow_sys = -1
         outDir = outDir + '/tow_-1_track_0'
       if key[1] == 'ptow' :
-        track_sys = 1
+        tow_sys = 1
         outDir = outDir + '/tow_1_track_0'
       if key[1] == 'nom' :
         outDir = outDir + '/tow_0_track_0'
