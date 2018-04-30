@@ -405,8 +405,8 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH1D*> sublead_jet_count_dict;
   
   TProfile2D* eff_ratio  = new TProfile2D("pp_eff_ratio",
-                                          "average pp efficiency ratio;p_{T};centrality;ratio",
-                                          200, 0, 5, 10, -0.5, 8.5);
+                                          "average pp efficiency ratio;p_{T};#eta;ratio",
+                                          200, 0, 5, 10, -1.0, 1.0);
   
   for (auto key : keys) {
     // create a unique histogram name for each key
@@ -541,6 +541,7 @@ int main(int argc, char* argv[]) {
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
+              pp_eff_ratio->Fill(sv->Pt(), sv->Eta(), ratio);
               double random_ = dis(gen);
               
               if ( random_ > ratio ) {
