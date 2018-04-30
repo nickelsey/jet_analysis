@@ -162,11 +162,12 @@ def main(args) :
     ## find the number of jobs still running via qstat
     ## if its at the maximum set jobsactive or jobsqueue,
     ## then pause
-
-    while activejobs(jobstatus) >= maxjobs :
+    jobsactive = activejobs(jobstatus)
+    while jobsactive >= maxjobs :
       print("reached max number of active jobs: pausing")
       time.sleep(30)
       jobstatus = updatestatus(jobstatus, args.output, args.name)
+      jobsactive = activejobs(jobstatus)
   
     ## now submit jobs up to maxjobs - jobsqueued
     njobs = maxjobs - jobsactive
