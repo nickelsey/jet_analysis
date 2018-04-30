@@ -353,7 +353,7 @@ int main(int argc, char* argv[]) {
           vz_dict[key] = header->GetPrimaryVertexZ();
           refmult_dict[key] = header->GetReferenceMultiplicity();
           grefmult_dict[key] = header->GetGReferenceMultiplicity();
-          refmultcorr_dict[key] = header->GetCorrectedReferenceMultiplicity();
+          refmultcorr_dict[key] = refmultcorr;
           grefmultcorr_dict[key] = header->GetCorrectedGReferenceMultiplicity();
           cent_dict[key] = centrality_bin;
           zdcrate_dict[key] = header->GetZdcCoincidenceRate();
