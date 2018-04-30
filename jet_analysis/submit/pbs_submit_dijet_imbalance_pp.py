@@ -185,6 +185,8 @@ def main(args) :
       if key[1] == 'ptow' :
         track_sys = 1
         outDir = outDir + '/tow_1_track_0'
+      if key[1] == 'nom' :
+        outDir = outDir + '/tow_0_track_0'
       
       ## build our qsub execution string
       clargs = '--outDir=' + outDir + ' --input=' + key[0] + ' --id=' + str(index)
