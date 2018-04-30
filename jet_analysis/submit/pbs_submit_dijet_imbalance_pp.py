@@ -1,4 +1,4 @@
-## pbs_submit_dijet_imbalance_auau.py
+## pbs_submit_dijet_imbalance_pp.py
 
 ## convenience script to batch submit and monitor
 ## job status, automatically resubmitting jobs that
@@ -100,7 +100,7 @@ def main(args) :
 
   ## for pp we have the option of running systematic uncertainties as well
   ## this is a list of the different variations for each file
-  systematic_variations = ['nom', 'ptow', 'mtow', 'ptrack', 'ntrack']
+  systematic_variations = ['nom', 'ptow', 'mtow', 'ptrack', 'mtrack']
 
   if args.systematics == False :
     systematic_variations = ['nom']

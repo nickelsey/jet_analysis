@@ -35,6 +35,14 @@ add_executable(print_auau_pp_results ${PRINT_AUAU_PP_RESULTS_SRC})
 target_link_libraries(print_auau_pp_results ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(print_auau_pp_results PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/dijet_imbalance)
 
+## given trees generated from the differential
+## dijet imbalance measurement, produce Aj plots
+## and various QA histograms, including systematic errors
+set(PRINT_AUAU_PP_SYS_SRC print_results_with_systematics.cc)
+add_executable(print_results_with_systematics ${PRINT_AUAU_PP_SYS_SRC})
+target_link_libraries(print_results_with_systematics ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(print_results_with_systematics PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/dijet_imbalance)
+
 #########################################
 ## install targets
 install(TARGETS basic_dijet_imbalance
@@ -46,4 +54,6 @@ install(TARGETS dijet_imbalance_auau
 install(TARGETS dijet_imbalance_pp
         DESTINATION bin/dijet_imbalance)
 install(TARGETS print_auau_pp_results
+        DESTINATION bin/dijet_imbalance)
+install(TARGETS print_results_with_systematics
         DESTINATION bin/dijet_imbalance)
