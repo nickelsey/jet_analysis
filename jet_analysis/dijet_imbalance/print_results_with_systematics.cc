@@ -80,8 +80,8 @@ std::vector<TH1D*> AddBins(std::vector<TH1D*> container, std::vector<std::pair<i
     for (int j = 0; j < bins.size(); ++j) {
       if (i >=bins[j].first && i <= bins[j].second) {
         if (ret[i] == nullptr) {
-          string name = string(h[i]->GetName()) + std::to_string(j);
-          ret[i] = h->ProjectionY(name.c_str(), i, i);
+          string name = string(container[i]->GetName()) + std::to_string(j);
+          ret[i] = container[i]->ProjectionY(name.c_str(), i, i);
         }
         else {
           ret[i]->Add(container[i]);
