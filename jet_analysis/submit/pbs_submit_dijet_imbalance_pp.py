@@ -159,14 +159,19 @@ def main(args) :
     for key in jobstatus :
       if jobstatus[key][1] == 1 :
         jobsactive = jobsactive + 1
+
     while jobsactive >= maxjobs :
       print("reached max number of active jobs: pausing")
-      time.sleep(60)
+      time.sleep(30)
       jobstatus = updatestatus(jobstatus, args.output, args.name)
+      print('pre update: ', jobsactive)
       jobsactive = 0
       for key in jobstatus :
         if jobstatus[key][1] == 1 :
           jobsactive = jobsactive + 1
+        if jobstatus[key][1] == 2 :
+          print('COMPLETE')
+      print('post update: ', jobsactive)
   
     ## now submit jobs up to maxjobs - jobsqueued
     njobs = maxjobs - jobsactive
