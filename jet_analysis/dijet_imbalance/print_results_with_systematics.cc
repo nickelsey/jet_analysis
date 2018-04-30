@@ -15,6 +15,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TGraphErrors.h"
 #include "TStyle.h"
 
 #include <unordered_map>
@@ -55,8 +56,8 @@ std::vector<TH1D*> SplitByCentrality(TH2D* h, std::vector<std::pair<int, int>>& 
   for (int i = 0; i < centrality.size(); ++i) {
     string name = string(h->GetName()) + std::to_string(i);
     TH1D* tmp = h->ProjectionY(name.c_str(),
-                               centrality[i].first,
-                               centrality[i].second);
+                               centrality[i].first + 1,
+                               centrality[i].second + 1);
     ret.push_back(tmp);
   }
   return ret;
@@ -79,16 +80,39 @@ std::vector<TH1D*> AddBins(std::vector<TH1D*> container, std::vector<std::pair<i
   for (int i = 0; i < container.size(); ++i) {
     for (int j = 0; j < bins.size(); ++j) {
       if (i >=bins[j].first && i <= bins[j].second) {
-        if (ret[i] == nullptr) {
+        if (ret[j] == nullptr) {
           string name = string(container[i]->GetName()) + std::to_string(j);
-          ret[i] = (TH1D*) container[i]->Clone(name.c_str());
+          ret[j] = (TH1D*) container[i]->Clone(name.c_str());
         }
         else {
-          ret[i]->Add(container[i]);
+          ret[j]->Add(container[i]);
         }
       }
     }
   }
+  return ret;
+}
+
+TGraphErrors* GetSystematic(TH1D* nom, TH1D* var1_a, TH1D* var1_b, TH1D* var2_a, TH1D* var2_b) {
+  int nBins = nom->GetNbinsX();
+  double x_[nBins];
+  double y_[nBins];
+  double x_err_[nBins];
+  double y_err_[nBins];
+  
+  for (int i = 0; i < nBins; ++i) {
+    x_[i] = nom->GetBinCenter(i+1);
+    y_[i] = nom->GetBinContent(i+1);
+    x_err_[i] = nom->GetXaxis()->GetBinWidth(1) / 2.0;
+    double diff_var_1_a = fabs(nom->GetBinContent(i+1)  - var1_a->GetBinContent(i+1));
+    double diff_var_1_b = fabs(nom->GetBinContent(i+1)  - var1_b->GetBinContent(i+1));
+    double diff_var_2_a = fabs(nom->GetBinContent(i+1)  - var2_a->GetBinContent(i+1));
+    double diff_var_2_b = fabs(nom->GetBinContent(i+1)  - var2_b->GetBinContent(i+1));
+    double max_var_1 = (diff_var_1_a > diff_var_1_b ? diff_var_1_a : diff_var_1_a);
+    double max_var_2 = (diff_var_2_a > diff_var_2_b ? diff_var_2_a : diff_var_2_b);
+    y_err_[i] = sqrt(max_var_1 * max_var_1 + max_var_2 * max_var_2);
+  }
+  TGraphErrors* ret = new TGraphErrors(nBins, x_, y_, x_err_, y_err_);
   return ret;
 }
 
@@ -129,7 +153,7 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--towLow", &opts.sys_tow_m) ||
         ParseStrFlag(string(argv[i]), "--towHigh", &opts.sys_tow_p) ||
         ParseStrFlag(string(argv[i]), "--trackLow", &opts.sys_trk_m) ||
-        ParseStrFlag(string(argv[i]), "--trackHigh", &opts.sys_tow_p) ||
+        ParseStrFlag(string(argv[i]), "--trackHigh", &opts.sys_trk_p) ||
         ParseIntFlag(string(argv[i]), "--centLow", &opts.cent_low) ||
         ParseIntFlag(string(argv[i]), "--centHigh", &opts.cent_high)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
@@ -279,6 +303,15 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> pp_match_aj_trk_p;
   std::unordered_map<string, TH2D*> pp_hard_aj_trk_m;
   std::unordered_map<string, TH2D*> pp_match_aj_trk_m;
+  
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_tow_p_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_tow_p_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_tow_m_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_tow_m_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_trk_p_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_trk_p_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_hard_aj_trk_m_spectra;
+  std::unordered_map<string, std::vector<TH1D*>> pp_match_aj_trk_m_spectra;
   
   
   
@@ -704,28 +737,28 @@ int main(int argc, char* argv[]) {
     while (tow_p_reader.Next()) {
       h_tow_p_hard_aj->Fill(*tow_p_cent,
                             ((*tow_p_jl).Pt() - (*tow_p_js).Pt()) / ((*tow_p_jl).Pt() + (*tow_p_js).Pt()));
-      h_tow_m_hard_aj->Fill(*tow_p_cent,
+      h_tow_p_match_aj->Fill(*tow_p_cent,
                             ((*tow_p_jlm).Pt() - (*tow_p_jsm).Pt()) / ((*tow_p_jlm).Pt() + (*tow_p_jsm).Pt()));
     }
     
     while (tow_m_reader.Next()) {
       h_tow_m_hard_aj->Fill(*tow_m_cent,
                             ((*tow_m_jl).Pt() - (*tow_m_js).Pt()) / ((*tow_m_jl).Pt() + (*tow_m_js).Pt()));
-      h_tow_m_hard_aj->Fill(*tow_m_cent,
+      h_tow_m_match_aj->Fill(*tow_m_cent,
                             ((*tow_m_jlm).Pt() - (*tow_m_jsm).Pt()) / ((*tow_m_jlm).Pt() + (*tow_m_jsm).Pt()));
     }
     
     while (trk_p_reader.Next()) {
       h_trk_p_hard_aj->Fill(*trk_p_cent,
                             ((*trk_p_jl).Pt() - (*trk_p_js).Pt()) / ((*trk_p_jl).Pt() + (*trk_p_js).Pt()));
-      h_trk_m_hard_aj->Fill(*trk_p_cent,
+      h_trk_p_match_aj->Fill(*trk_p_cent,
                             ((*trk_p_jlm).Pt() - (*trk_p_jsm).Pt()) / ((*trk_p_jlm).Pt() + (*trk_p_jsm).Pt()));
     }
     
     while (trk_m_reader.Next()) {
       h_trk_m_hard_aj->Fill(*trk_m_cent,
                             ((*trk_m_jl).Pt() - (*trk_m_js).Pt()) / ((*trk_m_jl).Pt() + (*trk_m_js).Pt()));
-      h_trk_m_hard_aj->Fill(*trk_m_cent,
+      h_trk_m_match_aj->Fill(*trk_m_cent,
                             ((*trk_m_jlm).Pt() - (*trk_m_jsm).Pt()) / ((*trk_m_jlm).Pt() + (*trk_m_jsm).Pt()));
     }
     
@@ -882,6 +915,7 @@ int main(int argc, char* argv[]) {
     Overlay1D(h_pp_match_sub_sig_spectra, centrality_5_string, hOpts, cOpts, out_loc,
               "pp_match_sub_sig", "", "#sigma", "fraction", "Centrality");
     
+    
     // for Aj
     std::vector<TH1D*> h_auau_hard_aj_spectra_bin = SplitByBin(h_auau_hard_aj);
     std::vector<TH1D*> h_auau_match_aj_spectra_bin = SplitByBin(h_auau_match_aj);
@@ -889,7 +923,6 @@ int main(int argc, char* argv[]) {
     std::vector<TH1D*> h_pp_hard_aj_spectra_bin = SplitByBin(h_pp_hard_aj);
     std::vector<TH1D*> h_pp_match_aj_spectra_bin = SplitByBin(h_pp_match_aj);
     
-    // and the systematics
     std::vector<TH1D*> h_tow_p_hard_aj_spectra_bin = SplitByBin(h_tow_p_hard_aj);
     std::vector<TH1D*> h_tow_p_match_aj_spectra_bin = SplitByBin(h_tow_p_match_aj);
     std::vector<TH1D*> h_tow_m_hard_aj_spectra_bin = SplitByBin(h_tow_m_hard_aj);
@@ -907,19 +940,32 @@ int main(int argc, char* argv[]) {
       auau_weights.push_back(h->Integral());
       sum += h->Integral();
     }
+    
     for (auto& entry : auau_weights) {
       entry /= sum;
     }
-                                 
+    
     for (int i = 0; i < h_auau_hard_aj_spectra_bin.size(); ++i) {
+      
       h_auau_hard_aj_spectra_bin[i]->RebinX(2);
       h_auau_match_aj_spectra_bin[i]->RebinX(2);
       h_pp_hard_aj_spectra_bin[i]->RebinX(2);
       h_pp_match_aj_spectra_bin[i]->RebinX(2);
+      
       h_auau_hard_aj_spectra_bin[i]->Scale(1.0/h_auau_hard_aj_spectra_bin[i]->Integral());
       h_auau_match_aj_spectra_bin[i]->Scale(1.0/h_auau_match_aj_spectra_bin[i]->Integral());
       h_pp_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_hard_aj_spectra_bin[i]->Integral());
       h_pp_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_match_aj_spectra_bin[i]->Integral());
+      
+      h_tow_p_hard_aj_spectra_bin[i]->RebinX(2);
+      h_tow_p_match_aj_spectra_bin[i]->RebinX(2);
+      h_tow_m_hard_aj_spectra_bin[i]->RebinX(2);
+      h_tow_m_match_aj_spectra_bin[i]->RebinX(2);
+      
+      h_trk_p_hard_aj_spectra_bin[i]->RebinX(2);
+      h_trk_p_match_aj_spectra_bin[i]->RebinX(2);
+      h_trk_m_hard_aj_spectra_bin[i]->RebinX(2);
+      h_trk_m_match_aj_spectra_bin[i]->RebinX(2);
       
       h_tow_p_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_p_hard_aj_spectra_bin[i]->Integral());
       h_tow_p_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_p_match_aj_spectra_bin[i]->Integral());
@@ -931,9 +977,6 @@ int main(int argc, char* argv[]) {
       h_trk_m_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_hard_aj_spectra_bin[i]->Integral());
       h_trk_m_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_match_aj_spectra_bin[i]->Integral());
     }
-    
-    std::vector<TH1D*> h_auau_hard_aj_spectra = AddBins(h_auau_hard_aj_spectra_bin, centrality_5);
-    std::vector<TH1D*> h_auau_match_aj_spectra = AddBins(h_auau_match_aj_spectra_bin, centrality_5);
     
     std::vector<TH1D*> h_pp_hard_aj_spectra = AddBins(h_pp_hard_aj_spectra_bin, centrality_5);
     std::vector<TH1D*> h_pp_match_aj_spectra = AddBins(h_pp_match_aj_spectra_bin, centrality_5);
@@ -948,63 +991,146 @@ int main(int argc, char* argv[]) {
     std::vector<TH1D*> h_trk_m_hard_aj_spectra = AddBins(h_trk_m_hard_aj_spectra_bin, centrality_5);
     std::vector<TH1D*> h_trk_m_match_aj_spectra = AddBins(h_trk_m_match_aj_spectra_bin, centrality_5);
     
-//
-//    Overlay1D(h_auau_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_hard_aj", "",
-//              "A_{J}", "fraction", "Centrality");
-//    Overlay1D(h_auau_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_match_aj", "",
-//              "A_{J}", "fraction", "Centrality");
-//    Overlay1D(h_pp_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "pp_hard_aj", "",
-//              "A_{J}", "fraction", "Centrality");
-//    Overlay1D(h_pp_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "pp_match_aj", "",
-//              "A_{J}", "fraction", "Centrality");
-//
-//    // add the containers to the dictionaries
-//    auau_hard_lead_pt_cent.insert({key, h_auau_hard_lead_pt_spectra});
-//    auau_hard_sub_pt_cent.insert({key, h_auau_hard_sub_pt_spectra});
-//    auau_match_lead_pt_cent.insert({key, h_auau_match_lead_pt_spectra});
-//    auau_match_sub_pt_cent.insert({key, h_auau_match_sub_pt_spectra});
-//    pp_hard_lead_pt_cent.insert({key, h_pp_hard_lead_pt_spectra});
-//    pp_hard_sub_pt_cent.insert({key, h_pp_hard_sub_pt_spectra});
-//    pp_match_lead_pt_cent.insert({key, h_pp_match_lead_pt_spectra});
-//    pp_match_sub_pt_cent.insert({key, h_pp_match_sub_pt_spectra});
-//    auau_hard_aj_cent.insert({key, h_auau_hard_aj_spectra});
-//    auau_match_aj_cent.insert({key, h_auau_match_aj_spectra});
-//    auau_hard_aj_cent.insert({key, h_pp_hard_aj_spectra});
-//    auau_match_aj_cent.insert({key, h_pp_match_aj_spectra});
-//
-//    auau_hard_lead_rho_cent.insert({key, h_auau_hard_lead_rho_spectra});
-//    auau_hard_lead_sig_cent.insert({key, h_auau_hard_lead_sig_spectra});
-//    auau_hard_sub_rho_cent.insert({key, h_auau_hard_sub_rho_spectra});
-//    auau_hard_sub_sig_cent.insert({key, h_auau_hard_sub_sig_spectra});
-//    auau_match_lead_rho_cent.insert({key, h_auau_match_lead_rho_spectra});
-//    auau_match_lead_sig_cent.insert({key, h_auau_match_lead_sig_spectra});
-//    auau_match_sub_rho_cent.insert({key, h_auau_match_sub_rho_spectra});
-//    auau_match_sub_sig_cent.insert({key, h_auau_match_sub_sig_spectra});
-//
-//    pp_hard_lead_rho_cent.insert({key, h_pp_hard_lead_rho_spectra});
-//    pp_hard_lead_sig_cent.insert({key, h_pp_hard_lead_sig_spectra});
-//    pp_hard_sub_rho_cent.insert({key, h_pp_hard_sub_rho_spectra});
-//    pp_hard_sub_sig_cent.insert({key, h_pp_hard_sub_sig_spectra});
-//    pp_match_lead_rho_cent.insert({key, h_pp_match_lead_rho_spectra});
-//    pp_match_lead_sig_cent.insert({key, h_pp_match_lead_sig_spectra});
-//    pp_match_sub_rho_cent.insert({key, h_pp_match_sub_rho_spectra});
-//    pp_match_sub_sig_cent.insert({key, h_pp_match_sub_sig_spectra});
-//
-//    // now, printing some comparisons
-//    // make a folder for each centrality
-//    // make output directory
-//    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
-//      std::string out_loc_cent = out_loc + "/cent_" + std::to_string(i);
-//      boost::filesystem::path dir(out_loc_cent.c_str());
-//      boost::filesystem::create_directories(dir);
-//
-//      Overlay1D(h_auau_hard_aj_spectra[i], h_pp_hard_aj_spectra[i], "AuAu hard A_{J}", "PP hard A_{J}",
-//                 hOpts, cOpts, out_loc_cent, "aj_hard", "", "A_{J}", "fraction", "A_{J}");
-//      Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], "AuAu matched A_{J}", "PP matched A_{J}",
-//                 hOpts, cOpts, out_loc_cent, "aj_match", "", "A_{J}", "fraction", "A_{J}");
-//    }
+    std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByCentrality(h_auau_hard_aj, centrality_5);
+    std::vector<TH1D*> h_auau_match_aj_spectra = SplitByCentrality(h_auau_match_aj, centrality_5);
+    
+    // re-normalize
+    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
+      
+      h_auau_hard_aj_spectra[i]->RebinX(2);
+      h_auau_match_aj_spectra[i]->RebinX(2);
+      
+      h_auau_hard_aj_spectra[i]->Scale(1.0 / h_auau_hard_aj_spectra[i]->Integral());
+      h_auau_match_aj_spectra[i]->Scale(1.0 / h_auau_match_aj_spectra[i]->Integral());
+      
+      h_pp_hard_aj_spectra[i]->Scale(1.0 / h_pp_hard_aj_spectra[i]->Integral());
+      h_pp_match_aj_spectra[i]->Scale(1.0 / h_pp_match_aj_spectra[i]->Integral());
+      
+      h_tow_p_hard_aj_spectra[i]->Scale(1.0 / h_tow_p_hard_aj_spectra[i]->Integral());
+      h_tow_p_match_aj_spectra[i]->Scale(1.0 / h_tow_p_match_aj_spectra[i]->Integral());
+      h_tow_m_hard_aj_spectra[i]->Scale(1.0 / h_tow_m_hard_aj_spectra[i]->Integral());
+      h_tow_m_match_aj_spectra[i]->Scale(1.0 / h_tow_m_match_aj_spectra[i]->Integral());
+      
+      h_trk_p_hard_aj_spectra[i]->Scale(1.0 / h_trk_p_hard_aj_spectra[i]->Integral());
+      h_trk_p_match_aj_spectra[i]->Scale(1.0 / h_trk_p_match_aj_spectra[i]->Integral());
+      h_trk_m_hard_aj_spectra[i]->Scale(1.0 / h_trk_m_hard_aj_spectra[i]->Integral());
+      h_trk_m_match_aj_spectra[i]->Scale(1.0 / h_trk_m_match_aj_spectra[i]->Integral());
+    }
+    
+
+    Overlay1D(h_auau_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_auau_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_pp_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "pp_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_pp_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "pp_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+
+    Overlay1D(h_tow_p_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "tow_p_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_tow_p_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "tow_p_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_tow_m_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "tow_m_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_tow_m_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "tow_m_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    
+    Overlay1D(h_trk_p_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "trk_p_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_trk_p_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "trk_p_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_trk_m_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "trk_m_hard_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    Overlay1D(h_trk_m_match_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "trk_m_match_aj", "",
+              "A_{J}", "fraction", "Centrality");
+    
+    // add the containers to the dictionaries
+    auau_hard_lead_pt_cent.insert({key, h_auau_hard_lead_pt_spectra});
+    auau_hard_sub_pt_cent.insert({key, h_auau_hard_sub_pt_spectra});
+    auau_match_lead_pt_cent.insert({key, h_auau_match_lead_pt_spectra});
+    auau_match_sub_pt_cent.insert({key, h_auau_match_sub_pt_spectra});
+    pp_hard_lead_pt_cent.insert({key, h_pp_hard_lead_pt_spectra});
+    pp_hard_sub_pt_cent.insert({key, h_pp_hard_sub_pt_spectra});
+    pp_match_lead_pt_cent.insert({key, h_pp_match_lead_pt_spectra});
+    pp_match_sub_pt_cent.insert({key, h_pp_match_sub_pt_spectra});
+    auau_hard_aj_cent.insert({key, h_auau_hard_aj_spectra});
+    auau_match_aj_cent.insert({key, h_auau_match_aj_spectra});
+    auau_hard_aj_cent.insert({key, h_pp_hard_aj_spectra});
+    auau_match_aj_cent.insert({key, h_pp_match_aj_spectra});
+
+    auau_hard_lead_rho_cent.insert({key, h_auau_hard_lead_rho_spectra});
+    auau_hard_lead_sig_cent.insert({key, h_auau_hard_lead_sig_spectra});
+    auau_hard_sub_rho_cent.insert({key, h_auau_hard_sub_rho_spectra});
+    auau_hard_sub_sig_cent.insert({key, h_auau_hard_sub_sig_spectra});
+    auau_match_lead_rho_cent.insert({key, h_auau_match_lead_rho_spectra});
+    auau_match_lead_sig_cent.insert({key, h_auau_match_lead_sig_spectra});
+    auau_match_sub_rho_cent.insert({key, h_auau_match_sub_rho_spectra});
+    auau_match_sub_sig_cent.insert({key, h_auau_match_sub_sig_spectra});
+
+    pp_hard_lead_rho_cent.insert({key, h_pp_hard_lead_rho_spectra});
+    pp_hard_lead_sig_cent.insert({key, h_pp_hard_lead_sig_spectra});
+    pp_hard_sub_rho_cent.insert({key, h_pp_hard_sub_rho_spectra});
+    pp_hard_sub_sig_cent.insert({key, h_pp_hard_sub_sig_spectra});
+    pp_match_lead_rho_cent.insert({key, h_pp_match_lead_rho_spectra});
+    pp_match_lead_sig_cent.insert({key, h_pp_match_lead_sig_spectra});
+    pp_match_sub_rho_cent.insert({key, h_pp_match_sub_rho_spectra});
+    pp_match_sub_sig_cent.insert({key, h_pp_match_sub_sig_spectra});
+
+    // now, printing some comparisons
+    // make a folder for each centrality
+    // make output directory
+    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
+      std::string out_loc_cent = out_loc + "/cent_" + std::to_string(i);
+      boost::filesystem::path dir(out_loc_cent.c_str());
+      boost::filesystem::create_directories(dir);
+      
+      // first overlay all the systematics
+      Overlay1D(h_tow_p_hard_aj_spectra[i], h_tow_m_hard_aj_spectra[i], "tower hard systematic", "systematic matched A_{J}",
+                hOpts, cOpts, out_loc_cent, "aj_hard_tow_sys", "", "A_{J}", "fraction", "A_{J}");
+      Overlay1D(h_tow_p_match_aj_spectra[i], h_tow_m_match_aj_spectra[i], "tower match systematic", "systematic matched A_{J}",
+                hOpts, cOpts, out_loc_cent, "aj_match_tow_sys", "", "A_{J}", "fraction", "A_{J}");
+      Overlay1D(h_trk_p_hard_aj_spectra[i], h_trk_m_hard_aj_spectra[i], "track hard systematic", "systematic matched A_{J}",
+                hOpts, cOpts, out_loc_cent, "aj_hard_trk_sys", "", "A_{J}", "fraction", "A_{J}");
+      Overlay1D(h_trk_p_match_aj_spectra[i], h_trk_m_match_aj_spectra[i], "track match systematic", "systematic matched A_{J}",
+                hOpts, cOpts, out_loc_cent, "aj_match_trk_sys", "", "A_{J}", "fraction", "A_{J}");
+      
+      
+      TGraphErrors* err_hard = GetSystematic(h_pp_hard_aj_spectra[i], h_tow_p_hard_aj_spectra[i], h_tow_m_hard_aj_spectra[i],
+                                                 h_trk_p_hard_aj_spectra[i], h_trk_m_hard_aj_spectra[i]);
+      TGraphErrors* err_match = GetSystematic(h_pp_match_aj_spectra[i], h_tow_p_match_aj_spectra[i], h_tow_m_match_aj_spectra[i],
+                                                  h_trk_p_match_aj_spectra[i], h_trk_m_match_aj_spectra[i]);
+
+      Overlay1D(h_auau_hard_aj_spectra[i], h_pp_hard_aj_spectra[i], 0.0, 0.25, 0.0, 0.9, "AuAu hard A_{J}", "PP hard A_{J}",
+                 hOpts, cOpts, out_loc_cent, "aj_hard", "", "A_{J}", "fraction", "A_{J}");
+      Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], 0.0, 0.23, 0.0, 0.9, "AuAu matched A_{J}", "PP matched A_{J}",
+                 hOpts, cOpts, out_loc_cent, "aj_match", "", "A_{J}", "fraction", "A_{J}");
+      
+      Overlay1D(h_auau_hard_aj_spectra[i], h_pp_hard_aj_spectra[i], err_hard, 0.0, 0.25, 0.0, 0.9, "AuAu hard A_{J}", "PP hard A_{J}",
+                "systematics", hOpts, cOpts, out_loc_cent, "aj_hard", "", "A_{J}", "fraction", "A_{J}");
+      Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], err_match, 0.0, 0.3, 0.0, 0.9, "AuAu matched A_{J}", "PP matched A_{J}",
+                "systematics", hOpts, cOpts, out_loc_cent, "aj_match", "", "A_{J}", "fraction", "A_{J}");
+    }
   }
   
   return 0;
 }
 
+//
+//void Overlay1D(H* h1,
+//               H* h2,
+//               TGraphErrors* sys,
+//               double y_min,
+//               double y_max,
+//               double x_min,
+//               double x_max,
+//               std::string h1_title,
+//               std::string h2_title,
+//               histogramOpts hopts,
+//               canvasOpts copts,
+//               std::string output_loc,
+//               std::string output_name,
+//               std::string canvas_title,
+//               std::string x_axis_label,
+//               std::string y_axis_label,
+//               std::string legend_title = "") {

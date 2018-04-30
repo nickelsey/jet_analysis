@@ -7,6 +7,7 @@
 #include "TH3.h"
 #include "TCanvas.h"
 #include "TLegend.h"
+#include "TGraphErrors.h"
 
 #include <iostream>
 #include <vector>
@@ -258,6 +259,113 @@ void Overlay1D(H* h1,
     leg->SetHeader(legend_title.c_str());
     leg->AddEntry(h1, h1_title.c_str(), "lep");
     leg->AddEntry(h2, h2_title.c_str(), "lep");
+    leg->Draw();
+  }
+  
+  c.SaveAs(canvas_name.c_str());
+}
+
+template<typename H>
+void Overlay1D(H* h1,
+               H* h2,
+               double y_min,
+               double y_max,
+               double x_min,
+               double x_max,
+               std::string h1_title,
+               std::string h2_title,
+               histogramOpts hopts,
+               canvasOpts copts,
+               std::string output_loc,
+               std::string output_name,
+               std::string canvas_title,
+               std::string x_axis_label,
+               std::string y_axis_label,
+               std::string legend_title = "") {
+  // we assume the output location exists, so create
+  // the final output string that will be used for pdf creation
+  std::string canvas_name = output_loc + "/" + output_name + ".pdf";
+  
+  // axis labels, and title
+  h1->SetTitle(canvas_title.c_str());
+  h1->GetXaxis()->SetTitle(x_axis_label.c_str());
+  h1->GetYaxis()->SetTitle(y_axis_label.c_str());
+  
+  // set draw options
+  hopts.SetHistogram(h1);
+  hopts.SetHistogram(h2);
+  
+  TCanvas c;
+  copts.SetMargins(&c);
+  copts.SetLogScale(&c);
+  
+  h1->Draw();
+  h2->Draw("SAME");
+  
+  TLegend* leg = copts.Legend();
+  if (leg != nullptr) {
+    leg->SetHeader(legend_title.c_str());
+    leg->AddEntry(h1, h1_title.c_str(), "lep");
+    leg->AddEntry(h2, h2_title.c_str(), "lep");
+    leg->Draw();
+  }
+  
+  c.SaveAs(canvas_name.c_str());
+}
+
+template<typename H>
+void Overlay1D(H* h1,
+               H* h2,
+               TGraphErrors* sys,
+               double y_min,
+               double y_max,
+               double x_min,
+               double x_max,
+               std::string h1_title,
+               std::string h2_title,
+               std::string sys_title,
+               histogramOpts hopts,
+               canvasOpts copts,
+               std::string output_loc,
+               std::string output_name,
+               std::string canvas_title,
+               std::string x_axis_label,
+               std::string y_axis_label,
+               std::string legend_title = "") {
+  // we assume the output location exists, so create
+  // the final output string that will be used for pdf creation
+  std::string canvas_name = output_loc + "/" + output_name + ".pdf";
+  
+  // axis labels, and title
+  h1->SetTitle(canvas_title.c_str());
+  h1->GetXaxis()->SetTitle(x_axis_label.c_str());
+  h1->GetYaxis()->SetTitle(y_axis_label.c_str());
+  h1->GetYaxis()->SetRangeUser(y_min, y_max);
+  h1->GetXaxis()->SetRangeUser(x_min, x_max);
+  
+  // set draw options
+  hopts.SetHistogram(h1);
+  hopts.SetHistogram(h2);
+  
+  TCanvas c;
+  copts.SetMargins(&c);
+  copts.SetLogScale(&c);
+  
+  sys->SetFillColorAlpha(h2->GetLineColor(), 0.6);
+  sys->SetFillStyle(1001);
+  sys->SetLineWidth(0);
+  sys->SetMarkerSize(0);
+  
+  h1->Draw("9");
+  h2->Draw("9SAME");
+  sys->Draw("9e2SAME");
+  
+  TLegend* leg = copts.Legend();
+  if (leg != nullptr) {
+    leg->SetHeader(legend_title.c_str());
+    leg->AddEntry(h1, h1_title.c_str(), "lep");
+    leg->AddEntry(h2, h2_title.c_str(), "lep");
+    leg->AddEntry(sys,sys_title.c_str(), "f");
     leg->Draw();
   }
   
