@@ -82,6 +82,11 @@ def main(args) :
   ## get max number of jobs to be submitted to pbs
   ## at a time
   maxjobs = args.maxjobs
+
+  ## select defaults
+  embedTrig = ''
+  if args.embedTriggers is not None :
+    embedTrig = args.embedTriggers
   
   ## some paths
   execpath = os.getcwd()
