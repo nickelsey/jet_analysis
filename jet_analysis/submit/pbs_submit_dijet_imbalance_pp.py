@@ -166,8 +166,8 @@ def main(args) :
       index = jobstatus[key][0]
 
       ## build log & error locations
-      outstream = "log/" + args.name + str(index) + ".log"
-      errstream = "log/" + args.name + str(index) + ".err"
+      outstream = "log/" + args.name + str(index) + "_" + key[1] + ".log"
+      errstream = "log/" + args.name + str(index) + "_" + key[1] + ".err"
 
       ## figure out which systematic variation we are running
       tow_sys = 0
