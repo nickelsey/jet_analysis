@@ -49,16 +49,16 @@ def updatestatus(jobstatus, outdir, name) :
     ## if not, mark to resubmit
     
     outDirMod = ''
-      if key[1] == 'mtrack' :
-        outDir = 'tow_0_track_-1'
-      if key[1] == 'ptrack' :
-        outDir = 'tow_0_track_1'
-      if key[1] == 'mtow' :
-        outDir = 'tow_-1_track_0'
-      if key[1] == 'ptow' :
-        outDir = 'tow_1_track_0'
-      if key[1] == 'nom' :
-        outDir = 'tow_0_track_0'
+    if key[1] == 'mtrack' :
+      outDir = 'tow_0_track_-1'
+    if key[1] == 'ptrack' :
+      outDir = 'tow_0_track_1'
+    if key[1] == 'mtow' :
+      outDir = 'tow_-1_track_0'
+    if key[1] == 'ptow' :
+      outDir = 'tow_1_track_0'
+    if key[1] == 'nom' :
+      outDir = 'tow_0_track_0'
     
     
     if outdir.startswith('/') :
