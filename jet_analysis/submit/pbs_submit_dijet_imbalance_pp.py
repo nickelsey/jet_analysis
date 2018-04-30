@@ -15,8 +15,8 @@ import ROOT
 
 def checkstatus(jobstatus) :
   loop = False
-  for i in range(len(jobstatus)) :
-    if jobstatus[i] != 2 :
+  for key in jobstatus :
+    if jobstatus[key] != 2 :
       loop = True
       break
   return loop
@@ -30,43 +30,45 @@ def updatestatus(jobstatus, outdir, name) :
   proc = subprocess.Popen( proccommand, stdout=subprocess.PIPE, shell=True)
   qstat_result = proc.stdout.read()
   
-  for i in range(len(jobstatus)) :
+  for key in jobstatus :
+    
+    index = jobstatus[key][0]
     
     ## if job is completed, we don't need to check again
-    if jobstatus[i] == 2 :
+    if jobstatus[key][1] == 2 :
       continue
     
     ## check if the job is still underway
-    jobinprocess = qstat_result.find(name + str(i))
+    jobinprocess = qstat_result.find(name + str(index))
     if jobinprocess >= 0 :
-      jobstatus[i] = 1
+      jobstatus[key][1] = 1
       continue
     
     ## if the job is not still underway,
     ## check to see if the job has completed properly
     ## if not, mark to resubmit
     if outdir.startswith('/') :
-      filename = outdir + '/' + name + str(i) + '.root'
+      filename = outdir + '/' + name + str(index) + '.root'
     else :
-      filename = os.getcwd() + '/' + outdir + '/' + name + str(i) + '.root'
+      filename = os.getcwd() + '/' + outdir + '/' + name + str(index) + '.root'
     
     if os.path.isfile(filename) :
       outputfile = ROOT.TFile(filename, "READ")
       if outputfile.IsZombie() :
-        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit")
-        jobstatus[i] = 0
+        print("job " + str(index+1) + " of " + str(len(jobstatus)) + " complete: file is zombie, resubmit")
+        jobstatus[key][1] = 0
         os.remove(filename)
       elif outputfile.IsOpen() :
-        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy")
+        print("job " + str(index+1) + " of " + str(len(jobstatus)) + " complete: ROOT file healthy")
         print(filename)
-        jobstatus[i] = 2
+        jobstatus[key][1] = 2
         outputfile.Close()
       else :
-        print("job " + str(i+1) + " of " + str(len(jobstatus)) + " undefined file status, resubmit")
-        jobstatus[i] = 0
+        print("job " + str(index+1) + " of " + str(len(jobstatus)) + " undefined file status, resubmit")
+        jobstatus[key][1] = 0
     else :
-      print("undefined status: job " + str(i+1) + " of " + str(len(jobstatus)) + " marked for submission")
-      jobstatus[i] = 0
+      print("undefined status: job " + str(index+1) + " of " + str(len(jobstatus)) + " marked for submission")
+      jobstatus[key][1] = 0
 
   return jobstatus
 
@@ -90,16 +92,29 @@ def main(args) :
   ## we need to do our own book keeping
   ## for when  job is active and when it
   ## has completed successfully
-  
+
+  ## for pp we have the option of running systematic uncertainties as well
+  ## this is a list of the different variations for each file
+  systematic_variations = ['nom', 'ptow', 'mtow', 'ptrack', 'ntrack']
+
+  if args.systematics == False :
+    systematic_variations = ['nom']
+
+  ## create the job list - its one job per input file, per systematic variation
   ## 0 not submitted, 1 for running, 2 for complete,
   ## and -1 for failed - resubmit
-  jobstatus = [0 for i in range(len(files))]
+  counter = 0
+  jobstatus = {}
+  for file in files :
+    for variation in systematic_variations :
+      jobstatus[(file, variation)] = [counter, 0]
+      counter = counter + 1
   
   ## count the number of qsub submission failures
   qsubfail = 0
 
   reader = ''
-embedReader = ''
+  embedReader = ''
   if args.readerSetting is not None :
     reader = args.readerSetting
   if args.embedReaderSetting is not None :
@@ -117,27 +132,53 @@ embedReader = ''
     ## find the number of jobs still running via qstat
     ## if its at the maximum set jobsactive or jobsqueue,
     ## then pause
-    jobsactive = jobstatus.count(1)
+    jobsactive = 0
+    for key in jobstatus :
+      if jobstatus[key][1] == 1 :
+        jobsactive = jobsactive + 1
     while jobsactive >= maxjobs :
       print("reached max number of active jobs: pausing")
       time.sleep(60)
       jobstatus = updatestatus(jobstatus, args.output, args.name)
-      jobsactive = jobstatus.count(1)
+      jobsactive = 0
+      for key in jobstatus :
+        if jobstatus[key][1] == 1 :
+          jobsactive = jobsactive + 1
   
     ## now submit jobs up to maxjobs - jobsqueued
     njobs = maxjobs - jobsactive
     
-    for i in range(len(jobstatus)) :
+    for key in jobstatus :
       if njobs == 0 :
         break
-      if jobstatus[i] == 1 or jobstatus[i] == 2 :
+      if jobstatus[key][1] == 1 or jobstatus[key][1] == 2 :
         continue
+
+      index = jobstatus[key][0]
+
       ## build log & error locations
-      outstream = "log/" + args.name + str(i) + ".log"
-      errstream = "log/" + args.name + str(i) + ".err"
+      outstream = "log/" + args.name + str(index) + ".log"
+      errstream = "log/" + args.name + str(index) + ".err"
+
+      ## figure out which systematic variation we are running
+      tow_sys = 0
+      track_sys = 0
+      outDir = args.output
+      if key[1] == 'mtrack' :
+        track_sys = -1
+        outDir = outDir + '/tow_0_track_-1'
+      if key[1] == 'ptrack' :
+        track_sys = 1
+        outDir = outDir + '/tow_0_track_1'
+      if key[1] == 'mtrack' :
+        track_sys = -1
+        outDir = outDir + '/tow_-1_track_0'
+      if key[1] == 'ptow' :
+        track_sys = 1
+        outDir = outDir + '/tow_1_track_0'
       
       ## build our qsub execution string
-      clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
+      clargs = '--outDir=' + outDir + ' --input=' + files[i] + ' --id=' + str(index)
       clargs = clargs + ' --name=' + args.name
       clargs = clargs + ' --runList=' + args.badRuns + ' --towList=' + args.badTowers + ' --triggers='
       clargs = clargs + args.triggers + ' --embedTriggers=' + embedTrig + ' --constEta=' + args.constEta
@@ -146,8 +187,8 @@ embedReader = ''
       clargs = clargs + args.subConstPtMatch + ' --leadR=' + args.leadR + ' --subR=' + args.subR
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
       clargs = clargs + ' --readerSetting=' + reader + ' --embedReaderSetting=' + embedReader
+      clargs = clargs + ' --towerUnc=' + tow_sys + ' --trackUnc=' + track_sys
       clargs = clargs + ' --efficFile=' + args.efficiencyFile + ' --embed=' args.embedFile
-      
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
       qsub = qsub + ':ppn=' + str(args.ppn) + ' -q ' + str(args.queue) + ' -o ' + outstream
@@ -158,7 +199,7 @@ embedReader = ''
       ret = subprocess.Popen( qsub, shell=True)
       ret.wait()
       if ret.returncode == 0 :
-        jobstatus[i] = 1
+        jobstatus[key][1] = 1
       else :
         print("warning: qsub submission failed")
         qsubfail = qsubfail + 1
@@ -185,6 +226,7 @@ if __name__ == "__main__":
   parser.add_argument('--priority', type=int, default=0, help=' queue priority')
   parser.add_argument('--queue', default='erhiq', help=' queue to submit jobs to' )
   parser.add_argument('--maxjobs',type=int, default=100, help=' max number of jobs to have in running or queue states')
+  parser.add_argument('--systematics', type=bool, default=True, help=' will run 4 systematic variations for error estimation')
   parser.add_argument('--output', default='out/post/tmp', help=' directory for output root files' )
   parser.add_argument('--embedFile', default='submit/y14_mb_file_list.txt', help=' file containing list of root files for embedding events')
   parser.add_argument('--efficiencyFile', default='submit/y14_effic_dca1.root', help=' root file containing run 14 efficiency curves')
