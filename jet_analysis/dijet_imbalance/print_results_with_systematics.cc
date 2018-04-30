@@ -80,7 +80,8 @@ std::vector<TH1D*> AddBins(std::vector<TH1D*> container, std::vector<std::pair<i
     for (int j = 0; j < bins.size(); ++j) {
       if (i >=bins[j].first && i <= bins[j].second) {
         if (ret[i] == nullptr) {
-          
+          string name = string(h[i]->GetName()) + std::to_string(j);
+          ret[i] = h->ProjectionY(name.c_str(), i, i);
         }
         else {
           ret[i]->Add(container[i]);
@@ -88,7 +89,7 @@ std::vector<TH1D*> AddBins(std::vector<TH1D*> container, std::vector<std::pair<i
       }
     }
   }
-  
+  return ret;
 }
 
 // command line option results
@@ -781,15 +782,15 @@ int main(int argc, char* argv[]) {
               "pp_match_sub_sig", "", "#sigma", "fraction", "Centrality");
     
     // for Aj
-    std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByCentrality(h_auau_hard_aj, centrality_5);
-    std::vector<TH1D*> h_auau_match_aj_spectra = SplitByCentrality(h_auau_match_aj, centrality_5);
+    std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByBin(h_auau_hard_aj);
+    std::vector<TH1D*> h_auau_match_aj_spectra = SplitByBin(h_auau_match_aj);
 
-    std::vector<TH1D*> h_pp_hard_aj_spectra = SplitByCentrality(h_pp_hard_aj, centrality_5);
-    std::vector<TH1D*> h_pp_match_aj_spectra = SplitByCentrality(h_pp_match_aj, centrality_5);
+    std::vector<TH1D*> h_pp_hard_aj_spectra = SplitByBin(h_pp_hard_aj);
+    std::vector<TH1D*> h_pp_match_aj_spectra = SplitByBin(h_pp_match_aj);
     
     // we will weight pp by the relative fraction of events in auau bins
-    
-    // rebin and
+                                 
+                                 
     for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
       h_auau_hard_aj_spectra[i]->RebinX(2);
       h_auau_match_aj_spectra[i]->RebinX(2);
