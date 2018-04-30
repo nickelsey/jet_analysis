@@ -126,7 +126,11 @@ def main(args) :
     jobstatus = updatestatus(jobstatus, args.output, args.name)
     
     ## if we have completed all jobs, exit
-    if len(jobstatus) == jobstatus.count(2) :
+    completed = 0
+    for key in jobstatus :
+      if jobstatus[key][1] == 2 :
+        completed = completed + 1
+    if len(jobstatus) == completed :
       break
     
     ## find the number of jobs still running via qstat
