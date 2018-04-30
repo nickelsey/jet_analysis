@@ -164,13 +164,10 @@ def main(args) :
     ## then pause
     jobsactive = activejobs(jobstatus)
     while jobsactive >= maxjobs :
-      print('jobsactive before? : ', jobsactive)
       print("reached max number of active jobs: pausing")
       time.sleep(30)
-      print('jobsactive before 2? : ', jobsactive)
       jobstatus = updatestatus(jobstatus, args.output, args.name)
       jobsactive = activejobs(jobstatus)
-      print('jobsactive after? : ', jobsactive)
   
     ## now submit jobs up to maxjobs - jobsqueued
     njobs = maxjobs - jobsactive
