@@ -16,7 +16,7 @@ import ROOT
 def checkstatus(jobstatus) :
   loop = False
   for key in jobstatus :
-    if jobstatus[key] != 2 :
+    if jobstatus[key][1] != 2 :
       loop = True
       break
   return loop
