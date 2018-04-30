@@ -201,7 +201,7 @@ def main(args) :
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
       qsub = qsub + ':ppn=' + str(args.ppn) + ' -q ' + str(args.queue) + ' -o ' + outstream
-      qsub = qsub + ' -e ' + errstream + ' -N ' + args.name + str(i) + ' -- '
+      qsub = qsub + ' -e ' + errstream + ' -N ' + args.name + str(index) + ' -- '
       qsub = qsub + qwrap + ' ' + execpath + ' ' + executable + ' ' + clargs
       print("submitting job: ")
       print(qsub)
