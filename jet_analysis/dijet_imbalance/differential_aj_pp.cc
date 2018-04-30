@@ -10,6 +10,7 @@
 #include "jet_analysis/util/arg_helper.hh"
 #include "jet_analysis/util/trigger_lookup.hh"
 #include "jet_analysis/util/reader_util.hh"
+#include "jet_analysis/util/string_util.hh"
 #include "jet_analysis/util/vector_conversion.hh"
 #include "jet_analysis/efficiency/run14_eff.hh"
 #include "jet_analysis/dijet_worker/dijet_worker.hh"
@@ -53,7 +54,7 @@
 using std::string;
 struct Options {
   string name        = "job"; /* output file name */
-  string id          = "0";   /* job id */
+  int id             = 0;     /* job id */
   string input       = "";    /* root file/root file list*/
   string embed       = "";    /* root file/file list for embedding*/
   string reader      = "";    /* settings file for primary reader */
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]) {
   Options opts;
   for (int i = 1; i < argc; ++i) {
     if (ParseStrFlag(string(argv[i]), "--name", &opts.name) ||
-        ParseStrFlag(string(argv[i]), "--id", &opts.id) ||
+        ParseIntFlag(string(argv[i]), "--id", &opts.id) ||
         ParseStrFlag(string(argv[i]), "--input", &opts.input) ||
         ParseStrFlag(string(argv[i]), "--embed", &opts.embed) ||
         ParseStrFlag(string(argv[i]), "--readerSetting", &opts.reader) ||
@@ -117,9 +118,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   
-  // first, build our input chains -
-  // the default chain must be initialized, but
-  // no embedding is necessary
+  // first, build our input chain
   TChain* chain = NewChainFromInput(opts.input);
   
   // build output directory if it doesn't exist, using boost::filesystem
@@ -129,7 +128,7 @@ int main(int argc, char* argv[]) {
   boost::filesystem::create_directories(dir);
   
   // create output file from the given directory, name & id
-  string outfile_name = opts.out_dir + "/" + opts.name + opts.id + ".root";
+  string outfile_name = opts.out_dir + "/" + opts.name + MakeString(opts.id) + ".root";
   TFile out(outfile_name.c_str(), "RECREATE");
   
   // initialize the reader
@@ -141,7 +140,51 @@ int main(int argc, char* argv[]) {
     InitReaderWithDefaults(reader, chain, opts.tow_list, opts.run_list);
   }
   
-  // get the triggers IDs that will be used
+  // setup embedding if requested
+  TChain* embed_chain = nullptr;
+  TStarJetPicoReader* embed_reader = new TStarJetPicoReader();
+  if (!opts.embed.empty()) {
+    embed_chain = new TChain("JetTree");
+    if (HasEnding(opts.embed, ".root")) {
+      embed_chain->Add(opts.embed.c_str());
+    }
+    else if (HasEnding(opts.embed, ".list") || HasEnding(opts.embed, ".txt")) {
+      // read in our possible embedding events
+      std::vector<string> embed_files;
+      std::ifstream embed_stream(opts.embed);
+      string line;
+      while (std::getline(embed_stream, line)) {
+        embed_files.push_back(line);
+      }
+      
+      // we want to have a good sample of events, about 40x more than the pp trigger
+      int min_events = chain->GetEntries() * 40;
+      
+      // we need to randomly sample the list using the index as the seed so its reproducible
+      std::mt19937 gen(opts.id);
+      std::uniform_int_distribution<int> uniform_dist(0, embed_files.size());
+      
+      while (embed_files.size() && embed_chain->GetEntries() < min_events) {
+        int idx = uniform_dist(gen);
+        embed_chain->Add(embed_files[idx].c_str());
+        embed_files.erase(embed_files.begin() + idx);
+        uniform_dist = std::uniform_int_distribution<>(0, embed_files.size());
+      }
+    }
+    else {
+      std::cerr << "error: unrecognized extension for embedding file type, exiting" << std::endl;
+      return 1;
+    }
+    
+    if (!opts.readeremb.empty()) {
+      InitReader(embed_reader, embed_chain, opts.readeremb, opts.tow_list, opts.run_list);
+    }
+    else {
+      InitReaderWithDefaults(embed_reader, embed_chain, opts.tow_list, opts.run_list);
+    }
+  }
+  
+  // get the trigger IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);
   
   std::cout << "taking triggers: " << opts.triggers << " for primary" << std::endl;

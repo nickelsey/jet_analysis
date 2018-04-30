@@ -10,6 +10,7 @@
 #include "jet_analysis/util/arg_helper.hh"
 #include "jet_analysis/util/trigger_lookup.hh"
 #include "jet_analysis/util/reader_util.hh"
+#include "jet_analysis/util/string_util.hh"
 #include "jet_analysis/util/vector_conversion.hh"
 #include "jet_analysis/efficiency/run14_eff.hh"
 #include "jet_analysis/dijet_worker/dijet_worker.hh"
@@ -53,7 +54,7 @@
 using std::string;
 struct Options {
   string name        = "job"; /* output file name */
-  string id          = "0";   /* job id */
+  int id             = 0;     /* job id */
   string input       = "";    /* root file/root file list*/
   string reader      = "";    /* settings file for primary reader */
   string out_dir     = "";    /* directory to save output in */
@@ -77,7 +78,7 @@ int main(int argc, char* argv[]) {
   Options opts;
   for (int i = 1; i < argc; ++i) {
     if (ParseStrFlag(string(argv[i]), "--name", &opts.name) ||
-        ParseStrFlag(string(argv[i]), "--id", &opts.id) ||
+        ParseIntFlag(string(argv[i]), "--id", &opts.id) ||
         ParseStrFlag(string(argv[i]), "--input", &opts.input) ||
         ParseStrFlag(string(argv[i]), "--readerSetting", &opts.reader) ||
         ParseStrFlag(string(argv[i]), "--outDir", &opts.out_dir) ||
@@ -106,9 +107,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   
-  // first, build our input chains -
-  // the default chain must be initialized, but
-  // no embedding is necessary
+  // first, build our input chain
   TChain* chain = NewChainFromInput(opts.input);
   
   // build output directory if it doesn't exist, using boost::filesystem
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]) {
   boost::filesystem::create_directories(dir);
   
   // create output file from the given directory, name & id
-  string outfile_name = opts.out_dir + "/" + opts.name + opts.id + ".root";
+  string outfile_name = opts.out_dir + "/" + opts.name + MakeString(opts.id) + ".root";
   TFile out(outfile_name.c_str(), "RECREATE");
   
   // initialize the reader
@@ -130,7 +129,7 @@ int main(int argc, char* argv[]) {
     InitReaderWithDefaults(reader, chain, opts.tow_list, opts.run_list);
   }
   
-  // get the triggers IDs that will be used
+  // get the trigger IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);
   
   std::cout << "taking triggers: " << opts.triggers << " for primary" << std::endl;
