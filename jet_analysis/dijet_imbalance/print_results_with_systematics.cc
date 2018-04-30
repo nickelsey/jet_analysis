@@ -270,6 +270,17 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, std::vector<TH1D*>> auau_npart_cent;
   std::unordered_map<string, std::vector<TH1D*>> pp_npart_cent;
   
+  // for systematics
+  std::unordered_map<string, TH2D*> pp_hard_aj_tow_p;
+  std::unordered_map<string, TH2D*> pp_match_aj_tow_p;
+  std::unordered_map<string, TH2D*> pp_hard_aj_tow_m;
+  std::unordered_map<string, TH2D*> pp_match_aj_tow_m;
+  std::unordered_map<string, TH2D*> pp_hard_aj_trk_p;
+  std::unordered_map<string, TH2D*> pp_match_aj_trk_p;
+  std::unordered_map<string, TH2D*> pp_hard_aj_trk_m;
+  std::unordered_map<string, TH2D*> pp_match_aj_trk_m;
+  
+  
   
   // count which key we are on
   int entry = -1;
@@ -311,8 +322,18 @@ int main(int argc, char* argv[]) {
     TTree* auau_tree = auau_trees[key];
     TTree* pp_tree = pp_trees[key];
     
+    TTree* tow_p_tree = tow_p_trees[key];
+    TTree* tow_m_tree = tow_m_trees[key];
+    TTree* trk_p_tree = trk_p_trees[key];
+    TTree* trk_m_tree = trk_m_trees[key];
+    
     TTreeReader auau_reader(auau_tree);
     TTreeReader pp_reader(pp_tree);
+    
+    TTreeReader tow_p_reader(tow_p_tree);
+    TTreeReader tow_m_reader(tow_m_tree);
+    TTreeReader trk_p_reader(trk_p_tree);
+    TTreeReader trk_m_reader(trk_m_tree);
     
     // create readervalues for auau first
     TTreeReaderValue<int> auau_runid(auau_reader, "runid");
@@ -389,6 +410,31 @@ int main(int argc, char* argv[]) {
     TTreeReaderValue<double> embed_rp(pp_reader, "embed_rp");
     TTreeReaderValue<double> embed_zdcrate(pp_reader, "embed_zdcrate");
     TTreeReaderValue<double> embed_vz(pp_reader, "embed_vz");
+    
+    // and systematics
+    TTreeReaderValue<TLorentzVector> tow_p_jl(tow_p_reader, "jl");
+    TTreeReaderValue<TLorentzVector> tow_p_js(tow_p_reader, "js");
+    TTreeReaderValue<TLorentzVector> tow_p_jlm(tow_p_reader, "jlm");
+    TTreeReaderValue<TLorentzVector> tow_p_jsm(tow_p_reader, "jsm");
+    TTreeReaderValue<int> tow_p_cent(tow_p_reader, "cent");
+    
+    TTreeReaderValue<TLorentzVector> tow_m_jl(tow_m_reader, "jl");
+    TTreeReaderValue<TLorentzVector> tow_m_js(tow_m_reader, "js");
+    TTreeReaderValue<TLorentzVector> tow_m_jlm(tow_m_reader, "jlm");
+    TTreeReaderValue<TLorentzVector> tow_m_jsm(tow_m_reader, "jsm");
+    TTreeReaderValue<int> tow_m_cent(tow_m_reader, "cent");
+    
+    TTreeReaderValue<TLorentzVector> trk_p_jl(trk_p_reader, "jl");
+    TTreeReaderValue<TLorentzVector> trk_p_js(trk_p_reader, "js");
+    TTreeReaderValue<TLorentzVector> trk_p_jlm(trk_p_reader, "jlm");
+    TTreeReaderValue<TLorentzVector> trk_p_jsm(trk_p_reader, "jsm");
+    TTreeReaderValue<int> trk_p_cent(trk_p_reader, "cent");
+    
+    TTreeReaderValue<TLorentzVector> trk_m_jl(trk_m_reader, "jl");
+    TTreeReaderValue<TLorentzVector> trk_m_js(trk_m_reader, "js");
+    TTreeReaderValue<TLorentzVector> trk_m_jlm(trk_m_reader, "jlm");
+    TTreeReaderValue<TLorentzVector> trk_m_jsm(trk_m_reader, "jsm");
+    TTreeReaderValue<int> trk_m_cent(trk_m_reader, "cent");
     
     // -----------------
     // define histograms
@@ -472,6 +518,23 @@ int main(int argc, char* argv[]) {
     TH2D* h_pp_npart = new TH2D(MakeString(key_prefix, "ppnpart").c_str(), ";refmult;nPart",
                                 16, 0, 16, 100, 0.5, 2500.5);
     
+    TH2D* h_tow_p_hard_aj = new TH2D(MakeString(key_prefix, "towphardaj").c_str(),
+                                  "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_tow_p_match_aj = new TH2D(MakeString(key_prefix, "towpmatchaj").c_str(),
+                                   "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_tow_m_hard_aj = new TH2D(MakeString(key_prefix, "towmhardaj").c_str(),
+                                     "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_tow_m_match_aj = new TH2D(MakeString(key_prefix, "towmmatchaj").c_str(),
+                                      "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_trk_p_hard_aj = new TH2D(MakeString(key_prefix, "trkphardaj").c_str(),
+                                     "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_trk_p_match_aj = new TH2D(MakeString(key_prefix, "trkpmatchaj").c_str(),
+                                      "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_trk_m_hard_aj = new TH2D(MakeString(key_prefix, "trkmhardaj").c_str(),
+                                     "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    TH2D* h_trk_m_match_aj = new TH2D(MakeString(key_prefix, "trkmmatchaj").c_str(),
+                                      "A_{J}", 16, 0, 16, 30, 0, 0.9);
+    
     // insert into the dictionaries
     auau_hard_lead_pt.insert({key, h_auau_hard_lead_pt});
     auau_hard_sub_pt.insert({key, h_auau_hard_lead_pt});
@@ -508,6 +571,15 @@ int main(int argc, char* argv[]) {
     
     auau_npart.insert({key, h_auau_npart});
     pp_npart.insert({key, h_pp_npart});
+    
+    pp_hard_aj_tow_p.insert({key, h_tow_p_hard_aj});
+    pp_match_aj_tow_p.insert({key, h_tow_p_match_aj});
+    pp_hard_aj_tow_m.insert({key, h_tow_m_hard_aj});
+    pp_match_aj_tow_m.insert({key, h_tow_m_match_aj});
+    pp_hard_aj_trk_p.insert({key, h_trk_p_hard_aj});
+    pp_match_aj_trk_p.insert({key, h_trk_p_match_aj});
+    pp_hard_aj_trk_m.insert({key, h_trk_m_hard_aj});
+    pp_match_aj_trk_m.insert({key, h_trk_m_match_aj});
     
     // loop over the data & fill histograms
     while (auau_reader.Next()) {
@@ -626,6 +698,35 @@ int main(int argc, char* argv[]) {
         // npart
         h_pp_npart->Fill(*pp_cent, *pp_nprt);
       }
+    }
+    
+    // next fill the systematics
+    while (tow_p_reader.Next()) {
+      h_tow_p_hard_aj->Fill(*tow_p_cent,
+                            ((*tow_p_jl).Pt() - (*tow_p_js).Pt()) / ((*tow_p_jl).Pt() + (*tow_p_js).Pt()));
+      h_tow_m_hard_aj->Fill(*tow_p_cent,
+                            ((*tow_p_jlm).Pt() - (*tow_p_jsm).Pt()) / ((*tow_p_jlm).Pt() + (*tow_p_jsm).Pt()));
+    }
+    
+    while (tow_m_reader.Next()) {
+      h_tow_m_hard_aj->Fill(*tow_m_cent,
+                            ((*tow_m_jl).Pt() - (*tow_m_js).Pt()) / ((*tow_m_jl).Pt() + (*tow_m_js).Pt()));
+      h_tow_m_hard_aj->Fill(*tow_m_cent,
+                            ((*tow_m_jlm).Pt() - (*tow_m_jsm).Pt()) / ((*tow_m_jlm).Pt() + (*tow_m_jsm).Pt()));
+    }
+    
+    while (trk_p_reader.Next()) {
+      h_trk_p_hard_aj->Fill(*trk_p_cent,
+                            ((*trk_p_jl).Pt() - (*trk_p_js).Pt()) / ((*trk_p_jl).Pt() + (*trk_p_js).Pt()));
+      h_trk_m_hard_aj->Fill(*trk_p_cent,
+                            ((*trk_p_jlm).Pt() - (*trk_p_jsm).Pt()) / ((*trk_p_jlm).Pt() + (*trk_p_jsm).Pt()));
+    }
+    
+    while (trk_m_reader.Next()) {
+      h_trk_m_hard_aj->Fill(*trk_m_cent,
+                            ((*trk_m_jl).Pt() - (*trk_m_js).Pt()) / ((*trk_m_jl).Pt() + (*trk_m_js).Pt()));
+      h_trk_m_hard_aj->Fill(*trk_m_cent,
+                            ((*trk_m_jlm).Pt() - (*trk_m_jsm).Pt()) / ((*trk_m_jlm).Pt() + (*trk_m_jsm).Pt()));
     }
     
     // print dphi
@@ -782,25 +883,71 @@ int main(int argc, char* argv[]) {
               "pp_match_sub_sig", "", "#sigma", "fraction", "Centrality");
     
     // for Aj
-    std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByBin(h_auau_hard_aj);
-    std::vector<TH1D*> h_auau_match_aj_spectra = SplitByBin(h_auau_match_aj);
+    std::vector<TH1D*> h_auau_hard_aj_spectra_bin = SplitByBin(h_auau_hard_aj);
+    std::vector<TH1D*> h_auau_match_aj_spectra_bin = SplitByBin(h_auau_match_aj);
 
-    std::vector<TH1D*> h_pp_hard_aj_spectra = SplitByBin(h_pp_hard_aj);
-    std::vector<TH1D*> h_pp_match_aj_spectra = SplitByBin(h_pp_match_aj);
+    std::vector<TH1D*> h_pp_hard_aj_spectra_bin = SplitByBin(h_pp_hard_aj);
+    std::vector<TH1D*> h_pp_match_aj_spectra_bin = SplitByBin(h_pp_match_aj);
+    
+    // and the systematics
+    std::vector<TH1D*> h_tow_p_hard_aj_spectra_bin = SplitByBin(h_tow_p_hard_aj);
+    std::vector<TH1D*> h_tow_p_match_aj_spectra_bin = SplitByBin(h_tow_p_match_aj);
+    std::vector<TH1D*> h_tow_m_hard_aj_spectra_bin = SplitByBin(h_tow_m_hard_aj);
+    std::vector<TH1D*> h_tow_m_match_aj_spectra_bin = SplitByBin(h_tow_m_match_aj);
+    
+    std::vector<TH1D*> h_trk_p_hard_aj_spectra_bin = SplitByBin(h_trk_p_hard_aj);
+    std::vector<TH1D*> h_trk_p_match_aj_spectra_bin = SplitByBin(h_trk_p_match_aj);
+    std::vector<TH1D*> h_trk_m_hard_aj_spectra_bin = SplitByBin(h_trk_m_hard_aj);
+    std::vector<TH1D*> h_trk_m_match_aj_spectra_bin = SplitByBin(h_trk_m_match_aj);
     
     // we will weight pp by the relative fraction of events in auau bins
-                                 
-                                 
-    for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
-      h_auau_hard_aj_spectra[i]->RebinX(2);
-      h_auau_match_aj_spectra[i]->RebinX(2);
-      h_pp_hard_aj_spectra[i]->RebinX(2);
-      h_pp_match_aj_spectra[i]->RebinX(2);
-      h_auau_hard_aj_spectra[i]->Scale(1.0/h_auau_hard_aj_spectra[i]->Integral());
-      h_auau_match_aj_spectra[i]->Scale(1.0/h_auau_match_aj_spectra[i]->Integral());
-      h_pp_hard_aj_spectra[i]->Scale(1.0/h_pp_hard_aj_spectra[i]->Integral());
-      h_pp_match_aj_spectra[i]->Scale(1.0/h_pp_match_aj_spectra[i]->Integral());
+    std::vector<double> auau_weights;
+    double sum;
+    for (auto h : h_auau_hard_aj_spectra_bin) {
+      auau_weights.push_back(h->Integral());
+      sum += h->Integral();
     }
+    for (auto& entry : auau_weights) {
+      entry /= sum;
+    }
+                                 
+    for (int i = 0; i < h_auau_hard_aj_spectra_bin.size(); ++i) {
+      h_auau_hard_aj_spectra_bin[i]->RebinX(2);
+      h_auau_match_aj_spectra_bin[i]->RebinX(2);
+      h_pp_hard_aj_spectra_bin[i]->RebinX(2);
+      h_pp_match_aj_spectra_bin[i]->RebinX(2);
+      h_auau_hard_aj_spectra_bin[i]->Scale(1.0/h_auau_hard_aj_spectra_bin[i]->Integral());
+      h_auau_match_aj_spectra_bin[i]->Scale(1.0/h_auau_match_aj_spectra_bin[i]->Integral());
+      h_pp_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_hard_aj_spectra_bin[i]->Integral());
+      h_pp_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_match_aj_spectra_bin[i]->Integral());
+      
+      h_tow_p_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_p_hard_aj_spectra_bin[i]->Integral());
+      h_tow_p_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_p_match_aj_spectra_bin[i]->Integral());
+      h_tow_m_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_m_hard_aj_spectra_bin[i]->Integral());
+      h_tow_m_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_m_match_aj_spectra_bin[i]->Integral());
+      
+      h_trk_p_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_p_hard_aj_spectra_bin[i]->Integral());
+      h_trk_p_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_p_match_aj_spectra_bin[i]->Integral());
+      h_trk_m_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_hard_aj_spectra_bin[i]->Integral());
+      h_trk_m_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_match_aj_spectra_bin[i]->Integral());
+    }
+    
+    std::vector<TH1D*> h_auau_hard_aj_spectra = AddBins(h_auau_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_auau_match_aj_spectra = AddBins(h_auau_match_aj_spectra_bin, centrality_5);
+    
+    std::vector<TH1D*> h_pp_hard_aj_spectra = AddBins(h_pp_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_pp_match_aj_spectra = AddBins(h_pp_match_aj_spectra_bin, centrality_5);
+    
+    std::vector<TH1D*> h_tow_p_hard_aj_spectra = AddBins(h_tow_p_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_tow_p_match_aj_spectra = AddBins(h_tow_p_match_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_tow_m_hard_aj_spectra = AddBins(h_tow_m_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_tow_m_match_aj_spectra = AddBins(h_tow_m_match_aj_spectra_bin, centrality_5);
+    
+    std::vector<TH1D*> h_trk_p_hard_aj_spectra = AddBins(h_trk_p_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_trk_p_match_aj_spectra = AddBins(h_trk_p_match_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_trk_m_hard_aj_spectra = AddBins(h_trk_m_hard_aj_spectra_bin, centrality_5);
+    std::vector<TH1D*> h_trk_m_match_aj_spectra = AddBins(h_trk_m_match_aj_spectra_bin, centrality_5);
+    
 //
 //    Overlay1D(h_auau_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_hard_aj", "",
 //              "A_{J}", "fraction", "Centrality");
