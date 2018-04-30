@@ -178,7 +178,7 @@ def main(args) :
         outDir = outDir + '/tow_1_track_0'
       
       ## build our qsub execution string
-      clargs = '--outDir=' + outDir + ' --input=' + files[i] + ' --id=' + str(index)
+      clargs = '--outDir=' + outDir + ' --input=' + key[0] + ' --id=' + str(index)
       clargs = clargs + ' --name=' + args.name
       clargs = clargs + ' --runList=' + args.badRuns + ' --towList=' + args.badTowers + ' --triggers='
       clargs = clargs + args.triggers + ' --embedTriggers=' + embedTrig + ' --constEta=' + args.constEta
