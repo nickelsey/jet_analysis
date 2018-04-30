@@ -541,7 +541,7 @@ int main(int argc, char* argv[]) {
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
-              pp_eff_ratio->Fill(sv->Pt(), sv->Eta(), ratio);
+              eff_ratio->Fill(sv->Pt(), sv->Eta(), ratio);
               double random_ = dis(gen);
               
               if ( random_ > ratio ) {
