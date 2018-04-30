@@ -21,6 +21,13 @@ def checkstatus(jobstatus) :
       break
   return loop
 
+def activejobs(jobstatus) :
+  counter = 0
+  for key in jobstatus :
+    if jobstatus[key][1] == 1 :
+      counter = counter + 1
+  return counter
+
 def updatestatus(jobstatus, outdir, name) :
   print("Updating job status")
   print("Total: " + str(len(jobstatus)))
@@ -155,23 +162,11 @@ def main(args) :
     ## find the number of jobs still running via qstat
     ## if its at the maximum set jobsactive or jobsqueue,
     ## then pause
-    jobsactive = 0
-    for key in jobstatus :
-      if jobstatus[key][1] == 1 :
-        jobsactive = jobsactive + 1
 
-    while jobsactive >= maxjobs :
+    while activejobs(jobstatus) >= maxjobs :
       print("reached max number of active jobs: pausing")
       time.sleep(30)
       jobstatus = updatestatus(jobstatus, args.output, args.name)
-      print('pre update: ', jobsactive)
-      jobsactive = 0
-      for key in jobstatus :
-        if jobstatus[key][1] == 1 :
-          jobsactive = jobsactive + 1
-        if jobstatus[key][1] == 2 :
-          print('COMPLETE')
-      print('post update: ', jobsactive)
   
     ## now submit jobs up to maxjobs - jobsqueued
     njobs = maxjobs - jobsactive
