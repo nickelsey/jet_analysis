@@ -179,8 +179,9 @@ int main(int argc, char* argv[]) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0) {
-          double weight = run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
+          double weight = 1.0 / run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
           pt->Fill(sv->Pt());
+          ptcorr->Fill(sv->Pt(), weight);
         }
       }
     }
