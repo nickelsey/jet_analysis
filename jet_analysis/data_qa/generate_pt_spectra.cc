@@ -175,8 +175,9 @@ int main(int argc, char* argv[]) {
     TList* tracks = reader->GetListOfSelectedTracks();
     TIter nextTrack(tracks);
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
-    }nhitsfit->Fill(track->GetNOfFittedHits());
-    dca->Fill(track->GetDCA());
+      nhitsfit->Fill(track->GetNOfFittedHits());
+      dca->Fill(track->GetDCA());
+    }
     
     TStarJetVector* sv;
     if (opts.useY7Eff) {
