@@ -169,9 +169,11 @@ int main(int argc, char* argv[]) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
-          double weight = 1.0 / run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
+          double eff = run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
+          if (eff <= 0.0 || eff > 1.0)
+            continue;
           pt->Fill(sv->Pt());
-          pt_corr->Fill(sv->Pt(), weight);
+          pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
     }
@@ -179,7 +181,9 @@ int main(int argc, char* argv[]) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
-          double weight = 1.0 / run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
+          double eff = run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
+          if (eff <= 0.0 || eff > 1.0)
+            continue;
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), weight);
         }
