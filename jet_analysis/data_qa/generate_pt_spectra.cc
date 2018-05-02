@@ -128,11 +128,13 @@ int main(int argc, char* argv[]) {
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   TH1D* frac = new TH1D("discarded", "", 10, 0, 1.0);
   TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
-  double counts = 0;
-  double norm = 0;
+  TProfile* avg_eff = new TH1D("eff", "", 100, 0, 1.0);
+
   // start the event loop
   // --------------------
   while(reader->NextEvent()) {
+    double counts = 0;
+    double norm = 0;
     // Print out reader status every 10 seconds
     reader->PrintStatus(10);
     
@@ -180,6 +182,7 @@ int main(int argc, char* argv[]) {
           }
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
+          avg_eff->Fill(sv->Pt(), 1.0 / eff);
         }
       }
       nprim->Fill(norm);
@@ -197,6 +200,7 @@ int main(int argc, char* argv[]) {
           }
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
+          avg_eff->Fill(sv->Pt(), 1.0 / eff);
         }
       }
       nprim->Fill(norm);
