@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <random>
 #include <exception>
+#include <cmath>
 
 #include "jet_analysis/util/arg_helper.hh"
 #include "jet_analysis/util/trigger_lookup.hh"
@@ -407,6 +408,7 @@ int main(int argc, char* argv[]) {
   TProfile2D* eff_ratio  = new TProfile2D("pp_eff_ratio",
                                           "average pp efficiency ratio;p_{T};#eta;ratio",
                                           200, 0, 5, 10, -1.0, 1.0);
+  TH1D* frac_finite = new TH1D("finite", "", 20, 0, 1);
   
   for (auto key : keys) {
     // create a unique histogram name for each key
@@ -534,13 +536,19 @@ int main(int argc, char* argv[]) {
         // and now convert the pp - if there is any efficiency curves to apply, do it now
         TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
         if (opts.use_effic) {
+          double norm = 0;
+          double counter = 0;
           TStarJetVector* sv;
           for (int i = 0; i < container->GetEntries(); ++i) {
             sv = container->Get(i);
-            
+           
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
+               norm++
+              if (!std::isfinite(ratio))
+                continue;
+              counter++;
               eff_ratio->Fill(sv->Pt(), sv->Eta(), ratio);
               double random_ = dis(gen);
               
@@ -555,6 +563,7 @@ int main(int argc, char* argv[]) {
             particles.push_back(tmpPJ);
             primary_particles.push_back(tmpPJ);
           }
+          finite->Fill(counter/norm);
         }
         // no efficiency, convert all
         else {
