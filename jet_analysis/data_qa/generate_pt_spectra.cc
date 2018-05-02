@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
         if (sv->GetCharge() && sv->Eta() < 1.0) {
           double weight = 1.0 / run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
           pt->Fill(sv->Pt());
-          ptcorr->Fill(sv->Pt(), weight);
+          pt_corr->Fill(sv->Pt(), weight);
         }
       }
     }
@@ -181,7 +181,7 @@ int main(int argc, char* argv[]) {
         if (sv->GetCharge() && sv->Eta() < 1.0) {
           double weight = 1.0 / run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
           pt->Fill(sv->Pt());
-          ptcorr->Fill(sv->Pt(), weight);
+          pt_corr->Fill(sv->Pt(), weight);
         }
       }
     }
