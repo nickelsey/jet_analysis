@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
   TH1D* pt = new TH1D("pt", ";p_{T}", 100, 0, 5);
   TH1D* pt_corr = new TH1D("ptcorr", ";p_{T}", 100, 0, 5);
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
+  TH1D* frac = new TH1D("discarded", "", 100, 0, 1.0);
   double counts = 0;
   double norm = 0;
   // start the event loop
@@ -164,13 +165,14 @@ int main(int argc, char* argv[]) {
     }
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
-    norm++;
+    
     TStarJetVector* sv;
     if (opts.useY7Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
           double eff = run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
+          norm++;
           if (eff <= 0.0 || eff > 1.0) {
             counts++;
             continue;
@@ -179,12 +181,14 @@ int main(int argc, char* argv[]) {
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
+      frac->Fill(counts/norm);
     }
     else if (opts.useY14Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
           double eff = run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
+          norm++;
           if (eff <= 0.0 || eff > 1.0) {
             counts++;
             continue;
@@ -193,9 +197,10 @@ int main(int argc, char* argv[]) {
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
+      frac->Fill(counts/norm);
     }
   }
-  std::cout << "number of discarded tracks... " << counts / norm;
+  
   out.Write();
   out.Close();
   return 0;
