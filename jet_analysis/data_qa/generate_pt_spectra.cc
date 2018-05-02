@@ -129,6 +129,8 @@ int main(int argc, char* argv[]) {
   TH1D* frac = new TH1D("discarded", "", 10, 0, 1.0);
   TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
   TProfile* avg_eff = new TProfile("eff", "", 100, 0, 5.0);
+  TH1D* nhitsfit = new TH1D("nhitsfit", "", 50, 0, 50);
+  TH1D* dca = new TH1D("dca", "", 50, 0, 3);
 
   // start the event loop
   // --------------------
@@ -169,6 +171,13 @@ int main(int argc, char* argv[]) {
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
     
+    // get tracks & towers
+    TList* tracks = reader->GetListOfSelectedTracks();
+    TIter nextTrack(tracks);
+    while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
+    }nhitsfit->Fill(track->GetNOfFittedHits());
+    dca->Fill(track->GetDCA());
+    
     TStarJetVector* sv;
     if (opts.useY7Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
@@ -183,10 +192,12 @@ int main(int argc, char* argv[]) {
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
           avg_eff->Fill(sv->Pt(), eff);
+          
         }
       }
       nprim->Fill(norm);
       frac->Fill(counts/norm);
+      
     }
     else if (opts.useY14Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
