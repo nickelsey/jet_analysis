@@ -5,7 +5,7 @@
 #include "run14_eff.hh"
 
 Run14Eff::Run14Eff(std::string filename) : file(nullptr), max_pt_(4.5), sys_(TrackingUnc::NONE),
-auau_u_(0.07), pp_u_(0.0), cent_u_(0.04) {
+auau_u_(0.05), pp_u_(0.03), cent_u_(0.00) {
   if (!filename.empty())
     loadFile(filename);
 }
