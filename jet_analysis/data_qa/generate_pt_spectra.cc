@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
           if (eff <= 0.0 || eff > 1.0)
             continue;
           pt->Fill(sv->Pt());
-          pt_corr->Fill(sv->Pt(), weight);
+          pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
     }
