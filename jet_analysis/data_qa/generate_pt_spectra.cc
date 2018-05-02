@@ -124,6 +124,7 @@ int main(int argc, char* argv[]) {
   
   // create pT histogram
   TH1D* pt = new TH1D("pt", ";p_{T}", 100, 0, 5);
+  TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   
   // start the event loop
   // --------------------
@@ -146,6 +147,7 @@ int main(int argc, char* argv[]) {
     if (opts.useY7Eff) {
       if (header->GetGReferenceMultiplicity() < year7_centrality_cut)
         continue;
+      refmult->Fill(header->GetGReferenceMultiplicity());
     }
     
     if (opts.useY14Eff) {
@@ -153,6 +155,7 @@ int main(int argc, char* argv[]) {
                           header->GetZdcCoincidenceRate(), header->GetPrimaryVertexZ());
       if (centrality.centrality16() > 3)
         continue;
+      refmult->Fill(header->GetReferenceMultiplicity());
     }
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
