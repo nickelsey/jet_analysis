@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
     if (opts.useY7Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
-        if (sv->GetCharge() && sv->Eta() < 1.0) {
+        if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
           double weight = 1.0 / run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), weight);
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
     else if (opts.useY14Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
-        if (sv->GetCharge() && sv->Eta() < 1.0) {
+        if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
           double weight = 1.0 / run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), weight);
