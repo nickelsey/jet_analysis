@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   TH1D* frac = new TH1D("discarded", "", 10, 0, 1.0);
   TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
-  TProfile* avg_eff = new TH1D("eff", "", 100, 0, 1.0);
+  TProfile* avg_eff = new TProfile("eff", "", 100, 0, 1.0);
 
   // start the event loop
   // --------------------
