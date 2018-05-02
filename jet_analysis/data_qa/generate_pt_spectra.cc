@@ -124,6 +124,7 @@ int main(int argc, char* argv[]) {
   
   // create pT histogram
   TH1D* pt = new TH1D("pt", ";p_{T}", 100, 0, 5);
+  TH1D* pt_corr = new TH1D("ptcorr", ";p_{T}", 100, 0, 5);
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   
   // start the event loop
@@ -135,6 +136,8 @@ int main(int argc, char* argv[]) {
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
     
+    
+    int cent_bin = 0;
     // check if event fired a trigger we will use
     if (triggers.size() != 0) {
       bool use_event = false;
@@ -156,6 +159,7 @@ int main(int argc, char* argv[]) {
       if (centrality.centrality16() > 3 || centrality.centrality16() < 0)
         continue;
       refmult->Fill(header->GetReferenceMultiplicity());
+      cent_bin = centrality.centrality16();
     }
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
@@ -165,8 +169,9 @@ int main(int argc, char* argv[]) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0) {
-          run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
+          double weight = 1.0 / run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
           pt->Fill(sv->Pt());
+          ptcorr->Fill(sv->Pt(), weight);
         }
       }
     }
@@ -174,6 +179,7 @@ int main(int argc, char* argv[]) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && sv->Eta() < 1.0) {
+          double weight = run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
           pt->Fill(sv->Pt());
         }
       }
