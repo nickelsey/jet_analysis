@@ -545,7 +545,7 @@ int main(int argc, char* argv[]) {
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
-               norm++
+              norm++;
               if (!std::isfinite(ratio))
                 continue;
               counter++;
@@ -563,7 +563,7 @@ int main(int argc, char* argv[]) {
             particles.push_back(tmpPJ);
             primary_particles.push_back(tmpPJ);
           }
-          finite->Fill(counter/norm);
+          frac_finite->Fill(counter/norm);
         }
         // no efficiency, convert all
         else {
