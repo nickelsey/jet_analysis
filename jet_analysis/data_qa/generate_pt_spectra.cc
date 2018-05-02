@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
     if (opts.useY14Eff) {
       centrality.setEvent(header->GetRunId(), header->GetReferenceMultiplicity(),
                           header->GetZdcCoincidenceRate(), header->GetPrimaryVertexZ());
-      if (centrality.centrality16() > 3)
+      if (centrality.centrality16() > 3 || centrality.centrality16() < 0)
         continue;
       refmult->Fill(header->GetReferenceMultiplicity());
     }
