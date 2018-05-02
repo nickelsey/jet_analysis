@@ -54,7 +54,7 @@ double Run14Eff::pp6Eff(double pt, double eta) {
 
 double Run14Eff::ratio(double pt, double eta, int cent, double zdcrate) {
   double ratio_ = AuAuEff(pt, eta, cent, zdcrate) / pp6Eff(pt, eta);
-  
+
   int sign_ = static_cast<int>(sys_);
   if (sign_ == 0)
     return ratio_;

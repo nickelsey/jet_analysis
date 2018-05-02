@@ -431,6 +431,10 @@ int main(int argc, char* argv[]) {
   else
     efficiency = new Run14Eff(opts.effic_file);
   
+  efficiency->setAuAuUncertainty(0.05);
+  efficiency->setPPUncertainty(0.03);
+  efficiency->setCentUncertainty(0.00);
+  
   switch(opts.track_unc) {
     case 0 :
       efficiency->setSystematicUncertainty(TrackingUnc::NONE);
@@ -464,6 +468,7 @@ int main(int argc, char* argv[]) {
   // -----------------------
   try {
     while (reader->NextEvent()) {
+    
       // Print out reader status every 10 seconds
       reader->PrintStatus(10);
       
@@ -541,6 +546,9 @@ int main(int argc, char* argv[]) {
           TStarJetVector* sv;
           for (int i = 0; i < container->GetEntries(); ++i) {
             sv = container->Get(i);
+            
+            if (fabs(sv->Eta()) > 1.0)
+              continue;
            
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
