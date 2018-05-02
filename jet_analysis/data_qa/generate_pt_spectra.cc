@@ -182,7 +182,7 @@ int main(int argc, char* argv[]) {
           }
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
-          avg_eff->Fill(sv->Pt(), 1.0 / eff);
+          avg_eff->Fill(sv->Pt(), eff);
         }
       }
       nprim->Fill(norm);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
           }
           pt->Fill(sv->Pt());
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
-          avg_eff->Fill(sv->Pt(), 1.0 / eff);
+          avg_eff->Fill(sv->Pt(), eff);
         }
       }
       nprim->Fill(norm);
