@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) {
   TH1D* pt_corr = new TH1D("ptcorr", ";p_{T}", 100, 0, 5);
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   TH1D* frac = new TH1D("discarded", "", 10, 0, 1.0);
+  TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
   double counts = 0;
   double norm = 0;
   // start the event loop
@@ -181,6 +182,7 @@ int main(int argc, char* argv[]) {
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
+      nprim->Fill(norm);
       frac->Fill(counts/norm);
     }
     else if (opts.useY14Eff) {
@@ -197,6 +199,7 @@ int main(int argc, char* argv[]) {
           pt_corr->Fill(sv->Pt(), 1.0 / eff);
         }
       }
+      nprim->Fill(norm);
       frac->Fill(counts/norm);
     }
   }
