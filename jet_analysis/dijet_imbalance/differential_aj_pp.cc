@@ -7,6 +7,7 @@
 #include <random>
 #include <exception>
 #include <cmath>
+#include <memory>
 
 #include "jet_analysis/util/arg_helper.hh"
 #include "jet_analysis/util/trigger_lookup.hh"
@@ -38,16 +39,7 @@
 #include "TStarJetPicoUtils.h"
 
 #include "fastjet/PseudoJet.hh"
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/ClusterSequencePassiveArea.hh"
-#include "fastjet/ClusterSequenceActiveArea.hh"
-#include "fastjet/ClusterSequenceActiveAreaExplicitGhosts.hh"
 #include "fastjet/Selector.hh"
-#include "fastjet/tools/JetMedianBackgroundEstimator.hh"
-#include "fastjet/tools/Subtractor.hh"
-#include "fastjet/tools/Filter.hh"
-#include "fastjet/FunctionOfPseudoJet.hh"
 
 // include boost for filesystem manipulation
 #include "boost/filesystem.hpp"
@@ -84,6 +76,17 @@ struct Options {
 };
 
 int main(int argc, char* argv[]) {
+  
+  // define the number of centrality bins used
+  const int n_centrality_bins = 16;
+  
+  // define the systematic uncertainties
+  const double auau_tracking_uncertainty = 0.05;
+  const double pp_tracking_uncertainty   = 0.03;
+  const double centrality_uncertainty    = 0.00;
+  
+  // define tower scale uncertainty
+  const double tower_scale_uncertainty   = 0.02;
   
   // parse command line options
   Options opts;
@@ -411,10 +414,17 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH1D*> lead_jet_count_dict;
   std::unordered_map<string, TH1D*> sublead_jet_count_dict;
   
-  TProfile2D* eff_ratio  = new TProfile2D("pp_eff_ratio",
-                                          "average pp efficiency ratio;p_{T};#eta;ratio",
-                                          200, 0, 5, 10, -1.0, 1.0);
-  TH1D* frac_finite = new TH1D("finite", "", 20, 0, 1);
+//  TProfile2D* eff_ratio  = new TProfile2D("pp_eff_ratio",
+//                                          "average pp efficiency ratio;p_{T};#eta;ratio",
+//                                          200, 0, 5, 10, -1.0, 1.0);
+  std::vector<std::shared_ptr<TProfile2D>> eff_ratio;
+  
+  for (int i = 0; i < n_centrality_bins; ++i) {
+    string eff_name = "pp_eff_ratio_cent_" + MakeString(i);
+    eff_ratio.push_back(std::make_shared<TProfile2D>(eff_name.c_str(),
+                                                     "average pp efficiency ratio;p_T;#eta;ratio",
+                                                     100, 0, 5, 10, -1, 1));
+  }
   
   for (auto key : keys) {
     // create a unique histogram name for each key
@@ -437,9 +447,9 @@ int main(int argc, char* argv[]) {
   else
     efficiency = new Run14Eff(opts.effic_file);
   
-  efficiency->setAuAuUncertainty(0.05);
-  efficiency->setPPUncertainty(0.03);
-  efficiency->setCentUncertainty(0.00);
+  efficiency->setAuAuUncertainty(auau_tracking_uncertainty);
+  efficiency->setPPUncertainty(pp_tracking_uncertainty);
+  efficiency->setCentUncertainty(centrality_uncertainty);
   
   switch(opts.track_unc) {
     case 0 :
@@ -457,8 +467,8 @@ int main(int argc, char* argv[]) {
   }
   
   // define our tower uncertainty scaling as well
-  double tower_scale_percent = 0.02;
-  if (opts.tower_unc != 1 && opts.tower_unc != 0 && opts.tower_unc != -1) {
+  double tower_scale_percent = tower_scale_uncertainty;
+  if (abs(opts.tower_unc) > 1) {
     std::cerr << "undefined tower efficiency setting, exiting" << std::endl;
   }
   double tower_scale = 1.0 + tower_scale_percent * opts.tower_unc;
@@ -498,7 +508,7 @@ int main(int argc, char* argv[]) {
       // as many of them as we can, without ending up in the same centrality bin twice
       std::set<int> cent_bins_used;
       for (int i = 0; i < opts.embed_tries; ++i) {
-        if (cent_bins_used.size() == 16)
+        if (cent_bins_used.size() == n_centrality_bins)
           break;
         
         int refmult = header->GetReferenceMultiplicity();
@@ -547,8 +557,7 @@ int main(int argc, char* argv[]) {
         // and now convert the pp - if there is any efficiency curves to apply, do it now
         TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
         if (opts.use_effic) {
-          double norm = 0;
-          double counter = 0;
+          
           TStarJetVector* sv;
           for (int i = 0; i < container->GetEntries(); ++i) {
             sv = container->Get(i);
@@ -559,13 +568,13 @@ int main(int argc, char* argv[]) {
             if (sv->GetCharge()) {
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
-              norm++;
+              
               if (!std::isfinite(ratio))
                 continue;
-              counter++;
-              eff_ratio->Fill(sv->Pt(), sv->Eta(), ratio);
-              double random_ = dis(gen);
               
+              eff_ratio[centrality_bin]->Fill(sv->Pt(), sv->Eta(), ratio);
+              
+              double random_ = dis(gen);
               if ( random_ > ratio ) {
                 continue;
               }
@@ -577,7 +586,7 @@ int main(int argc, char* argv[]) {
             particles.push_back(tmpPJ);
             primary_particles.push_back(tmpPJ);
           }
-          frac_finite->Fill(counter/norm);
+          
         }
         // no efficiency, convert all
         else {
