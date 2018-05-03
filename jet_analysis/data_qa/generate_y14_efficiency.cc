@@ -246,15 +246,17 @@ int main(int argc, char* argv[]) {
   fit->Draw();
   c.SaveAs(fit_name.c_str());
   
-  TH1D* dca = (TH1D*) in.Get("dca");
+  TH2D* dcapt = (TH2D*) in.Get("dcapt");
+  TH1D* dca = dcapt->ProjectionX();
   string dca_name = opts.out_dir + "/" + "dca.pdf";
-  dca->GetXaxis()->SetRangeUser(0.0, 2.0);
+  dca->GetXaxis()->SetRangeUser(0.0, 3.0);
   dca->Draw();
   c.SetLogy();
   c.SaveAs(dca_name.c_str());
   c.SetLogy(false);
   // write to file
   out.cd();
+  
   for (auto vec : eff_curves) {
     for (auto hist : vec) {
       hist->Write();

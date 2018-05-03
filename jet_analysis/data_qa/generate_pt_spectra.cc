@@ -44,6 +44,11 @@ struct Options {
   string effcurves   = "";       /* file holding y14 efficiency curves */
   bool useY14Eff     = false;    /* use y14 efficiency curves when doing efficiency corrections */
   bool useY7Eff      = false;    /* use y7 efficiency curves when doing efficiency corrections */
+  int nhitsfit       = 10;       /* nhits fit cut */
+  double eta         = 1.0;      /* eta cut for tracks */
+  double nsigpion    = 2.0;      /* pion nsigma cut */
+  double dca         = 3.0;      /* track dca cut */
+  double fitfrac     = 0.0;      /* nhits fit/ nhits prossible */
 };
 
 int main(int argc, char* argv[]) {
@@ -61,7 +66,12 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--triggers", &opts.triggers) ||
         ParseStrFlag(string(argv[i]), "--efficiencyCurves", &opts.effcurves) ||
         ParseBoolFlag(string(argv[i]), "--year7", &opts.useY7Eff) ||
-        ParseBoolFlag(string(argv[i]), "--year14", &opts.useY14Eff)) continue;
+        ParseBoolFlag(string(argv[i]), "--year14", &opts.useY14Eff) ||
+        ParseIntFlag(string(argv[i]), "--nhitsfit", &opts.nhitsfit) ||
+        ParseFloatFlag(string(argv[i]), "--eta", &opts.eta) ||
+        ParseFloatFlag(string(argv[i]), "--nsigPion", &opts.nsigpion) ||
+        ParseFloatFlag(string(argv[i]), "--dca", &opts.dca) ||
+        ParseFloatFlag(string(argv[i]), "--fitfrac", &opts.fitfrac)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
   }
@@ -93,6 +103,11 @@ int main(int argc, char* argv[]) {
   // initialize the reader(s)
   TStarJetPicoReader* reader = new TStarJetPicoReader();
   InitReaderWithDefaults(reader, chain, opts.tow_list, opts.run_list);
+  reader->GetTrackCuts()->SetDCACut(opts.dca);                // distance of closest approach to primary vtx
+  reader->GetTrackCuts()->SetMinNFitPointsCut(opts.nhitsfit);       // minimum fit points in track reco
+  reader->GetTrackCuts()->SetFitOverMaxPointsCut(opts.fitfrac);  // minimum ratio of fit points used over possible
+  reader->GetTrackCuts()->SetMaxPtCut(1000);             // essentially infinity - cut in eventcuts
+  
   
   // get the triggers IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);
@@ -130,8 +145,11 @@ int main(int argc, char* argv[]) {
   TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
   TProfile* avg_eff = new TProfile("eff", "", 100, 0, 5.0);
   TH1D* nhitsfit = new TH1D("nhitsfit", "", 50, 0, 50);
-  TH1D* dca = new TH1D("dca", "", 50, 0, 3);
-
+  TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
+  TH2D* dcapion = new TH2D("dcaptpion", "", 50, 0, 3, 50, 0, 5);
+  TH1D* nhit = new TH1D("nhit", "", 50, 0, 50);
+  TH1D* nhitpion = new TH1D("nhitpion", "", 50, 0, 50);
+  
   // start the event loop
   // --------------------
   while(reader->NextEvent()) {
@@ -176,14 +194,22 @@ int main(int argc, char* argv[]) {
     TIter nextTrack(tracks);
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
       nhitsfit->Fill(track->GetNOfFittedHits());
-      dca->Fill(track->GetDCA());
+      dca->Fill(track->GetDCA(), track->GetPt());
+      
+      if (fabs(track->GetEta()) > opts.eta)
+        continue;
+      nhit->Fill(track->GetNOfFittedHits());
+      if (fabs(track->GetNsigmaPion() > opts.nsigpion))
+        continue;
+      nhitpion->Fill(track->GetNOfFittedHits());
+      dcapion->Fill(track->GetDCA(), track->GetPt());
     }
     
     TStarJetVector* sv;
     if (opts.useY7Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
-        if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
+        if (sv->GetCharge() && fabs(sv->Eta()) < opts.eta && sv->Pt() > 0.2) {
           double eff = run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
           norm++;
           if (eff <= 0.0 || eff > 1.0) {
@@ -203,7 +229,7 @@ int main(int argc, char* argv[]) {
     else if (opts.useY14Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
-        if (sv->GetCharge() && sv->Eta() < 1.0 && sv->Pt() > 0.2) {
+        if (sv->GetCharge() && fabs(sv->Eta()) < opts.eta && sv->Pt() > 0.2) {
           double eff = run14Eff->AuAuEff(sv->Pt(), sv->Eta(), cent_bin, header->GetZdcCoincidenceRate());
           norm++;
           if (eff <= 0.0 || eff > 1.0) {
