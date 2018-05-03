@@ -31,13 +31,7 @@ double Run14Eff::AuAuEff(double pt, double eta, int cent, double zdcrate) {
   if (pt > max_pt_)
     pt = max_pt_;
   
-  int zdcBin;
-  if (zdcrate/1000.0 < 33.0)
-    zdcBin = 0;
-  else if (zdcrate/1000.0 < 66.0)
-    zdcBin = 1;
-  else
-    zdcBin = 2;
+  int zdcBin = luminosityBin(zdcrate);
   
   int bin = curves.at(zdcBin).at(cent)->FindBin(pt, eta);
   return curves.at(zdcBin).at(cent)->GetBinContent(bin);
@@ -78,6 +72,18 @@ double Run14Eff::ratioUncertainty(double pt, double eta, int cent, double zdcrat
   double pp_term_ = pow(pp_u_ / pp_, 2.0);
   double cent_term_ = pow(cent_u_ / auau_, 2.0);
   return sqrt(au_term_ + pp_term_ + cent_term_);
+}
+
+int Run14Eff::luminosityBin(double zdcrate) {
+  int zdcBin;
+  if (zdcrate/1000.0 < 33.0)
+    zdcBin = 0;
+  else if (zdcrate/1000.0 < 66.0)
+    zdcBin = 1;
+  else
+    zdcBin = 2;
+  
+  return zdcBin;
 }
 
 void Run14Eff::loadCurves(int nBinsZDC, int nBinsCent) {

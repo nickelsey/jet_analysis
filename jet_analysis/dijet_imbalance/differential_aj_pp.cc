@@ -80,6 +80,8 @@ int main(int argc, char* argv[]) {
   // define the number of centrality bins used
   const int n_centrality_bins = 16;
   
+  const int n_luminosity_bins = 3;
+  
   // define the systematic uncertainties
   const double auau_tracking_uncertainty = 0.05;
   const double pp_tracking_uncertainty   = 0.03;
@@ -417,13 +419,16 @@ int main(int argc, char* argv[]) {
 //  TProfile2D* eff_ratio  = new TProfile2D("pp_eff_ratio",
 //                                          "average pp efficiency ratio;p_{T};#eta;ratio",
 //                                          200, 0, 5, 10, -1.0, 1.0);
-  std::vector<std::shared_ptr<TProfile2D>> eff_ratio;
+  std::vector<std::vector<std::shared_ptr<TProfile2D>>> eff_ratio;
   
-  for (int i = 0; i < n_centrality_bins; ++i) {
-    string eff_name = "pp_eff_ratio_cent_" + MakeString(i);
-    eff_ratio.push_back(std::make_shared<TProfile2D>(eff_name.c_str(),
-                                                     "average pp efficiency ratio;p_T;#eta;ratio",
-                                                     100, 0, 5, 10, -1, 1));
+  for (int i = 0; i < n_luminosity_bins; ++i) {
+    eff_ratio.push_back(std::vector<std::shared_ptr<TProfile2D>>());
+    for (int j = 0; j < n_centrality_bins; ++j) {
+      string eff_name = MakeString("eff_ratio_lumi_", i, "_cent_", j);
+      eff_ratio[i].push_back(std::make_shared<TProfile2D>(eff_name.c_str(),
+                                                          "average pp efficiency ratio;p_T;#eta;ratio",
+                                                          100, 0, 5, 10, -1, 1));
+    }
   }
   
   for (auto key : keys) {
@@ -566,13 +571,14 @@ int main(int argc, char* argv[]) {
               continue;
            
             if (sv->GetCharge()) {
+              int lumi_bin = efficiency->luminosityBin(embed_header->GetZdcCoincidenceRate());
               double ratio = efficiency->ratio(sv->Pt(), sv->Eta(), centrality_bin,
                                                embed_header->GetZdcCoincidenceRate());
               
               if (!std::isfinite(ratio))
                 continue;
               
-              eff_ratio[centrality_bin]->Fill(sv->Pt(), sv->Eta(), ratio);
+              eff_ratio[lumi_bin][centrality_bin]->Fill(sv->Pt(), sv->Eta(), ratio);
               
               double random_ = dis(gen);
               if ( random_ > ratio ) {

@@ -32,6 +32,8 @@ public:
   double ratio(double pt, double eta, int cent, double zdcrate);
   double ratioUncertainty(double pt, double eta, int cent, double zdcrate);
   
+  int luminosityBin(double zdcrate);
+  
   void setSystematicUncertainty(TrackingUnc sys = TrackingUnc::NONE) {sys_ = sys;}
   TrackingUnc SystematicUncertainty() const {return sys_;}
   
