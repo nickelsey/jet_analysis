@@ -70,6 +70,7 @@ struct Options {
   string sub_r       = "";    /* sublead jet radii */
   string lj_pt       = "";    /* leading hard jet pt cut */
   string sj_pt       = "";    /* subleading hard jet pt cut */
+  double dca         = 1.0;   /* track dca cut */
 };
 
 int main(int argc, char* argv[]) {
@@ -93,7 +94,8 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--leadR", &opts.lead_r) ||
         ParseStrFlag(string(argv[i]), "--subR", &opts.sub_r) ||
         ParseStrFlag(string(argv[i]), "--leadJetPt", &opts.lj_pt) ||
-        ParseStrFlag(string(argv[i]), "--subJetPt", &opts.sj_pt)) continue;
+        ParseStrFlag(string(argv[i]), "--subJetPt", &opts.sj_pt) ||
+        ParseFloatFlag(string(argv[i]), "--DCA", &opts.dca)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
   }
@@ -128,6 +130,7 @@ int main(int argc, char* argv[]) {
   else {
     InitReaderWithDefaults(reader, chain, opts.tow_list, opts.run_list);
   }
+  reader->GetTrackCuts()->SetDCACut(opts.dca);
   
   // get the trigger IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);

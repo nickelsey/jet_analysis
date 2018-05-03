@@ -214,6 +214,7 @@ def main(args) :
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
       clargs = clargs + ' --readerSetting=' + reader + ' --embedReaderSetting=' + embedReader
       clargs = clargs + ' --towerUnc=' + str(tow_sys) + ' --trackUnc=' + str(track_sys)
+      clargs = clargs + ' --DCA=' + args.DCA + ' --embedDCA=' + args.embedDCA
       clargs = clargs + ' --efficFile=' + args.efficiencyFile + ' --embed=' + args.embedFile
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
@@ -271,7 +272,8 @@ if __name__ == "__main__":
   parser.add_argument('--leadJetPt', default='20.0', help='list of leading jet pt cuts to use during jetfinding')
   parser.add_argument('--subR', default='0.4', help='list of jet radii to be used for subleading jet')
   parser.add_argument('--subJetPt', default='10.0', help='list of subleading jet pt cuts to use during jetfinding')
-  
+  parser.add_argument('--DCA', default='1.0', help='pp track dca cut [cm]')
+  parser.add_argument('--embedDCA', default='1.0', help='embed track dca cut [cm]')
   args = parser.parse_args()
   main( args )
 

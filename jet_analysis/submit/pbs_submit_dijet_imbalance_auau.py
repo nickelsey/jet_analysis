@@ -142,7 +142,7 @@ def main(args) :
       clargs = clargs + ' --leadConstPtMatch=' + args.leadConstPtMatch + ' --subConstPtMatch='
       clargs = clargs + args.subConstPtMatch + ' --leadR=' + args.leadR + ' --subR=' + args.subR
       clargs = clargs + ' --leadJetPt=' + args.leadJetPt + ' --subJetPt=' + args.subJetPt
-      clargs = clargs + ' --readerSetting=' + reader
+      clargs = clargs + ' --readerSetting=' + reader + ' --DCA=' + args.DCA
       
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
@@ -195,6 +195,7 @@ if __name__ == "__main__":
   parser.add_argument('--leadJetPt', default='20.0', help='list of leading jet pt cuts to use during jetfinding')
   parser.add_argument('--subR', default='0.4', help='list of jet radii to be used for subleading jet')
   parser.add_argument('--subJetPt', default='10.0', help='list of subleading jet pt cuts to use during jetfinding')
+  parser.add_argument('--DCA', default='1.0', help='track dca cut [cm]')
   
   args = parser.parse_args()
   main( args )

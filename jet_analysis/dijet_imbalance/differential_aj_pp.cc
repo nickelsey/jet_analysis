@@ -79,6 +79,8 @@ struct Options {
   int tower_unc      = 0;     /* flag for tower systematic uncertainty (off = 0, or 1, -1) */
   int track_unc      = 0;     /* flag for tracking systematic uncertainty (off = 0, or 1, -1) */
   int embed_tries    = 32;    /* number of times we attempt to embed a trigger event */
+  double dca         = 1.0;   /* pp dca */
+  double embed_dca   = 1.0;   /* embedding dca */
 };
 
 int main(int argc, char* argv[]) {
@@ -110,7 +112,9 @@ int main(int argc, char* argv[]) {
         ParseStrFlag(string(argv[i]), "--subJetPt", &opts.sj_pt) ||
         ParseIntFlag(string(argv[i]), "--towerUnc", &opts.tower_unc) ||
         ParseIntFlag(string(argv[i]), "--trackUnc", &opts.track_unc) ||
-        ParseIntFlag(string(argv[i]), "--embedTries", &opts.embed_tries)) continue;
+        ParseIntFlag(string(argv[i]), "--embedTries", &opts.embed_tries) ||
+        ParseFloatFlag(string(argv[i]), "--DCA", &opts.dca) ||
+        ParseFloatFlag(string(argv[i]), "--embedDCA", &opts.embed_dca)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
     return 1;
   }
@@ -156,10 +160,11 @@ int main(int argc, char* argv[]) {
   else {
     InitReaderWithDefaults(reader, chain, opts.tow_list, opts.run_list);
   }
+  reader->GetTrackCuts()->SetDCACut(opts.dca);
   
   // setup embedding if requested
   TChain* embed_chain = nullptr;
-  TStarJetPicoReader* embed_reader = new TStarJetPicoReader();
+  TStarJetPicoReader* embed_reader = nullptr;
   if (!opts.embed.empty()) {
     embed_chain = new TChain("JetTree");
     if (HasEnding(opts.embed, ".root")) {
@@ -192,13 +197,14 @@ int main(int argc, char* argv[]) {
       std::cerr << "error: unrecognized extension for embedding file type, exiting" << std::endl;
       return 1;
     }
-    
+    embed_reader = new TStarJetPicoReader();
     if (!opts.readeremb.empty()) {
       InitReader(embed_reader, embed_chain, opts.readeremb, opts.tow_list, opts.run_list);
     }
     else {
       InitReaderWithDefaults(embed_reader, embed_chain, opts.tow_list, opts.run_list);
     }
+    embed_reader->GetTrackCuts()->SetDCACut(opts.embed_dca);
   }
   
   // get the trigger IDs that will be used
