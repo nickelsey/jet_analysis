@@ -260,7 +260,7 @@ if __name__ == "__main__":
   parser.add_argument('--badRuns', default='', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='submit/y7_y6_bad_tower.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
-  parser.add_argument('--embedTriggers', default='y14vpdmb30', help=' event triggers to consider for embedding data (see above for options)')
+  parser.add_argument('--embedTriggers', default='y7mb', help=' event triggers to consider for embedding data (see above for options)')
   parser.add_argument('--readerSetting', default=None, help='can specify non-default reader settings in a text tile')
   parser.add_argument('--embedReaderSetting', default=None, help='can specify non-default reader settings for embedding data in text file')
   parser.add_argument('--constEta', default='1.0', help='list of constituent eta ranges to use during jetfinding')
