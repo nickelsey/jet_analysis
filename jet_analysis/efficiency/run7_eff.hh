@@ -20,7 +20,6 @@ public:
     NEGATIVE = -1
   };
   
-  Run7Eff();
   Run7Eff(std::string filename = "submit/y7_effic.root");
   
   ~Run7Eff();

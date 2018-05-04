@@ -2,9 +2,6 @@
 
 #include "run7_eff.hh"
 
-Run7Eff::Run7Eff() : file(nullptr), maxPt(5.0), maxPtpp(9.0) {
-  
-}
 
 Run7Eff::Run7Eff(std::string filename) : file(nullptr), maxPt(5.0), maxPtpp(9.0), sys_(TrackingUncY7::NONE) {
   loadFile(filename);
@@ -131,6 +128,8 @@ double Run7Eff::ratio(double pt, double eta) {
   Double_t pp_eff = ppEff(pt, eta);
   Double_t auau_eff = AuAuEff020Avg(pt, eta);
   
+  double ratio_ = auau_eff / pp_eff;
+  
   int sign_ = static_cast<int>(sys_);
   if (sign_ == 0)
     return ratio_;
@@ -143,16 +142,21 @@ double Run7Eff::ratio(double pt, double eta) {
     return 1.0;
   
   return ratio_;
-  }
 }
+
 
 double Run7Eff::ratioUncertainty(double pt, double eta) {
   
-  double cent_unc = 0.04;
-  double eff_unc  = 0.03;
+  double cent_u_ = 0.04;
+  double auau_u_  = 0.03;
+  double pp_u_  = 0.03;
   
-  Double_t pp_eff = ppEff(pt, eta);
-  Double_t auau_eff = AuAuEff020Avg(pt, eta);
+  double auau_ = AuAuEff020Avg(pt, eta);
+  double pp_ = ppEff(pt, eta);
+  double ratio_ = auau_ / pp_;
   
-  
+  double au_term_ = pow(auau_u_ / auau_, 2.0);
+  double pp_term_ = pow(pp_u_ / pp_, 2.0);
+  double cent_term_ = pow(cent_u_ / auau_, 2.0);
+  return sqrt(au_term_ + pp_term_ + cent_term_);
 }
