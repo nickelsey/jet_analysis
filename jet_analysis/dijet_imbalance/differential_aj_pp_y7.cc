@@ -492,6 +492,7 @@ int main(int argc, char* argv[]) {
           std::cerr << "no events found for embedding, given trigger requirements: exiting" << std::endl;
           return 1;
         }
+      }
       
       std::vector<fastjet::PseudoJet> particles;
       std::vector<fastjet::PseudoJet> embed_particles;
