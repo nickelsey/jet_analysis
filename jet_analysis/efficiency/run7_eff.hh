@@ -11,14 +11,14 @@
 #include "TF2.h"
 #include "TFile.h"
 
+enum class TrackingUncY7 {
+  NONE = 0,
+  POSITIVE = 1,
+  NEGATIVE = -1
+};
+
 class Run7Eff {
 public:
-  
-  enum class TrackingUncY7 {
-    NONE = 0,
-    POSITIVE = 1,
-    NEGATIVE = -1
-  };
   
   Run7Eff(std::string filename = "submit/y7_effic.root");
   

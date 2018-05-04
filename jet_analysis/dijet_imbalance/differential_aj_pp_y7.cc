@@ -76,11 +76,6 @@ struct Options {
 
 int main(int argc, char* argv[]) {
   
-  // define the number of centrality bins used
-  const int n_centrality_bins = 1;
-  
-  const int n_luminosity_bins = 1;
-  
   // define tower scale uncertainty
   const double tower_scale_uncertainty   = 0.02;
   
@@ -513,7 +508,6 @@ int main(int argc, char* argv[]) {
             continue;
           
           if (sv->GetCharge()) {
-            int lumi_bin = efficiency->luminosityBin(embed_header->GetZdcCoincidenceRate());
             double ratio = efficiency->ratio(sv->Pt(), sv->Eta());
             
             if (!std::isfinite(ratio))

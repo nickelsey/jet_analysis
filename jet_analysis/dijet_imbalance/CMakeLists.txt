@@ -29,7 +29,7 @@ set_target_properties(dijet_imbalance_pp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${C
 
 ## differential dijet imbalance analysis for PP embedded in year 7
 ## using the DijetWorker
-set(DIJET_IMBALANCE_BASE_SRC_PP_Y7 differential_aj_pp.cc)
+set(DIJET_IMBALANCE_BASE_SRC_PP_Y7 differential_aj_pp_y7.cc)
 add_executable(dijet_imbalance_pp_y7 ${DIJET_IMBALANCE_BASE_SRC_PP_Y7})
 target_link_libraries(dijet_imbalance_pp_y7 ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${FASTJET_LIBRARIES} ${Boost_LIBRARIES} DijetWorker Efficiency Centrality)
 set_target_properties(dijet_imbalance_pp_y7 PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/dijet_imbalance)
