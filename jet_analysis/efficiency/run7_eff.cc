@@ -6,7 +6,7 @@ Run7Eff::Run7Eff() : file(nullptr), maxPt(5.0), maxPtpp(9.0) {
   
 }
 
-Run7Eff::Run7Eff(std::string filename) : file(nullptr), maxPt(5.0), maxPtpp(9.0) {
+Run7Eff::Run7Eff(std::string filename) : file(nullptr), maxPt(5.0), maxPtpp(9.0), sys_(TrackingUncY7::NONE) {
   loadFile(filename);
 }
 
@@ -125,4 +125,34 @@ TF2* Run7Eff::GetEffY04(Int_t cb)
     std::cout << "Error: Nonsensical Centrality Class!" << std::endl;
   
   return func;
+}
+
+double Run7Eff::ratio(double pt, double eta) {
+  Double_t pp_eff = ppEff(pt, eta);
+  Double_t auau_eff = AuAuEff020Avg(pt, eta);
+  
+  int sign_ = static_cast<int>(sys_);
+  if (sign_ == 0)
+    return ratio_;
+  
+  double systematic_ = sign_ * ratioUncertainty(pt, eta);
+  
+  ratio_ = ratio_ + ratio_ * systematic_;
+  
+  if (ratio_ > 1.0)
+    return 1.0;
+  
+  return ratio_;
+  }
+}
+
+double Run7Eff::ratioUncertainty(double pt, double eta) {
+  
+  double cent_unc = 0.04;
+  double eff_unc  = 0.03;
+  
+  Double_t pp_eff = ppEff(pt, eta);
+  Double_t auau_eff = AuAuEff020Avg(pt, eta);
+  
+  
 }

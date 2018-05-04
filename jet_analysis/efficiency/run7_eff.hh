@@ -13,8 +13,15 @@
 
 class Run7Eff {
 public:
+  
+  enum class TrackingUncY7 {
+    NONE = 0,
+    POSITIVE = 1,
+    NEGATIVE = -1
+  };
+  
   Run7Eff();
-  Run7Eff(std::string filename);
+  Run7Eff(std::string filename = "submit/y7_effic.root");
   
   ~Run7Eff();
   
@@ -23,6 +30,11 @@ public:
   double AuAuEff(double pt, double eta, int cent);
   double AuAuEff020Avg(double pt, double eta);
   double ppEff(double pt, double eta);
+  double ratio(double pt, double eta);
+  double ratioUncertainty(double pt, double eta);
+  
+  void setSystematicUncertainty(TrackingUncY7 sys = TrackingUncY7::NONE) {sys_ = sys;}
+  
   
 private:
   
@@ -40,7 +52,7 @@ private:
   
   double maxPt;
   double maxPtpp;
-  
+  TrackingUncY7 sys_;
 };
 
 #endif // RUN7_EFF_HH
