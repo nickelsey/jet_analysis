@@ -486,6 +486,13 @@ int main(int argc, char* argv[]) {
       int centrality_bin = -1;
       int embed_centrality = -1;
       
+      // if embedding, read next event, loop to event 0 if needed
+      if (embed_reader) {
+        if (!GetNextValidEvent(embed_reader, embed_triggers)) {
+          std::cerr << "no events found for embedding, given trigger requirements: exiting" << std::endl;
+          return 1;
+        }
+      
       std::vector<fastjet::PseudoJet> particles;
       std::vector<fastjet::PseudoJet> embed_particles;
       std::vector<fastjet::PseudoJet> primary_particles;
