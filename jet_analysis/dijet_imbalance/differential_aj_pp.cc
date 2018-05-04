@@ -288,18 +288,22 @@ int main(int argc, char* argv[]) {
   std::unordered_map<std::string, int> lead_hard_jet_nconst_dict;
   std::unordered_map<std::string, double> lead_hard_rho_dict;
   std::unordered_map<std::string, double> lead_hard_sigma_dict;
+  std::unordered_map<std::string, double> lead_hard_area_dict;
   std::unordered_map<std::string, TLorentzVector> lead_match_jet_dict;
   std::unordered_map<std::string, int> lead_match_jet_nconst_dict;
   std::unordered_map<std::string, double> lead_match_rho_dict;
   std::unordered_map<std::string, double> lead_match_sigma_dict;
+  std::unordered_map<std::string, double> lead_match_area_dict;
   std::unordered_map<std::string, TLorentzVector> sublead_hard_jet_dict;
   std::unordered_map<std::string, int> sublead_hard_jet_nconst_dict;
   std::unordered_map<std::string, double> sublead_hard_rho_dict;
   std::unordered_map<std::string, double> sublead_hard_sigma_dict;
+  std::unordered_map<std::string, double> sublead_hard_area_dict;
   std::unordered_map<std::string, TLorentzVector> sublead_match_jet_dict;
   std::unordered_map<std::string, int> sublead_match_jet_nconst_dict;
   std::unordered_map<std::string, double> sublead_match_rho_dict;
   std::unordered_map<std::string, double> sublead_match_sigma_dict;
+  std::unordered_map<std::string, double> sublead_match_area_dict;
   
   // if embedding is being done
   std::unordered_map<std::string, int> embed_runid_dict;
@@ -333,18 +337,22 @@ int main(int argc, char* argv[]) {
     lead_hard_jet_nconst_dict.insert({key, 0});
     lead_hard_rho_dict.insert({key, 0});
     lead_hard_sigma_dict.insert({key, 0});
+    lead_hard_area_dict.insert({key, 0});
     lead_match_jet_dict.insert({key, TLorentzVector()});
     lead_match_jet_nconst_dict.insert({key, 0});
     lead_match_rho_dict.insert({key, 0});
     lead_match_sigma_dict.insert({key, 0});
+    lead_match_area_dict.insert({key, 0});
     sublead_hard_jet_dict.insert({key, TLorentzVector()});
     sublead_hard_jet_nconst_dict.insert({key, 0});
     sublead_hard_rho_dict.insert({key, 0});
     sublead_hard_sigma_dict.insert({key, 0});
+    sublead_hard_area_dict.insert({key, 0});
     sublead_match_jet_dict.insert({key, TLorentzVector()});
     sublead_match_jet_nconst_dict.insert({key, 0});
     sublead_match_rho_dict.insert({key, 0});
     sublead_match_sigma_dict.insert({key, 0});
+    sublead_match_area_dict.insert({key, 0});
     
     if (embed_reader != nullptr) {
       embed_runid_dict.insert({key, 0});
@@ -383,15 +391,19 @@ int main(int argc, char* argv[]) {
     tmp->Branch("jlconst", &lead_hard_jet_nconst_dict[key]);
     tmp->Branch("jlrho", &lead_hard_rho_dict[key]);
     tmp->Branch("jlsig", &lead_hard_sigma_dict[key]);
+    tmp->Branch("jlarea", &lead_hard_area_dict[key]);
     tmp->Branch("jlmconst", &lead_match_jet_nconst_dict[key]);
     tmp->Branch("jlmrho", &lead_match_rho_dict[key]);
     tmp->Branch("jlmsig", &lead_match_sigma_dict[key]);
+    tmp->Branch("jlmarea", &lead_match_area_dict[key]);
     tmp->Branch("jsconst", &sublead_hard_jet_nconst_dict[key]);
     tmp->Branch("jsrho", &sublead_hard_rho_dict[key]);
     tmp->Branch("jssig", &sublead_hard_sigma_dict[key]);
+    tmp->Branch("jsarea", &sublead_hard_area_dict[key]);
     tmp->Branch("jsmconst", &sublead_match_jet_nconst_dict[key]);
     tmp->Branch("jsmrho", &sublead_match_rho_dict[key]);
     tmp->Branch("jsmsig", &sublead_match_sigma_dict[key]);
+    tmp->Branch("jsmarea", &sublead_match_area_dict[key]);
     
     if (embed_reader != nullptr) {
       tmp->Branch("embed_eventid", &embed_eventid_dict[key]);
@@ -655,6 +667,7 @@ int main(int argc, char* argv[]) {
             lead_hard_jet_nconst_dict[key] = out.lead_hard.constituents().size();
             lead_hard_rho_dict[key] = out.lead_hard_rho;
             lead_hard_sigma_dict[key] = out.lead_hard_sigma;
+            lead_hard_area_dict[key] = out.lead_hard.area();
             lead_match_jet_dict[key] = TLorentzVector(out.lead_match.px(),
                                                       out.lead_match.py(),
                                                       out.lead_match.pz(),
@@ -662,6 +675,7 @@ int main(int argc, char* argv[]) {
             lead_match_jet_nconst_dict[key] = out.lead_match.constituents().size();
             lead_match_rho_dict[key] = out.lead_match_rho;
             lead_match_sigma_dict[key] = out.lead_match_sigma;
+            lead_match_area_dict[key] = out.lead_match.area();
             sublead_hard_jet_dict[key] = TLorentzVector(out.sublead_hard.px(),
                                                         out.sublead_hard.py(),
                                                         out.sublead_hard.pz(),
@@ -669,6 +683,7 @@ int main(int argc, char* argv[]) {
             sublead_hard_jet_nconst_dict[key] = out.sublead_hard.constituents().size();
             sublead_hard_rho_dict[key] = out.sublead_hard_rho;
             sublead_hard_sigma_dict[key] = out.sublead_hard_sigma;
+            sublead_hard_area_dict[key] = out.sublead_hard.area();
             sublead_match_jet_dict[key] = TLorentzVector(out.sublead_match.px(),
                                                          out.sublead_match.py(),
                                                          out.sublead_match.pz(),
@@ -676,6 +691,7 @@ int main(int argc, char* argv[]) {
             sublead_match_jet_nconst_dict[key] = out.sublead_match.constituents().size();
             sublead_match_rho_dict[key] = out.sublead_match_rho;
             sublead_match_sigma_dict[key] = out.sublead_match_sigma;
+            sublead_match_area_dict[key] = out.sublead_match.area();
             
             trees[key]->Fill();
           }
