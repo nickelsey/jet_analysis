@@ -161,11 +161,11 @@ def main(args) :
       print("qsub failure too many times - exiting")
       return
 
-  ## wait two minutes before rechecking
-  print("finished round of submissions: pausing")
+    ## wait two minutes before rechecking
+    print("finished round of submissions: pausing")
     time.sleep(60)
 
-print("all jobs completed: exiting")
+  print("all jobs completed: exiting")
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs via PBS & resubmit if necessary')
