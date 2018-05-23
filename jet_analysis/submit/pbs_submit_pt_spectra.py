@@ -68,7 +68,7 @@ def updatestatus(jobstatus, outdir, name) :
       print("undefined status: job " + str(i+1) + " of " + str(len(jobstatus)) + " marked for submission")
       jobstatus[i] = 0
 
-return jobstatus
+  return jobstatus
 
 
 def main(args) :
