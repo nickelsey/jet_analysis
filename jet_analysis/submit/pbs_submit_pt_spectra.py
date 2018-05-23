@@ -86,8 +86,8 @@ def main(args) :
   ## at a time
   maxjobs = args.maxjobs
 
-## some paths
-execpath = os.getcwd()
+  ## some paths
+  execpath = os.getcwd()
   executable = './bin/data_qa/generate_pt_spectra'
   ## find the qwrap file
   qwrap = execpath + '/submit/qwrap.sh'
@@ -152,12 +152,12 @@ execpath = os.getcwd()
       ret.wait()
       if ret.returncode == 0 :
         jobstatus[i] = 1
-else :
-  print("warning: qsub submission failed")
-  qsubfail = qsubfail + 1
-    njobs = njobs - 1
+      else :
+        print("warning: qsub submission failed")
+        qsubfail = qsubfail + 1
+      njobs = njobs - 1
     
-    if qsubfail > 100 :
+    if qsubfail > 1000 :
       print("qsub failure too many times - exiting")
       return
 
