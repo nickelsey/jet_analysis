@@ -46,7 +46,6 @@ struct Options {
   bool useY7Eff      = false;    /* use y7 efficiency curves when doing efficiency corrections */
   int nhitsfit       = 10;       /* nhits fit cut */
   double eta         = 1.0;      /* eta cut for tracks */
-  double nsigpion    = 2.0;      /* pion nsigma cut */
   double dca         = 3.0;      /* track dca cut */
   double fitfrac     = 0.0;      /* nhits fit/ nhits prossible */
 };
@@ -69,7 +68,6 @@ int main(int argc, char* argv[]) {
         ParseBoolFlag(string(argv[i]), "--year14", &opts.useY14Eff) ||
         ParseIntFlag(string(argv[i]), "--nhitsfit", &opts.nhitsfit) ||
         ParseFloatFlag(string(argv[i]), "--eta", &opts.eta) ||
-        ParseFloatFlag(string(argv[i]), "--nsigPion", &opts.nsigpion) ||
         ParseFloatFlag(string(argv[i]), "--dca", &opts.dca) ||
         ParseFloatFlag(string(argv[i]), "--fitfrac", &opts.fitfrac)) continue;
     std::cerr << "Unknown command line option: " << argv[i] << std::endl;
@@ -127,7 +125,8 @@ int main(int argc, char* argv[]) {
   // initialize centrality definition for run 14
   // and set a lower limit on 0-20% for year 7
   CentralityRun14 centrality;
-  int year7_centrality_cut = 269;
+  //int year7_centrality_cut = 269;
+  int year7_centrality_cut = 485;
   
   // change to output file
   out.cd();
@@ -143,12 +142,16 @@ int main(int argc, char* argv[]) {
   TH1D* refmult = new TH1D("refmult", ";refmult", 800, 0, 800);
   TH1D* frac = new TH1D("discarded", "", 10, 0, 1.0);
   TH1D* nprim = new TH1D("nprim", "", 100, 0, 2000);
+  TH1D* nsel = new TH1D("nsel", "", 100, 0, 2000);
   TProfile* avg_eff = new TProfile("eff", "", 100, 0, 5.0);
   TH1D* nhitsfit = new TH1D("nhitsfit", "", 50, 0, 50);
   TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
-  TH2D* dcapion = new TH2D("dcaptpion", "", 50, 0, 3, 50, 0, 5);
-  TH1D* nhit = new TH1D("nhit", "", 50, 0, 50);
-  TH1D* nhitpion = new TH1D("nhitpion", "", 50, 0, 50);
+  
+  // 2D eta/phi histograms
+  TH2D* etaphi_pt0 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt1 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt2 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt3 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   
   // start the event loop
   // --------------------
@@ -181,7 +184,7 @@ int main(int argc, char* argv[]) {
     if (opts.useY14Eff) {
       centrality.setEvent(header->GetRunId(), header->GetReferenceMultiplicity(),
                           header->GetZdcCoincidenceRate(), header->GetPrimaryVertexZ());
-      if (centrality.centrality16() > 3 || centrality.centrality16() < 0)
+      if (centrality.centrality16() > 0 || centrality.centrality16() < 0)
         continue;
       refmult->Fill(header->GetReferenceMultiplicity());
       cent_bin = centrality.centrality16();
@@ -191,26 +194,34 @@ int main(int argc, char* argv[]) {
     
     // get tracks & towers
     TList* tracks = reader->GetListOfSelectedTracks();
+    int selected = 0;
     TIter nextTrack(tracks);
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
+  
+      if (fabs(track->GetEta()) > opts.eta || track->GetPt() < 0.2)
+        continue;
+      selected++;
       nhitsfit->Fill(track->GetNOfFittedHits());
       dca->Fill(track->GetDCA(), track->GetPt());
       
-      if (fabs(track->GetEta()) > opts.eta)
-        continue;
-      nhit->Fill(track->GetNOfFittedHits());
-      if (fabs(track->GetNsigmaPion() > opts.nsigpion))
-        continue;
-      nhitpion->Fill(track->GetNOfFittedHits());
-      dcapion->Fill(track->GetDCA(), track->GetPt());
+      if (track->GetPt() > 0.2 && track->GetPt() < 0.5)
+        etaphi_pt0->Fill(track->GetEta(), track->GetPhi());
+      else if (track->GetPt() < 1.0)
+        etaphi_pt1->Fill(track->GetEta(), track->GetPhi());
+      else if (track->GetPt() < 3.0)
+        etaphi_pt2->Fill(track->GetEta(), track->GetPhi());
+      else {
+        etaphi_pt3->Fill(track->GetEta(), track->GetPhi());
+      }
     }
+    nsel->Fill(selected);
     
     TStarJetVector* sv;
     if (opts.useY7Eff) {
       for (int i = 0; i < container->GetEntries(); ++i) {
         sv = container->Get(i);
         if (sv->GetCharge() && fabs(sv->Eta()) < opts.eta && sv->Pt() > 0.2) {
-          double eff = run7Eff->AuAuEff020Avg(sv->Pt(), sv->Eta());
+          double eff = run7Eff->AuAuEff(sv->Pt(), sv->Eta(), 0);
           norm++;
           if (eff <= 0.0 || eff > 1.0) {
             counts++;

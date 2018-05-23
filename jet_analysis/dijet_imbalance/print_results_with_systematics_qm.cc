@@ -17,6 +17,9 @@
 #include "TH3.h"
 #include "TGraphErrors.h"
 #include "TStyle.h"
+#include "TLegend.h"
+#include "TPaveText.h"
+#include "TLatex.h"
 
 #include <unordered_map>
 #include <iostream>
@@ -178,9 +181,6 @@ int main(int argc, char* argv[]) {
   std::vector<std::pair<int, int>> centrality_5{{0, 3}, {4, 7}, {10,13}};
   std::vector<std::string> centrality_5_string{"0-20%", "20-40%", "50-70%"};
   
-//  std::vector<std::pair<int, int>> centrality_5{{0, 1}, {2, 3}, {4,5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}};
-//  std::vector<std::string> centrality_5_string{"0-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%"};
-//
   // read in the files
   TFile auau_file(opts.auau_file.c_str(), "READ");
   TFile pp_file(opts.pp_file.c_str(), "READ");
@@ -958,13 +958,10 @@ int main(int argc, char* argv[]) {
       h_pp_hard_aj_spectra_bin[i]->RebinX(2);
       h_pp_match_aj_spectra_bin[i]->RebinX(2);
       
-//      h_auau_hard_aj_spectra_bin[i]->Scale(1.0/h_auau_hard_aj_spectra_bin[i]->Integral());
-//      h_auau_match_aj_spectra_bin[i]->Scale(1.0/h_auau_match_aj_spectra_bin[i]->Integral());
+      h_auau_hard_aj_spectra_bin[i]->Scale(1.0/h_auau_hard_aj_spectra_bin[i]->Integral());
+      h_auau_match_aj_spectra_bin[i]->Scale(1.0/h_auau_match_aj_spectra_bin[i]->Integral());
       h_pp_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_hard_aj_spectra_bin[i]->Integral());
       h_pp_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_pp_match_aj_spectra_bin[i]->Integral());
-      
-      h_pp_hard_aj_spectra_bin[i]->Scale(1.0/h_pp_hard_aj_spectra_bin[i]->Integral());
-      h_pp_match_aj_spectra_bin[i]->Scale(1.0/h_pp_match_aj_spectra_bin[i]->Integral());
       
       h_tow_p_hard_aj_spectra_bin[i]->RebinX(2);
       h_tow_p_match_aj_spectra_bin[i]->RebinX(2);
@@ -980,21 +977,11 @@ int main(int argc, char* argv[]) {
       h_tow_p_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_p_match_aj_spectra_bin[i]->Integral());
       h_tow_m_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_m_hard_aj_spectra_bin[i]->Integral());
       h_tow_m_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_tow_m_match_aj_spectra_bin[i]->Integral());
-
+      
       h_trk_p_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_p_hard_aj_spectra_bin[i]->Integral());
       h_trk_p_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_p_match_aj_spectra_bin[i]->Integral());
       h_trk_m_hard_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_hard_aj_spectra_bin[i]->Integral());
       h_trk_m_match_aj_spectra_bin[i]->Scale(auau_weights[i]/h_trk_m_match_aj_spectra_bin[i]->Integral());
-      
-//      h_tow_p_hard_aj_spectra_bin[i]->Scale(1.0/h_tow_p_hard_aj_spectra_bin[i]->Integral());
-//      h_tow_p_match_aj_spectra_bin[i]->Scale(1.0/h_tow_p_match_aj_spectra_bin[i]->Integral());
-//      h_tow_m_hard_aj_spectra_bin[i]->Scale(1.0/h_tow_m_hard_aj_spectra_bin[i]->Integral());
-//      h_tow_m_match_aj_spectra_bin[i]->Scale(1.0/h_tow_m_match_aj_spectra_bin[i]->Integral());
-//
-//      h_trk_p_hard_aj_spectra_bin[i]->Scale(1.0/h_trk_p_hard_aj_spectra_bin[i]->Integral());
-//      h_trk_p_match_aj_spectra_bin[i]->Scale(1.0/h_trk_p_match_aj_spectra_bin[i]->Integral());
-//      h_trk_m_hard_aj_spectra_bin[i]->Scale(1.0/h_trk_m_hard_aj_spectra_bin[i]->Integral());
-//      h_trk_m_match_aj_spectra_bin[i]->Scale(1.0/h_trk_m_match_aj_spectra_bin[i]->Integral());
     }
     
     std::vector<TH1D*> h_pp_hard_aj_spectra = AddBins(h_pp_hard_aj_spectra_bin, centrality_5);
@@ -1013,21 +1000,14 @@ int main(int argc, char* argv[]) {
     std::vector<TH1D*> h_auau_hard_aj_spectra = SplitByCentrality(h_auau_hard_aj, centrality_5);
     std::vector<TH1D*> h_auau_match_aj_spectra = SplitByCentrality(h_auau_match_aj, centrality_5);
     
-//    std::vector<TH1D*> h_auau_hard_aj_spectra = AddBins(h_auau_hard_aj_spectra_bin, centrality_5);
-//    std::vector<TH1D*> h_auau_match_aj_spectra = AddBins(h_auau_match_aj_spectra_bin, centrality_5);
-    
     // re-normalize
-    TFile a("tmp2.root", "RECREATE");
     for (int i = 0; i < h_auau_hard_aj_spectra.size(); ++i) {
       
       h_auau_hard_aj_spectra[i]->RebinX(2);
       h_auau_match_aj_spectra[i]->RebinX(2);
       
-//      h_auau_hard_aj_spectra[i]->Scale(1.0 / h_auau_hard_aj_spectra[i]->Integral());
-//      h_auau_match_aj_spectra[i]->Scale(1.0 / h_auau_match_aj_spectra[i]->Integral());
-      
-      h_auau_hard_aj_spectra[i]->Write();
-      h_auau_match_aj_spectra[i]->Write();
+      h_auau_hard_aj_spectra[i]->Scale(1.0 / h_auau_hard_aj_spectra[i]->Integral());
+      h_auau_match_aj_spectra[i]->Scale(1.0 / h_auau_match_aj_spectra[i]->Integral());
       
       h_pp_hard_aj_spectra[i]->Scale(1.0 / h_pp_hard_aj_spectra[i]->Integral());
       h_pp_match_aj_spectra[i]->Scale(1.0 / h_pp_match_aj_spectra[i]->Integral());
@@ -1042,7 +1022,7 @@ int main(int argc, char* argv[]) {
       h_trk_m_hard_aj_spectra[i]->Scale(1.0 / h_trk_m_hard_aj_spectra[i]->Integral());
       h_trk_m_match_aj_spectra[i]->Scale(1.0 / h_trk_m_match_aj_spectra[i]->Integral());
     }
-    a.Close();
+    
 
     Overlay1D(h_auau_hard_aj_spectra, centrality_5_string, hOpts, cOpts, out_loc, "auau_hard_aj", "",
               "A_{J}", "fraction", "Centrality");
@@ -1137,6 +1117,189 @@ int main(int argc, char* argv[]) {
       Overlay1D(h_auau_match_aj_spectra[i], h_pp_match_aj_spectra[i], err_match, 0.0, 0.3, 0.0, 0.9, "AuAu matched A_{J}", "PP matched A_{J}",
                 "systematics", hOpts, cOpts, out_loc_cent, "aj_match", "", "A_{J}", "fraction", "A_{J}");
     }
+    
+    string out_loc_aj = out_loc + "/aj_plots";
+    boost::filesystem::path aj_dir(out_loc_aj);
+    boost::filesystem::create_directories(aj_dir);
+    
+    TFile* kolja = new TFile("kolja.root", "READ");
+    TH1D* kolja_au = (TH1D*) kolja->Get("AuAuAJ_hi");
+    hOpts.SetHistogram(kolja_au);
+    kolja_au->SetMarkerStyle(29);
+    kolja_au->SetMarkerSize(2);
+    kolja_au->SetMarkerColor(kRed);
+    kolja_au->SetLineColor(kRed);
+    kolja_au->GetXaxis()->SetTitle("A_{J}");
+    kolja_au->GetYaxis()->SetTitle("fraction");
+    
+    TH1D* kolja_pp = (TH1D*) kolja->Get("ppInAuAuAJ_hi");
+    kolja_pp->SetMarkerStyle(30);
+    kolja_pp->SetMarkerSize(2);
+    
+    
+    string name_aj1 = out_loc + "/aj_plots/aj_0_20.pdf";
+    string name_aj1G = out_loc + "/aj_plots/aj_0_20.gif";
+    TCanvas* c1 = new TCanvas();
+    cOpts.SetMargins(c1);
+    
+    kolja_au->GetXaxis()->SetRangeUser(0.0, 0.7);
+    kolja_au->Draw();
+    //kolja_pp->Draw("same");
+    
+    h_auau_hard_aj_spectra[0]->SetMarkerSize(1.7);
+    h_auau_hard_aj_spectra[0]->SetLineColor(kBlue);
+    h_auau_hard_aj_spectra[0]->SetMarkerColor(kBlue);
+    h_auau_hard_aj_spectra[0]->GetYaxis()->SetRangeUser(0.0, 0.25);
+    h_auau_hard_aj_spectra[0]->GetXaxis()->SetTitle("A_{J}");
+    h_auau_hard_aj_spectra[0]->GetYaxis()->SetTitle("fraction");
+    h_auau_hard_aj_spectra[0]->Draw("SAME");
+    
+    TLegend* leg1 = new TLegend(0.55, 0.7, 0.9, 0.88);
+    leg1->SetTextSize(0.032);
+    leg1->AddEntry(h_auau_hard_aj_spectra[0], "Run 14 Au+Au", "lep");
+    leg1->AddEntry(kolja_au, "Run 7 Au+Au", "lep");
+    //leg1->AddEntry(kolja_pp, "Run 6 p+p HT + Au+Au 0-20%", "lep");
+    leg1->Draw();
+    
+    TPaveText *t = new TPaveText(0.65, 0.5, 0.88, 0.65, "NB NDC");
+    t->SetFillStyle(0);
+    t->SetBorderSize(0);
+    string cent_string_1 = centrality_5_string[0] + " Centrality";
+    t->AddText("p_{T}^{const} > 2.0 GeV/c");
+    t->AddText("p+p eff. corrected to Run 7 Au+Au 0-20%" );
+    //t->Draw();
+    
+    TLatex latex;
+    latex.SetNDC();
+    latex.SetTextSize(0.045);
+    latex.SetTextColor(kGray+3);
+    latex.SetTextColor(kRed+3);
+    latex.DrawLatex( 0.15, 0.85, "STAR Preliminary");
+    
+    TLatex latex1;
+    latex1.SetNDC();
+    latex1.SetTextSize(0.04);
+    latex1.SetTextColor(kBlack);
+    latex1.DrawLatex( 0.67, 0.44, cent_string_1.c_str());
+    
+    TLatex latex2;
+    latex2.SetNDC();
+    latex2.SetTextSize(0.04);
+    latex2.SetTextColor(kBlack);
+    latex2.DrawLatex( 0.25, 0.42, "p_{T}^{const} > 2.0 GeV/c");
+    latex2.DrawLatex( 0.25, 0.36, "p_{T}^{lead} > 20.0 GeV/c");
+    latex2.DrawLatex( 0.25, 0.3, "p_{T}^{sublead} > 10.0 GeV/c");
+    //latex2.DrawLatex( 0.22, 0.24, "p+p eff. corrected to Run 7");
+    //latex2.DrawLatex( 0.29, 0.2, "Au+Au 0-20%" );
+    
+    c1->SaveAs(name_aj1.c_str());
+    c1->SaveAs(name_aj1G.c_str());
+    
+//    TCanvas *c2 = new TCanvas();
+//    cOpts.SetMargins(c2);
+//
+//    h_auau_hard_aj_spectra[1]->GetXaxis()->SetRangeUser(0.0, 0.7);
+//    h_auau_hard_aj_spectra[1]->SetMarkerStyle(20);
+//    h_auau_hard_aj_spectra[1]->SetMarkerSize(1.7);
+//    h_auau_hard_aj_spectra[1]->SetLineColor(kMagenta);
+//    h_auau_hard_aj_spectra[1]->SetMarkerColor(kMagenta);
+//    h_auau_hard_aj_spectra[1]->GetYaxis()->SetRangeUser(0.0, 0.25);
+//    h_auau_hard_aj_spectra[1]->GetXaxis()->SetTitle("A_{J}");
+//    h_auau_hard_aj_spectra[1]->GetYaxis()->SetTitle("fraction");
+//    h_auau_hard_aj_spectra[1]->Draw();
+//
+//    TLegend* leg2 = new TLegend(0.65, 0.8, 0.88, 0.88);
+//    leg2->AddEntry(h_auau_hard_aj_spectra[1], "Run 14 Au+Au", "lep");
+//    leg2->Draw();
+//
+//    latex.DrawLatex( 0.15, 0.85, "STAR Preliminary");
+//    string cent_string_2 = centrality_5_string[1] + " Centrality";
+//    latex1.DrawLatex( 0.67, 0.44, cent_string_2.c_str());
+//
+//    string name_aj2 = out_loc + "/aj_plots/aj_20_40.pdf";
+//    c2->SaveAs(name_aj2.c_str());
+//
+//
+//    TCanvas *c3 = new TCanvas();
+//    cOpts.SetMargins(c3);
+//
+//    h_auau_hard_aj_spectra[2]->GetXaxis()->SetRangeUser(0.0, 0.7);
+//    h_auau_hard_aj_spectra[2]->SetMarkerStyle(20);
+//    h_auau_hard_aj_spectra[2]->SetMarkerSize(1.7);
+//    h_auau_hard_aj_spectra[2]->SetLineColor(kGreen+1);
+//    h_auau_hard_aj_spectra[2]->SetMarkerColor(kGreen+1);
+//    h_auau_hard_aj_spectra[2]->GetYaxis()->SetRangeUser(0.0, 0.25);
+//    h_auau_hard_aj_spectra[2]->GetXaxis()->SetTitle("A_{J}");
+//    h_auau_hard_aj_spectra[2]->GetYaxis()->SetTitle("fraction");
+//    h_auau_hard_aj_spectra[2]->Draw();
+//
+//    TLegend* leg3 = new TLegend(0.65, 0.8, 0.88, 0.88);
+//    leg3->AddEntry(h_auau_hard_aj_spectra[2], "Run 14 Au+Au", "lep");
+//    leg3->Draw();
+//
+//    latex.DrawLatex( 0.15, 0.85, "STAR Preliminary");
+//    string cent_string_3 = centrality_5_string[2] + " Centrality";
+//    latex1.DrawLatex( 0.67, 0.44, cent_string_3.c_str());
+//
+//    string name_aj3 = out_loc + "/aj_plots/aj_50_70.pdf";
+//    c3->SaveAs(name_aj3.c_str());
+    
+    
+    TCanvas *c2 = new TCanvas();
+    cOpts.SetMargins(c2);
+    
+    h_auau_hard_aj_spectra[0]->GetXaxis()->SetRangeUser(0.0, 0.7);
+    h_auau_hard_aj_spectra[0]->SetMarkerSize(1.7);
+    h_auau_hard_aj_spectra[0]->SetLineColor(kBlue);
+    h_auau_hard_aj_spectra[0]->SetMarkerColor(kBlue);
+    h_auau_hard_aj_spectra[0]->GetYaxis()->SetRangeUser(0.0, 0.25);
+    h_auau_hard_aj_spectra[0]->GetXaxis()->SetTitle("A_{J}");
+    h_auau_hard_aj_spectra[0]->GetYaxis()->SetTitle("fraction");
+    h_auau_hard_aj_spectra[0]->Draw("");
+    std::cout << "entries in 0-20: " << h_auau_hard_aj_spectra[0]->GetEntries() << std::endl;
+    
+    h_auau_hard_aj_spectra[1]->GetXaxis()->SetRangeUser(0.0, 0.7);
+    h_auau_hard_aj_spectra[1]->SetMarkerStyle(20);
+    h_auau_hard_aj_spectra[1]->SetMarkerSize(1.7);
+    h_auau_hard_aj_spectra[1]->SetLineColor(kMagenta);
+    h_auau_hard_aj_spectra[1]->SetMarkerColor(kMagenta);
+    h_auau_hard_aj_spectra[1]->GetYaxis()->SetRangeUser(0.0, 0.25);
+    h_auau_hard_aj_spectra[1]->GetXaxis()->SetTitle("A_{J}");
+    h_auau_hard_aj_spectra[1]->GetYaxis()->SetTitle("fraction");
+    h_auau_hard_aj_spectra[1]->Draw("SAME");
+    std::cout << "entries in 20-40: " << h_auau_hard_aj_spectra[1]->GetEntries() << std::endl;
+    
+    h_auau_hard_aj_spectra[2]->GetXaxis()->SetRangeUser(0.0, 0.7);
+    h_auau_hard_aj_spectra[2]->SetMarkerStyle(20);
+    h_auau_hard_aj_spectra[2]->SetMarkerSize(1.7);
+    h_auau_hard_aj_spectra[2]->SetLineColor(kGreen+1);
+    h_auau_hard_aj_spectra[2]->SetMarkerColor(kGreen+1);
+    h_auau_hard_aj_spectra[2]->GetYaxis()->SetRangeUser(0.0, 0.25);
+    h_auau_hard_aj_spectra[2]->GetXaxis()->SetTitle("A_{J}");
+    h_auau_hard_aj_spectra[2]->GetYaxis()->SetTitle("fraction");
+    h_auau_hard_aj_spectra[2]->Draw("SAME");
+    std::cout << "entries in 50-70: " << h_auau_hard_aj_spectra[2]->GetEntries() << std::endl;
+    
+    TLegend* leg2 = new TLegend(0.55, 0.65, 0.88, 0.88);
+    leg2->SetTextSize(0.032);
+    leg2->AddEntry(h_auau_hard_aj_spectra[0], "Run 14 0-20%", "lep");
+    leg2->AddEntry(h_auau_hard_aj_spectra[1], "Run 14 20-40%", "lep");
+    leg2->AddEntry(h_auau_hard_aj_spectra[2], "Run 14 50-70%", "lep");
+    leg2->Draw();
+    
+    latex.DrawLatex( 0.15, 0.85, "STAR Preliminary");
+    
+    latex2.SetNDC();
+    latex2.SetTextSize(0.04);
+    latex2.SetTextColor(kBlack);
+    latex2.DrawLatex( 0.25, 0.42, "p_{T}^{const} > 2.0 GeV/c");
+    latex2.DrawLatex( 0.25, 0.36, "p_{T}^{lead} > 20.0 GeV/c");
+    latex2.DrawLatex( 0.25, 0.3, "p_{T}^{sublead} > 10.0 GeV/c");
+    
+    string name_aj2 = out_loc + "/aj_plots/aj_run14.pdf";
+    string name_aj2G = out_loc + "/aj_plots/aj_run14.gif";
+    c2->SaveAs(name_aj2.c_str());
+    c2->SaveAs(name_aj2G.c_str());
     
   }
   
