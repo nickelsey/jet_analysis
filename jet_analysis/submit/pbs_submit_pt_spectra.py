@@ -78,7 +78,7 @@ def main(args) :
     return
   
   ## if neither args.year7 or args.year14 are true, exit
-  if !args.year7 and !args.year14:
+  if not args.year7 and not args.year14:
     print("error: must select either year 14 or year 7")
     return 1
 
