@@ -59,18 +59,42 @@ int main(int argc, char* argv[]) {
   boost::filesystem::path dir(opts.out_dir.c_str());
   boost::filesystem::create_directories(dir);
   
-  // load root files
+  // load root files and histograms
   TFile input_y7(opts.input_y7.c_str(), "READ");
   TFile input_y14(opts.input_y14.c_str(), "READ");
   
-//  TH2D* y14_eta_phi_0 = (TH2D*)
-//  TH2D* y14_eta_phi_1 = (TH2D*)
-//  TH2D* y14_eta_phi_2 = (TH2D*)
-//  
-//  TH2D* y7_eta_phi_0 = (TH2D*)
-//  TH2D* y7_eta_phi_1 = (TH2D*)
-//  TH2D* y7_eta_phi_2 = (TH2D*)
-//  
+  TH1D* y14_pt = (TH1D*) input_y14.Get("pt");
+  TH1D* y14_pt_corr = (TH1D*) input_y14.Get("ptcorr");
+  TH1D* y14_refmult = (TH1D*) input_y14.Get("refmult");
+  TH1D* y14_nprim = (TH1D*) input_y14.Get("nprim");
+  TH1D* y14_nsel = (TH1D*) input_y14.Get("nsel");
+  TH1D* y14_nhitsfit = (TH1D*) input_y14.Get("nhitsfit");
+  TH1D* y14_nhitspos = (TH1D*) input_y14.Get("nhitspos");
+  TH1D* y14_nhitsfitfrac = (TH1D*) input_y14.Get("nhitsfitfrac");
+  TH1D* y14_dcapt = (TH1D*) input_y14.Get("dcapt");
+  TProfile* y14_eff = (TProfile*) input_y14.Get("eff");
+  TH2D* y14_eta_phi_0 = (TH2D*) input_y14.Get("etaphi0");
+  TH2D* y14_eta_phi_1 = (TH2D*) input_y14.Get("etaphi1");
+  TH2D* y14_eta_phi_2 = (TH2D*) input_y14.Get("etaphi2");
+  TH2D* y14_eta_phi_3 = (TH2D*) input_y14.Get("etaphi3");
+
+  TH1D* y7_pt = (TH1D*) input_y7.Get("pt");
+  TH1D* y7_pt_corr = (TH1D*) input_y7.Get("ptcorr");
+  TH1D* y7_refmult = (TH1D*) input_y7.Get("refmult");
+  TH1D* y7_nprim = (TH1D*) input_y7.Get("nprim");
+  TH1D* y7_nsel = (TH1D*) input_y7.Get("nsel");
+  TH1D* y7_nhitsfit = (TH1D*) input_y7.Get("nhitsfit");
+  TH1D* y7_nhitspos = (TH1D*) input_y7.Get("nhitspos");
+  TH1D* y7_nhitsfitfrac = (TH1D*) input_y7.Get("nhitsfitfrac");
+  TH1D* y7_dcapt = (TH1D*) input_y7.Get("dcapt");
+  TProfile* y7_eff = (TProfile*) input_y7.Get("eff");
+  TH2D* y7_eta_phi_0 = (TH2D*) input_y7.Get("etaphi0");
+  TH2D* y7_eta_phi_1 = (TH2D*) input_y7.Get("etaphi1");
+  TH2D* y7_eta_phi_2 = (TH2D*) input_y7.Get("etaphi2");
+  TH2D* y7_eta_phi_3 = (TH2D*) input_y7.Get("etaphi3");
+  
+  
+
   
   return 0;
 }

@@ -145,6 +145,8 @@ int main(int argc, char* argv[]) {
   TH1D* nsel = new TH1D("nsel", "", 100, 0, 2000);
   TProfile* avg_eff = new TProfile("eff", "", 100, 0, 5.0);
   TH1D* nhitsfit = new TH1D("nhitsfit", "", 50, 0, 50);
+  TH1D* nhitspos = new TH1D("nhitspos", "", 50, 0, 50);
+  TH1D* nhitsfitfrac = new TH1D("nhitsfitfrac", "", 50, 0, 1.0);
   TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
   
   // 2D eta/phi histograms
@@ -203,6 +205,8 @@ int main(int argc, char* argv[]) {
       selected++;
       nhitsfit->Fill(track->GetNOfFittedHits());
       dca->Fill(track->GetDCA(), track->GetPt());
+      nhitspos->Fill(track->GetNOfPossHits());
+      nhitsfitfrac->Fill((double)track->GetNOfFittedHits()/track->GetNOfPossHits());
       
       if (track->GetPt() > 0.2 && track->GetPt() < 0.5)
         etaphi_pt0->Fill(track->GetEta(), track->GetPhi());
