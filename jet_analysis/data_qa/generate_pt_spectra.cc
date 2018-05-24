@@ -148,10 +148,10 @@ int main(int argc, char* argv[]) {
   TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
   
   // 2D eta/phi histograms
-  TH2D* etaphi_pt0 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt0 = new TH2D("etaphi0", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   TH2D* etaphi_pt1 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
-  TH2D* etaphi_pt2 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
-  TH2D* etaphi_pt3 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt2 = new TH2D("etaphi2", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
+  TH2D* etaphi_pt3 = new TH2D("etaphi3", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   
   // start the event loop
   // --------------------

@@ -40,12 +40,17 @@ add_executable(generate_y14_efficiency ${GEN_EFF_SRCS})
 target_link_libraries(generate_y14_efficiency ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(generate_y14_efficiency PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
-## generate efficiency curves
+## generate pt spectra and QA for different data sets
 set(GEN_PT_SPEC_SRCS generate_pt_spectra.cc)
 add_executable(generate_pt_spectra ${GEN_PT_SPEC_SRCS})
 target_link_libraries(generate_pt_spectra ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality)
 set_target_properties(generate_pt_spectra PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## compare pt spectra for y14 & y7
+set(COMPARE_PT_SRCS compare_y14_y7_pt.cc)
+add_executable(compare_y14_y7_pt ${COMPARE_PT_SRCS})
+target_link_libraries(compare_y14_y7_pt ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality)
+set_target_properties(compare_y14_y7_pt PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 #########################################
 ## install targets
@@ -55,5 +60,5 @@ install(TARGETS print_data_quality generate_runid_list
         DESTINATION bin/data_qa)
 install(TARGETS print_pp_compare generate_y14_efficiency
         DESTINATION bin/data_qa)
-install(TARGETS generate_pt_spectra
+install(TARGETS generate_pt_spectra compare_y14_y7_pt
         DESTINATION bin/data_qa)
