@@ -211,9 +211,9 @@ int main(int argc, char* argv[]) {
       nhitspos->Fill(track->GetNOfPossHits());
       nhitsfitfrac->Fill((double)track->GetNOfFittedHits()/track->GetNOfPossHits());
       
-      if (fabs(header->GetPrimaryVertexZ()) < 10 && fabs(track->GetEta()) < 0.1)
+      if (fabs(header->GetPrimaryVertexZ()) < 10)
         nhitpos_inner_vz->Fill(track->GetNOfPossHits());
-      if (fabs(header->GetPrimaryVertexZ()) > 20 && fabs(track->GetEta()) < 0.1)
+      if (fabs(header->GetPrimaryVertexZ()) > 25)
         nhitpos_outer_vz->Fill(track->GetNOfPossHits());
       
       if (track->GetPt() > 0.2 && track->GetPt() < 0.5)
