@@ -149,8 +149,8 @@ int main(int argc, char* argv[]) {
   TH1D* nhitsfitfrac = new TH1D("nhitsfitfrac", "", 50, 0, 1.0);
   TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
   
-  TH1D* nhitpos_outer_vz = new TH1D("outervz", "", 50, 0, 50);
-  TH1D* nhitpos_inner_vz = new TH1D("innervz", "", 50, 0, 50);
+  TH1D* nhitpos_outer_vz = new TH1D("outervz", "", 60, 0, 60);
+  TH1D* nhitpos_inner_vz = new TH1D("innervz", "", 60, 0, 60);
   
   // 2D eta/phi histograms
   TH2D* etaphi_pt0 = new TH2D("etaphi0", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
