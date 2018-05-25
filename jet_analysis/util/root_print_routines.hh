@@ -461,7 +461,7 @@ void PrintWithRatio(H* h1,
   tmp->Divide(h2);
   hopts.SetHistogram(tmp);
   
-  tmp->GetYaxis()->SetRangeUser(0, 2);
+  tmp->GetYaxis()->SetRangeUser(0.5, 1.5);
   tmp->GetYaxis()->SetNdivisions(4);
   tmp->GetXaxis()->SetTitle(x_axis_label.c_str());
   tmp->GetYaxis()->SetTitle("Ratio");

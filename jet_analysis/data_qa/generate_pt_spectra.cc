@@ -149,6 +149,9 @@ int main(int argc, char* argv[]) {
   TH1D* nhitsfitfrac = new TH1D("nhitsfitfrac", "", 50, 0, 1.0);
   TH2D* dca = new TH2D("dcapt", "", 50, 0, 3, 50, 0, 5);
   
+  TH1D* nhitpos_outer_vz = new TH1D("outervz", "", 50, 0, 50);
+  TH1D* nhitpos_inner_vz = new TH1D("innervz", "", 50, 0, 50);
+  
   // 2D eta/phi histograms
   TH2D* etaphi_pt0 = new TH2D("etaphi0", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   TH2D* etaphi_pt1 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
@@ -207,6 +210,11 @@ int main(int argc, char* argv[]) {
       dca->Fill(track->GetDCA(), track->GetPt());
       nhitspos->Fill(track->GetNOfPossHits());
       nhitsfitfrac->Fill((double)track->GetNOfFittedHits()/track->GetNOfPossHits());
+      
+      if (fabs(header->GetPrimaryVertexZ()) < 10 && fabs(track->GetEta()) < 0.1)
+        nhitpos_inner_vz->Fill(track->GetNOfPossHits());
+      if (fabs(header->GetPrimaryVertexZ()) > 20 && fabs(track->GetEta()) < 0.1)
+        nhitpos_outer_vz->Fill(track->GetNOfPossHits());
       
       if (track->GetPt() > 0.2 && track->GetPt() < 0.5)
         etaphi_pt0->Fill(track->GetEta(), track->GetPhi());
