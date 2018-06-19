@@ -131,10 +131,6 @@ int main(int argc, char* argv[]) {
   int year7_centrality_cut_upper = 114;
   int year7_centrality_cut_lower = 69;
   
-  0 1  2  3  4  5  6  7  8  9  10 11 12 13 14
-  
-  5 10 15 20 25 30 35 40 45 50
-  
   // change to output file
   out.cd();
   
