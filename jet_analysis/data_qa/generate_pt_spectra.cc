@@ -126,10 +126,10 @@ int main(int argc, char* argv[]) {
   // and set a lower limit on 0-20% for year 7
   CentralityRun14 centrality;
   //int year7_centrality_cut = 269;
-  //int year7_centrality_cut = 485;
+  int year7_centrality_cut = 485;
   // define upper and lower cut for 40-50%
-  int year7_centrality_cut_upper = 114;
-  int year7_centrality_cut_lower = 69;
+  //int year7_centrality_cut_upper = 114;
+  //int year7_centrality_cut_lower = 69;
   
   // change to output file
   out.cd();
@@ -184,8 +184,7 @@ int main(int argc, char* argv[]) {
     }
     
     if (opts.useY7Eff) {
-      if (header->GetGReferenceMultiplicity() < year7_centrality_cut_lower ||
-          header->GetGReferenceMultiplicity() >= year7_centrality_cut_upper)
+      if (header->GetGReferenceMultiplicity() < year7_centrality_cut)
         continue;
       refmult->Fill(header->GetGReferenceMultiplicity());
     }
@@ -193,7 +192,7 @@ int main(int argc, char* argv[]) {
     if (opts.useY14Eff) {
       centrality.setEvent(header->GetRunId(), header->GetReferenceMultiplicity(),
                           header->GetZdcCoincidenceRate(), header->GetPrimaryVertexZ());
-      if (centrality.centrality16() > 9 || centrality.centrality16() < 8)
+      if (centrality.centrality16() > 0 || centrality.centrality16() < 0)
         continue;
       refmult->Fill(header->GetReferenceMultiplicity());
       cent_bin = centrality.centrality16();
