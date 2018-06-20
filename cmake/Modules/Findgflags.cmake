@@ -23,6 +23,7 @@ if(MSVC)
     find_package(gflags NO_MODULE HINTS ${GFLAGS_ROOT_DIR})
     set(GFLAGS_LIBRARY ${gflags_LIBRARIES})
 else()
+    message(STATUS "GOT HERE: " ${GFLAGS_ROOT_DIR})
     find_library(GFLAGS_LIBRARY gflags
     PATHS ${GFLAGS_ROOT_DIR}
     PATH_SUFFIXES lib lib64)
