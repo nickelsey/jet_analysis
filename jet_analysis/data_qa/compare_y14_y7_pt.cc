@@ -48,6 +48,17 @@ int main(int argc, char* argv[]) {
   cOptsBottomLeg.leg_lower_bound = 0.18;
   cOptsBottomLeg.leg_right_bound = 0.9;
   cOptsBottomLeg.leg_left_bound = 0.7;
+  canvasOpts cOptsBottomLeftLeg;
+  cOptsBottomLeftLeg.leg_upper_bound = 0.4;
+  cOptsBottomLeftLeg.leg_lower_bound = 0.18;
+  cOptsBottomLeftLeg.leg_right_bound = 0.18;
+  cOptsBottomLeftLeg.leg_left_bound = 0.4;
+  canvasOpts cOptsBottomLeftLegLogy;
+  cOptsBottomLeftLegLogy.log_y = true;
+  cOptsBottomLeftLegLogy.leg_upper_bound = 0.4;
+  cOptsBottomLeftLegLogy.leg_lower_bound = 0.18;
+  cOptsBottomLeftLegLogy.leg_right_bound = 0.18;
+  cOptsBottomLeftLegLogy.leg_left_bound = 0.4;
   
   // parse command line options
   // --------------------------
@@ -107,7 +118,7 @@ int main(int argc, char* argv[]) {
   TH1D* y7_nhitsfit = (TH1D*) input_y7.Get("nhitsfit");
   TH1D* y7_nhitspos = (TH1D*) input_y7.Get("nhitspos");
   TH1D* y7_nhitsfitfrac = (TH1D*) input_y7.Get("nhitsfitfrac");
-  TH1D* y7_dcapt = (TH1D*) input_y7.Get("dcapt");
+  TH2D* y7_dcapt = (TH2D*) input_y7.Get("dcapt");
   TProfile* y7_eff = (TProfile*) input_y7.Get("eff");
   TH2D* y7_eta_phi_0 = (TH2D*) input_y7.Get("etaphi0");
   TH2D* y7_eta_phi_1 = (TH2D*) input_y7.Get("etaphi1");
@@ -143,22 +154,30 @@ int main(int argc, char* argv[]) {
   y7_nhitspos->Scale(1.0 / y7_nhitspos->Integral());
   y7_dcapt->Scale(1.0 / y7_dcapt->Integral());
   
+  TH1D* y14_dca = (TH1D*) y14_dcapt->ProjectionY();
+  y14_dca->SetName("y14dca");
+  TH1D* y7_dca = (TH1D*) y7_dcapt->ProjectionY();
+  y7_dca->SetName("y7dca");
+  y14_dca->Scale(1.0 / y14_dca->Integral());
+  y7_dca->Scale(1.0 / y7_dca->Integral());
+  
   PrintWithRatio(y7_pt, y14_pt, "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "uncorr_pt",
             "", "p_{T}", "1/Nevents dN/dp_{T}");
   PrintWithRatio(y7_pt_corr, y14_pt_corr, "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "corr_pt",
             "", "p_{T}", "1/Nevents dN/dp_{T}");
-  Overlay1D(y7_refmult, y14_refmult, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "refmult",
+  Overlay1D(y7_refmult, y14_refmult, "run 7", "run 14", hOpts, cOptsBottomLeftLegLogy, opts.out_dir, "refmult",
             "", "refmult", "fraction");
-  Overlay1D(y7_nprim, y14_nprim, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "prim", "",
+  Overlay1D(y7_nprim, y14_nprim, "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "prim", "",
             "N_{primaries}", "fraction");
-  Overlay1D(y7_nsel, y14_nsel, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "nsel", "",
+  Overlay1D(y7_nsel, y14_nsel, "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "nsel", "",
             "N_{tracks}", "fraction");
-  Overlay1D(y7_nhitsfit, y14_nhitsfit, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "nhits",
+  Overlay1D(y7_nhitsfit, y14_nhitsfit, "run 7", "run 14", hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhits",
             "", "nhits fit", "fraction");
-  Overlay1D(y7_nhitspos, y14_nhitspos, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "nhitspos",
+  Overlay1D(y7_nhitspos, y14_nhitspos, "run 7", "run 14", hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhitspos",
             "", "nhits possible", "fraction");
-  Overlay1D(y7_nhitsfitfrac, y14_nhitsfitfrac, "run 7", "run 14", hOpts, cOpts, opts.out_dir, "nhitsfitfrac",
+  Overlay1D(y7_nhitsfitfrac, y14_nhitsfitfrac, "run 7", "run 14", hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhitsfitfrac",
             "", "nhits fit fraction", "fraction");
+  Overlay1D(y7_dca, y14_dca, "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "dca", "", "DCA [cm]", "fraction");
   
   Print2DSimple(y7_eta_phi_0, hOpts, cOpts, opts.out_dir, "y7_ep_0", "", "#eta", "#phi");
   Print2DSimple(y7_eta_phi_1, hOpts, cOpts, opts.out_dir, "y7_ep_1", "", "#eta", "#phi");

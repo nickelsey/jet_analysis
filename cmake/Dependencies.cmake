@@ -1,6 +1,6 @@
 ## list of project dependencies
 
-########################################
+#######################################
 ## Set up ROOT environment - package is
 ## Built into ROOT6, I didn't check for ROOT5
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
@@ -8,7 +8,7 @@ find_package(ROOT REQUIRED COMPONENTS MathCore RIO Hist Tree Net)
 include(${ROOT_USE_FILE})
 message(STATUS "Found ROOT")
 
-########################################
+#######################################
 ## Setup fastjet environment
 find_package(FastJet REQUIRED)
 
@@ -27,3 +27,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 #######################################
 ## Setup TStarJetPico environment
 find_package(TStarJetPico REQUIRED)
+
+#######################################
+## setup glog and gflags
+find_package(gflags REQUIRED)
+find_package(glog REQUIRED)
