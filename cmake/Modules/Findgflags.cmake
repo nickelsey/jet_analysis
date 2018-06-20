@@ -18,7 +18,7 @@ if(NOT WIN32)
     find_path(GFLAGS_INCLUDE_DIR include/gflags/gflags.h
         PATHS ${GFLAGS_ROOT_DIR})
 endif()
-
+message(STATUS "FOUND: " ${GFLAGS_ROOT_DIR})
 if(MSVC)
     find_package(gflags NO_MODULE)
     set(GFLAGS_LIBRARY ${gflags_LIBRARIES})
