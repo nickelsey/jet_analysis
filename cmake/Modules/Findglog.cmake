@@ -19,7 +19,7 @@ if(NOT WIN32)
 endif()
 
 if(MSVC)
-    find_package(glog NO_MODULE)
+    find_package(glog NO_MODULE HINTS ${GLOG_ROOT_DIR})
     if(TARGET glog)
       set(GLOG_LIBRARY glog)
     elseif(TARGET glog::glog)
