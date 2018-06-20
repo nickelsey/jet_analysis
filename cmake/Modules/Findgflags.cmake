@@ -16,9 +16,10 @@ set(GFLAGS_ROOT_DIR "" CACHE PATH "Folder contains Gflags")
 # We are testing only a couple of files in the include directories
 if(NOT WIN32)
     find_path(GFLAGS_INCLUDE_DIR gflags/gflags.h
-        PATHS ${GFLAGS_ROOT_DIR})
+        PATHS ${GFLAGS_ROOT_DIR}
+        PATH_SUFFIXES include)
 endif()
-
+message(STATUS "INCLUDE: " ${GFLAGS_INCLUDE_DIR})
 if(MSVC)
     find_package(gflags NO_MODULE HINTS ${GFLAGS_ROOT_DIR})
     set(GFLAGS_LIBRARY ${gflags_LIBRARIES})
@@ -28,11 +29,7 @@ else()
     PATH_SUFFIXES lib lib64)
 endif()
 
-message(STATUS "GOT HERE: " ${GFLAGS_ROOT_DIR})
-message(STATUS "LIBRARY: " ${GFLAGS_LIBRARY})
-message(STATUS "INCLUDE: " ${GFLAGS_INCLUDE_DIR})
 find_package_handle_standard_args(gflags DEFAULT_MSG GFLAGS_INCLUDE_DIR GFLAGS_LIBRARY)
-
 
 if(GFLAGS_FOUND)
     set(GFLAGS_INCLUDE_DIRS ${GFLAGS_INCLUDE_DIR})
