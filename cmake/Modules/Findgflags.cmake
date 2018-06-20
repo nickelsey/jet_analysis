@@ -23,13 +23,14 @@ if(MSVC)
     find_package(gflags NO_MODULE HINTS ${GFLAGS_ROOT_DIR})
     set(GFLAGS_LIBRARY ${gflags_LIBRARIES})
 else()
-    message(STATUS "GOT HERE: " ${GFLAGS_ROOT_DIR})
     find_library(GFLAGS_LIBRARY gflags
     PATHS ${GFLAGS_ROOT_DIR}
     PATH_SUFFIXES lib lib64)
-    message(STATUS "LIBRARY: " ${GFLAGS_LIBRARY})
 endif()
 
+message(STATUS "GOT HERE: " ${GFLAGS_ROOT_DIR})
+message(STATUS "LIBRARY: " ${GFLAGS_LIBRARY})
+message(STATUS "INCLUDE: " ${GFLAGS_INCLUDE_DIR})
 find_package_handle_standard_args(gflags DEFAULT_MSG GFLAGS_INCLUDE_DIR GFLAGS_LIBRARY)
 
 
