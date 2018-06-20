@@ -15,7 +15,7 @@ set(GFLAGS_ROOT_DIR "" CACHE PATH "Folder contains Gflags")
 
 # We are testing only a couple of files in the include directories
 if(NOT WIN32)
-    find_path(GFLAGS_INCLUDE_DIR include/gflags/gflags.h
+    find_path(GFLAGS_INCLUDE_DIR gflags/gflags.h
         PATHS ${GFLAGS_ROOT_DIR})
 endif()
 message(STATUS "FOUND: " ${GFLAGS_ROOT_DIR})
