@@ -27,6 +27,7 @@ else()
     find_library(GFLAGS_LIBRARY gflags
     PATHS ${GFLAGS_ROOT_DIR}
     PATH_SUFFIXES lib lib64)
+    message(STATUS "LIBRARY: " ${GFLAGS_LIBRARY})
 endif()
 
 find_package_handle_standard_args(gflags DEFAULT_MSG GFLAGS_INCLUDE_DIR GFLAGS_LIBRARY)
