@@ -146,8 +146,8 @@ int main(int argc, char* argv[]) {
   TH2D* pt_corr = new TH2D("ptcorr", ";p_{T};centrality", 100, 0, 5,cent_bins, -0.5, cent_bins - 0.5);
   TH2D* refmult = new TH2D("refmult", ";refmult;centrality", 800, 0, 800, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* frac = new TH2D("discarded", "", 10, 0, 1.0, cent_bins, -0.5, cent_bins - 0.5);
-  TH2D* nprim = new TH2D("nprim", "", 100, 0, 2000, cent_bins, -0.5, cent_bins - 0.5);
-  TH2D* nsel = new TH2D("nsel", "", 100, 0, 2000, cent_bins, -0.5, cent_bins - 0.5);
+  TH2D* nprim = new TH2D("nprim", "", 100, 0, 1200, cent_bins, -0.5, cent_bins - 0.5);
+  TH2D* nsel = new TH2D("nsel", "", 100, 0, 12000, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* nhitsfit = new TH2D("nhitsfit", "", 50, 0, 50, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* nhitspos = new TH2D("nhitspos", "", 50, 0, 50, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* nhitsfitfrac = new TH2D("nhitsfitfrac", "", 50, 0, 1.0, cent_bins, -0.5, cent_bins - 0.5);
@@ -252,19 +252,12 @@ int main(int argc, char* argv[]) {
       // do efficiency corrected pt spectrum
       double eff = -1;
       if (opts.useY7Eff) {
-        if (cent_bin <= 2) {
-          int cent_bin_tmp = 0;
-          if (header->GetGReferenceMultiplicity() >= 485)
-            cent_bin_tmp = 0;
-          else if (header->GetGReferenceMultiplicity() >= 399)
-            cent_bin_tmp = 1;
-          else if (header->GetGReferenceMultiplicity() >= 269)
-            cent_bin_tmp = 2;
-          else
-            continue;
-          
-          eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), cent_bin_tmp);
-        }
+        if (header->GetGReferenceMultiplicity() >= 485)
+          eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), 0);
+        else if (header->GetGReferenceMultiplicity() >= 399)
+          eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), 1);
+        else if (header->GetGReferenceMultiplicity() >= 269)
+          eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), 2);
       }
       else if (opts.useY14Eff) {
         eff = run14Eff->AuAuEff(track->GetPt(), track->GetEta(), centrality.centrality16(),
