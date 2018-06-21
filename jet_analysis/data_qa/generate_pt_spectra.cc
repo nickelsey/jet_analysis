@@ -8,6 +8,7 @@
 
 
 #include <string>
+#include <iostream>
 
 // include boost for filesystem manipulation
 #include "boost/filesystem.hpp"
@@ -176,7 +177,7 @@ int main(int argc, char* argv[]) {
     
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
-    
+    std::cout << "new event" << std::endl;
     
     int cent_bin = -1;
     // check if event fired a trigger we will use
@@ -187,7 +188,7 @@ int main(int argc, char* argv[]) {
           use_event = true;
       if (!use_event) continue;
     }
-    
+    std::cout << "got triggers" << std::endl;
     if (opts.useY7Eff) {
       for (int i = 0; i < cent_bins; ++i) {
         if (header->GetGReferenceMultiplicity() >= CentBoundariesY7[i].first &&
@@ -198,7 +199,7 @@ int main(int argc, char* argv[]) {
       }
       refmult->Fill(header->GetGReferenceMultiplicity(), cent_bin);
     }
-    
+    std::cout << "got cent_bin: " << cent_bin << std::endl;
     if (opts.useY14Eff) {
       centrality.setEvent(header->GetRunId(), header->GetReferenceMultiplicity(),
                           header->GetZdcCoincidenceRate(), header->GetPrimaryVertexZ());
@@ -217,7 +218,7 @@ int main(int argc, char* argv[]) {
     }
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
-    
+    std::cout << "looping" << std::endl;
     // get tracks & towers
     TList* tracks = reader->GetListOfSelectedTracks();
     int selected = 0;
@@ -249,6 +250,7 @@ int main(int argc, char* argv[]) {
       
       // do efficiency corrected pt spectrum
       double eff = -1;
+      std::cout << "getting efficiency" << std::endl;
       if (opts.useY7Eff) {
         if (cent_bin <= 2) {
           int cent_bin_tmp = 0;
@@ -258,6 +260,9 @@ int main(int argc, char* argv[]) {
             cent_bin_tmp = 1;
           else if (header->GetGReferenceMultiplicity() >= 269)
             cent_bin_tmp = 2;
+          else
+            continue;
+          
           eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), cent_bin_tmp);
         }
       }
@@ -265,7 +270,7 @@ int main(int argc, char* argv[]) {
         eff = run14Eff->AuAuEff(track->GetPt(), track->GetEta(), centrality.centrality16(),
                                 header->GetZdcCoincidenceRate());
       }
-      
+      std::cout << "basically done" << std::endl;
       norm++;
       
       pt->Fill(track->GetPt(), cent_bin);
@@ -276,11 +281,12 @@ int main(int argc, char* argv[]) {
       }
       avg_eff[cent_bin]->Fill(track->GetPt(), eff);
       pt_corr->Fill(track->GetPt(), cent_bin);
-      
+      std::cout << "finished track" << std::endl;
     }
     nsel->Fill(selected, cent_bin);
     nprim->Fill(selected, cent_bin);
     frac->Fill(counts/norm, cent_bin);
+    std::cout << "finished event" << std::endl;
   }
   
   out.Write();
