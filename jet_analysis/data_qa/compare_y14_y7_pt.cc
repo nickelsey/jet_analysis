@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
   auto y7_ref_cent = ProjectXByBin(y7_refmult, "y7refmult", true);
   auto y14_ref_cent = ProjectXByBin(y14_refmult, "y14reftmult", true);
   PrintForCentrality(y7_ref_cent, y14_ref_cent, hOpts, cOptsLogy, opts.out_dir, "refmult", "",
-                     "p_{T}", "1/Nevents dN/dp_{T}");
+                     "refmult", "fraction");
   
   // do uncorrected pt
   
@@ -188,17 +188,17 @@ int main(int argc, char* argv[]) {
   
   auto y7_nhit_cent = ProjectXByBin(y7_nhitsfit, "y7nhitsfit", true);
   auto y14_nhit_cent = ProjectXByBin(y14_nhitsfit, "y14nhitsfit", true);
-  PrintForCentrality(y7_nhit_cent, y14_nhit_cent, hOpts, cOptsLogy, opts.out_dir, "nhit", "",
+  PrintForCentrality(y7_nhit_cent, y14_nhit_cent, hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhit", "",
                      "fit points", "fraction");
   
   auto y7_nhitpos_cent = ProjectXByBin(y7_nhitspos, "y7nhitspos", true);
   auto y14_nhitpos_cent = ProjectXByBin(y14_nhitspos, "y14nhitspos", true);
-  PrintForCentrality(y7_nhitpos_cent, y14_nhitpos_cent, hOpts, cOptsLogy, opts.out_dir, "nhitspos", "",
+  PrintForCentrality(y7_nhitpos_cent, y14_nhitpos_cent, hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhitspos", "",
                      "fit points possible", "fraction");
   
   auto y7_nhitfrac_cent = ProjectXByBin(y7_nhitsfitfrac, "y7nhitsfrac", true);
   auto y14_nhitfrac_cent = ProjectXByBin(y14_nhitsfitfrac, "y14nhitsfrac", true);
-  PrintForCentrality(y7_nhitpos_cent, y14_nhitpos_cent, hOpts, cOptsLogy, opts.out_dir, "nhitsfrac", "",
+  PrintForCentrality(y7_nhitfrac_cent, y14_nhitfrac_cent, hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhitsfrac", "",
                      "fit points / possible", "fraction");
   
   
