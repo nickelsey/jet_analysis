@@ -171,7 +171,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs via PBS & resubmit if necessary')
   parser.add_argument('strings', metavar='S', nargs='*', help=' input files ')
   parser.add_argument('--name', default='job_', help=' job name (identifier for qsub)')
-  parser.add_argument('--mem', type=int, default=4, help=' memory required per job [GB]')
+  parser.add_argument('--mem', type=int, default=6, help=' memory required per job [GB]')
   parser.add_argument('--nodes', type=int, default=1, help=' number of nodes required per job')
   parser.add_argument('--ppn', type=int, default=1, help=' number of processors per node required per job')
   parser.add_argument('--priority', type=int, default=0, help=' queue priority')
