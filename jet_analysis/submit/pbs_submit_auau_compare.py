@@ -78,8 +78,8 @@ def main(args) :
     return
   
   ## if neither args.year7 or args.year14 are true, exit
-  if args.year7 != 'true' and args.year14 != 'true':
-    print("error: must select either year 14 or year 7")
+  if args.year7 != 'true' and args.year14 != 'true' and args.year11 != 'true':
+    print("error: must select either year 14, year 11 or year 7")
     return 1
 
   ## get max number of jobs to be submitted to pbs
