@@ -115,12 +115,12 @@ int main(int argc, char* argv[]) {
   TH2::SetDefaultSumw2();
   TH3::SetDefaultSumw2();
   
-  TH3D* fulltracks = new TH3D("tracks", ";nglobal;refmult;nprimary", 400, 0, 2000, 400, 0, 800, 400, 0, 1200);
-  TH3D* lumiTracks = new TH3D("lumitracks", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
+  TH3D* fulltracks = new TH3D("tracks", ";nglobal;refmult;nprimary", 400, 0, 4000, 400, 0, 800, 400, 0, 1200);
+  TH3D* lumiTracks = new TH3D("lumitracks", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 4000, 400, 0, 1200);
   TH2D* recalcRefMult = new TH2D("refmult", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
   
-  TH3D* fulltracks_vz = new TH3D("tracksvz", ";nglobal;refmult;nprimary", 400, 0, 2000, 400, 0, 800, 400, 0, 1200);
-  TH3D* lumiTracks_vz = new TH3D("lumitracksvz", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
+  TH3D* fulltracks_vz = new TH3D("tracksvz", ";nglobal;refmult;nprimary", 400, 0, 4000, 400, 0, 800, 400, 0, 1200);
+  TH3D* lumiTracks_vz = new TH3D("lumitracksvz", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 4000, 400, 0, 1200);
   TH2D* recalcRefMult_vz = new TH2D("refmultvz", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
   
   
