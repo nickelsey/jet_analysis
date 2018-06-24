@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
   TH3::SetDefaultSumw2();
   
   TH3D* fulltracks = new TH3D("tracks", ";nglobal;refmult;nprimary", 400, 0, 2000, 400, 0, 800, 400, 0, 1200);
-  TH3D* lumiTracks = new TH3D("tracks", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
+  TH3D* lumiTracks = new TH3D("lumitracks", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
   TH2D* recalcRefMult = new TH2D("refmult", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
   
   
