@@ -123,6 +123,13 @@ int main(int argc, char* argv[]) {
   TH3D* lumiTracks_vz = new TH3D("lumitracksvz", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 4000, 400, 0, 1200);
   TH2D* recalcRefMult_vz = new TH2D("refmultvz", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
   
+  TH1D* pt = new TH1D("pt", ";pt", 100, 0, 10);
+  TH1D* nhit = new TH1D("nhit", ";nhit", 50, 0, 50);
+  TH1D* nhitpos = new TH1D("nhitpos", ";nhitpos", 50, 0, 50);
+  TH1D* fitfrac = new TH1D("fitfrac", ";fitfrac", 100, 0, 1.0);
+  
+  TH2D* etaphi = new TH2D("etaphi", ";eta;phi", 40, -1, 1, 40 -TMath::Pi(), TMath::Pi());
+  
   
   // start the event loop
   // --------------------
@@ -166,6 +173,13 @@ int main(int argc, char* argv[]) {
         recalc_refmult++;
       if (fabs(track->GetEta()) < 1.0 && track->GetDCA() < 3.0 && track->GetNOfFittedHits() >= 10)
         nprimary++;
+      
+      pt->Fill(track->GetPt());
+      nhit->Fill(track->GetNOfFittedHits());
+      nhitpos->Fill(track->GetNOfPossHits());
+      fitfrac->Fill((double)track->GetNOfFittedHits() / track->GetNOfPossHits());
+      etaphi->Fill(track->GetEta(), track->GetPhi());
+      
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
