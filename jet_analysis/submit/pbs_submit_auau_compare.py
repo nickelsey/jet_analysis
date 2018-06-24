@@ -135,12 +135,12 @@ def main(args) :
       errstream = "log/" + args.name + str(i) + ".err"
       
       ## build our qsub execution string
-      clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
-      clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
-      clargs = clargs + ' --towList=' + args.badTowers + ' --triggers=' + args.triggers
-      clargs = clargs + ' --efficiencyCurves=' + args.efficiencyCurves + ' --nhitsfit=' + args.nhitsfit
+      clargs = '--outdir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
+      clargs = clargs + ' --name=' + args.name + ' --runlist=' + args.badRuns
+      clargs = clargs + ' --towlist=' + args.badTowers + ' --triggers=' + args.triggers
+      clargs = clargs + ' --nhitsfit=' + args.nhitsfit
       clargs = clargs + ' --eta=' + args.eta + ' --dca=' + args.dca + ' --fitfrac=' + args.fitfrac
-      clargs = clargs + ' --year14=' + args.year14 + ' --year7=' + args.year7 + ' --year11=' + args.year11
+      clargs = clargs + ' --y14=' + args.year14 + ' --y7=' + args.year7 + ' --y11=' + args.year11
       
       qsub = 'qsub -V -p ' + str(args.priority) + ' -l mem=' + str(args.mem) + 'GB -l nodes=' + str(args.nodes)
       qsub = qsub + ':ppn=' + str(args.ppn) + ' -q ' + str(args.queue) + ' -o ' + outstream
@@ -191,3 +191,18 @@ if __name__ == "__main__":
   args = parser.parse_args()
   main( args )
 
+DEFINE_bool(y14, false, "select year 14 centrality");
+DEFINE_bool(y11, false, "select year 11 centrality");
+DEFINE_bool(y7, false, "select year 7 centrality");
+
+DEFINE_string(name, "job", "job name");
+DEFINE_int32(id, 0, "job id");
+DEFINE_string(input, "", "input root/txt file");
+DEFINE_string(outdir, "tmp", "output directory");
+DEFINE_string(towlist, "", "bad tower list");
+DEFINE_string(runlist, "", "bad run list");
+DEFINE_string(triggers, "", "trigger string (see util/trigger_lookup.hh");
+DEFINE_int32(nhits, 10, "minimum number of fit points");
+DEFINE_double(eta, 1.0, "maximum eta for tracks");
+DEFINE_double(dca, 3.0, "max DCA for tracks");
+DEFINE_double(fitfrac, 0.0, "minimum fit points/fit points possible");
