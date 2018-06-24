@@ -188,7 +188,7 @@ if __name__ == "__main__":
   parser.add_argument('--fitfrac', default='0.0', help='defines minimum nhits/nhitspossible')
   parser.add_argument('--year14', default='false', help='set flag for year 14')
   parser.add_argument('--year7', default='false', help='set flag for year 7')
-  parser.add_argument('--year11', default='false', help='set flag for year 7')
+  parser.add_argument('--year11', default='false', help='set flag for year 11')
   args = parser.parse_args()
   main( args )
 
