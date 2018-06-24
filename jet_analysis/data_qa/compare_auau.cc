@@ -119,6 +119,10 @@ int main(int argc, char* argv[]) {
   TH3D* lumiTracks = new TH3D("lumitracks", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
   TH2D* recalcRefMult = new TH2D("refmult", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
   
+  TH3D* fulltracks_vz = new TH3D("tracksvz", ";nglobal;refmult;nprimary", 400, 0, 2000, 400, 0, 800, 400, 0, 1200);
+  TH3D* lumiTracks_vz = new TH3D("lumitracksvz", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 400, 0, 2000, 400, 0, 1200);
+  TH2D* recalcRefMult_vz = new TH2D("refmultvz", ";refmult;recalc refmult", 400, 0, 800, 400, 0, 800);
+  
   
   // start the event loop
   // --------------------
@@ -166,6 +170,12 @@ int main(int argc, char* argv[]) {
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
     lumiTracks->Fill(luminosity, refmult, nprimary);
+    
+    if (fabs(header->GetPrimaryVertexZ()) > 15.0) {
+      recalcRefMult_vz->Fill(refmult, recalc_refmult);
+      fulltracks_vz->Fill(nglobal, refmult, nprimary);
+      lumiTracks_vz->Fill(luminosity, refmult, nprimary);
+    }
     
   }
   
