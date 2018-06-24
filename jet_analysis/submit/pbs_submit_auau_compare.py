@@ -138,7 +138,7 @@ def main(args) :
       clargs = '--outdir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --runlist=' + args.badRuns
       clargs = clargs + ' --towlist=' + args.badTowers + ' --triggers=' + args.triggers
-      clargs = clargs + ' --nhitsfit=' + args.nhitsfit
+      clargs = clargs + ' --nhits=' + args.nhitsfit
       clargs = clargs + ' --eta=' + args.eta + ' --dca=' + args.dca + ' --fitfrac=' + args.fitfrac
       clargs = clargs + ' --y14=' + args.year14 + ' --y7=' + args.year7 + ' --y11=' + args.year11
       
@@ -190,19 +190,3 @@ if __name__ == "__main__":
   parser.add_argument('--year11', default='false', help='set flag for year 11')
   args = parser.parse_args()
   main( args )
-
-DEFINE_bool(y14, false, "select year 14 centrality");
-DEFINE_bool(y11, false, "select year 11 centrality");
-DEFINE_bool(y7, false, "select year 7 centrality");
-
-DEFINE_string(name, "job", "job name");
-DEFINE_int32(id, 0, "job id");
-DEFINE_string(input, "", "input root/txt file");
-DEFINE_string(outdir, "tmp", "output directory");
-DEFINE_string(towlist, "", "bad tower list");
-DEFINE_string(runlist, "", "bad run list");
-DEFINE_string(triggers, "", "trigger string (see util/trigger_lookup.hh");
-DEFINE_int32(nhits, 10, "minimum number of fit points");
-DEFINE_double(eta, 1.0, "maximum eta for tracks");
-DEFINE_double(dca, 3.0, "max DCA for tracks");
-DEFINE_double(fitfrac, 0.0, "minimum fit points/fit points possible");
