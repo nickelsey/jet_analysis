@@ -143,6 +143,14 @@ int main(int argc, char* argv[]) {
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
     
+    if (triggers.size() != 0) {
+      bool use_event = false;
+      for (auto trigger : triggers)
+        if (header->HasTriggerId(trigger))
+          use_event = true;
+      if (!use_event) continue;
+    }
+    
     int cent_bin = 0;
     int refmult = 0;
     int nglobal = header->GetNGlobalTracks();
