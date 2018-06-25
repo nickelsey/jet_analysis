@@ -197,7 +197,7 @@ std::set<unsigned> GetTriggerIDs(std::string token) {
     ret = std::set<unsigned>{450010, 450020};
   else if (token == "y14vpdmb5")
     ret = std::set<unsigned>{450008, 450018};
-  else if (token == "y14mbmob")
+  else if (token == "y14mbmon")
     ret = std::set<unsigned>{450011, 450021};
   else if (token == "y6ppall")
     ret = std::set<unsigned>{117211, 117212, 127212, 127213, 137213,
