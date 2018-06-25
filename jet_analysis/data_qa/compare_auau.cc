@@ -11,6 +11,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TProfile.h"
 
 // include boost for filesystem manipulation
 #include "boost/filesystem.hpp"
@@ -130,6 +131,7 @@ int main(int argc, char* argv[]) {
   
   TH2D* etaphi = new TH2D("etaphi", ";eta;phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   
+  TProfile* avg_nglobal = new TProfile("avgnglobal", "", 100, 0, 1000);
   
   // start the event loop
   // --------------------
@@ -189,6 +191,9 @@ int main(int argc, char* argv[]) {
       recalcRefMult_vz->Fill(refmult, recalc_refmult);
       fulltracks_vz->Fill(nglobal, refmult, nprimary);
       lumiTracks_vz->Fill(luminosity, refmult, nprimary);
+      
+      if (cent_bin == 0 || cent_bin == 1)
+        avg_nglobal->Fill(nprimary, nglobal);
     }
     
   }

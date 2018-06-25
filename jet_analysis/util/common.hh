@@ -74,4 +74,12 @@ struct PairHash {
   }
 };
 
+struct PairEnumHash {
+  template <typename T, typename U>
+  std::size_t operator()(const std::pair<T, U> &x) const
+  {
+    return EnumClassHash()(x.first) ^ EnumClassHash()(x.second);
+  }
+};
+
 #endif // JET_ANALYSIS_UTILS_COMMON_HH

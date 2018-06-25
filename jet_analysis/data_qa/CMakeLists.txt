@@ -56,7 +56,13 @@ set_target_properties(compare_y14_y7_pt PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CM
 set(COMPARE_AUAU_SRCS compare_auau.cc)
 add_executable(compare_auau ${COMPARE_AUAU_SRCS})
 target_link_libraries(compare_auau ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} Efficiency Centrality)
-set_target_properties(compare_y14_y7_pt PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+set_target_properties(compare_auau PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+## compare different AuAu datasets - print
+set(COMPARE_AUAU_PRINT_SRCS compare_auau_print.cc)
+add_executable(compare_auau_print ${COMPARE_AUAU_PRINT_SRCS})
+target_link_libraries(compare_auau_print ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} Efficiency Centrality)
+set_target_properties(compare_auau_print PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 
 #########################################
@@ -69,5 +75,5 @@ install(TARGETS print_pp_compare generate_y14_efficiency
         DESTINATION bin/data_qa)
 install(TARGETS generate_pt_spectra compare_y14_y7_pt
         DESTINATION bin/data_qa)
-install(TARGETS compare_auau
+install(TARGETS compare_auau compare_auau_print
         DESTINATION bin/data_qa)
