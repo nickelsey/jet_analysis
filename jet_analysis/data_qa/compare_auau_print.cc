@@ -70,6 +70,7 @@ int main(int argc, char* argv[]) {
   map<pair<DATA, CUTS>, TH2D*> nhitpos;
   map<pair<DATA, CUTS>, TH2D*> fitfrac;
   map<pair<DATA, CUTS>, TProfile*> avgnglobal;
+  map<pair<DATA, CUTS>, TProfile*> avgnhit;
   
   for (auto type : data_types) {
     for (auto cut : cut_types) {
@@ -84,6 +85,7 @@ int main(int argc, char* argv[]) {
       nhitpos[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nhitpos");
       fitfrac[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("fitfrac");
       avgnglobal[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnglobal");
+      avgnhit[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnhit");
     }
   }
   
@@ -153,7 +155,6 @@ int main(int argc, char* argv[]) {
   }
   
   // print avg nglobal as a function of nprimary
-  vector<TProfile*> avg_nglobal_tmp;
   for (auto cut : cut_types) {
     vector<TProfile*> avg_nglobal_tmp;
     vector<string> names_tmp;
@@ -164,6 +165,19 @@ int main(int argc, char* argv[]) {
     Overlay1D(avg_nglobal_tmp, names_tmp, hopts, cOptsBottomLeg, FLAGS_outdir, MakeString("avgnglobal", cut.second), "",
               "nprimary", "<nglobal>");
   }
+  
+  // print comparison of average nhit
+  for (auto cut : cut_types) {
+    vector<TProfile*> avg_nhit_tmp;
+    vector<string> names_tmp;
+    for (auto data : data_types) {
+      avg_nhit_tmp.push_back(avgnhit[{data.first, cut.first}]);
+      names_tmp.push_back(data.second);
+    }
+    Overlay1D(avg_nhit_tmp, names_tmp, hopts, copts, FLAGS_outdir, MakeString("avgnhit", cut.second), "",
+              "nglobal", "<nhit>");
+  }
+  
   
   // compare y11 and y14 nhits
   for (auto cut : cut_types) {

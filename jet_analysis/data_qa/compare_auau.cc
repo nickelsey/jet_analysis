@@ -133,6 +133,7 @@ int main(int argc, char* argv[]) {
   
   TProfile* avg_nglobal = new TProfile("avgnglobal", "", 100, 0, 1000);
   TProfile* avg_nhit = new TProfile("avgnhit", "", 100, 0, 4000);
+  TProfile* avg_nhit_vz = new TProfile("avgnhitvz", "", 100, 0, 4000);
   
   // start the event loop
   // --------------------
@@ -191,6 +192,9 @@ int main(int argc, char* argv[]) {
       fitfrac->Fill(cent_bin, (double)track->GetNOfFittedHits() / track->GetNOfPossHits());
       etaphi->Fill(track->GetEta(), track->GetPhi());
       avg_nhit->Fill(nglobal, track->GetNOfFittedHits());
+      
+      if (fabs(header->GetPrimaryVertexZ()) > 15.0)
+        avg_nhit_vz->Fill(nglobal, track->GetNOfFittedHits());
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
