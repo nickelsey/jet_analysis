@@ -12,6 +12,7 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TStyle.h"
+#include "TProfile.h"
 
 // include boost for filesystem manipulation
 #include "boost/filesystem.hpp"
@@ -68,6 +69,7 @@ int main(int argc, char* argv[]) {
   map<pair<DATA, CUTS>, TH2D*> nhit;
   map<pair<DATA, CUTS>, TH2D*> nhitpos;
   map<pair<DATA, CUTS>, TH2D*> fitfrac;
+  map<pair<DATA, CUTS>, TProfile*> avgnglobal;
   
   for (auto type : data_types) {
     for (auto cut : cut_types) {
@@ -81,6 +83,7 @@ int main(int argc, char* argv[]) {
       nhit[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nhit");
       nhitpos[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nhitpos");
       fitfrac[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("fitfrac");
+      avgnglobal[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnglobal");
     }
   }
   
@@ -149,9 +152,46 @@ int main(int argc, char* argv[]) {
     Overlay1D(fitfrac_tmp, names_tmp, hopts, cOptsBottomLeftLeg, FLAGS_outdir, MakeString("fitfrac", data.second), "", "fitfrac", "fraction");
   }
   
+  // print avg nglobal as a function of nprimary
+  vector<TProfile*> avg_nglobal_tmp;
+  for (auto cut : cut_types) {
+    vector<TProfile*> avg_nglobal_tmp;
+    vector<string> names_tmp;
+    for (auto data : data_types) {
+      avg_nglobal_tmp.push_back(avgnglobal[{data.first, cut.first}]);
+      names_tmp.push_back(data.second);
+    }
+    Overlay1D(avg_nglobal_tmp, names_tmp, hopts, cOptsBottomLeg, FLAGS_outdir, MakeString("avgnglobal", cut.second), "",
+              "nprimary", "<nglobal>");
+  }
+  
+  // compare y11 and y14 nhits
+  for (auto cut : cut_types) {
+    auto h1 = (TH1D*) nhit[{DATA::y11, cut.first}]->ProjectionY(MakeString("tmpnhity11", cut.second).c_str(), 1, 1);
+    auto h2 = (TH1D*) nhit[{DATA::y14, cut.first}]->ProjectionY(MakeString("tmpnhity14", cut.second).c_str(), 1, 1);
+    h1->Scale(1.0 / h1->Integral());
+    h2->Scale(1.0 / h2->Integral());
+    //h1->GetXaxis()->SetRange(lowBin, highBin);
+    //h2->GetXaxis()->SetRange(lowBin, highBin);
+    PrintWithRatio(h1, h2, "y11", "y14", hopts, cOptsBottomLeftLegLogy, FLAGS_outdir, MakeString("nhitratio", cut.second), "", "nhits", "fraction");
+  }
+  
   gflags::ShutDownCommandLineFlags();
   return 0;
 }
+
+//void PrintWithRatio(H* h1,
+//                    H* h2,
+//                    std::string h1_title,
+//                    std::string h2_title,
+//                    histogramOpts hopts,
+//                    canvasOpts copts,
+//                    std::string output_loc,
+//                    std::string output_name,
+//                    std::string canvas_title,
+//                    std::string x_axis_label,
+//                    std::string y_axis_label,
+//                    std::string legend_title = "")
 
 //void Overlay1D(const std::vector<H*>& h,
 //               std::vector<std::string> hist_titles,

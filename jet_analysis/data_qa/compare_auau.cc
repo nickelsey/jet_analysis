@@ -132,6 +132,7 @@ int main(int argc, char* argv[]) {
   TH2D* etaphi = new TH2D("etaphi", ";eta;phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   
   TProfile* avg_nglobal = new TProfile("avgnglobal", "", 100, 0, 1000);
+  TProfile* avg_nhit = new TProfile("avgnhit", "", 100, 0, 4000);
   
   // start the event loop
   // --------------------
@@ -189,7 +190,7 @@ int main(int argc, char* argv[]) {
       nhitpos->Fill(cent_bin, track->GetNOfPossHits());
       fitfrac->Fill(cent_bin, (double)track->GetNOfFittedHits() / track->GetNOfPossHits());
       etaphi->Fill(track->GetEta(), track->GetPhi());
-      
+      avg_nhit->Fill(nglobal, track->GetNOfFittedHits());
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
@@ -200,8 +201,10 @@ int main(int argc, char* argv[]) {
       fulltracks_vz->Fill(nglobal, refmult, nprimary);
       lumiTracks_vz->Fill(luminosity, refmult, nprimary);
       
-      if (cent_bin == 0 || cent_bin == 1)
+      if (cent_bin == 0 || cent_bin == 1) {
         avg_nglobal->Fill(nprimary, nglobal);
+      }
+      
     }
     
   }
