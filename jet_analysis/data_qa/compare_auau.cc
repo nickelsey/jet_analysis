@@ -193,14 +193,14 @@ int main(int argc, char* argv[]) {
       etaphi->Fill(track->GetEta(), track->GetPhi());
       avg_nhit->Fill(nglobal, track->GetNOfFittedHits());
       
-      if (fabs(header->GetPrimaryVertexZ()) > 15.0)
+      if (fabs(header->GetPrimaryVertexZ()) > 20.0)
         avg_nhit_vz->Fill(nglobal, track->GetNOfFittedHits());
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
     lumiTracks->Fill(luminosity, refmult, nprimary);
     
-    if (fabs(header->GetPrimaryVertexZ()) > 15.0) {
+    if (fabs(header->GetPrimaryVertexZ()) > 20.0) {
       recalcRefMult_vz->Fill(refmult, recalc_refmult);
       fulltracks_vz->Fill(nglobal, refmult, nprimary);
       lumiTracks_vz->Fill(luminosity, refmult, nprimary);

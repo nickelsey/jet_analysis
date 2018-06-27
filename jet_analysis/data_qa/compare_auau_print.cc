@@ -34,7 +34,7 @@ map<pair<DATA, CUTS>, TFile*> LoadAllInputs(string inputdir) {
       string file = MakeString(inputdir, "/", type.second, "_", cut.second, ".root");
       // check to make sure the input file exists
       if (!boost::filesystem::exists(file))
-        throw std::runtime_error("could not load file");
+        throw std::runtime_error(MakeString("could not load file: ", file).c_str());
       ret[{type.first, cut.first}] = new TFile(file.c_str(), "READ");
     }
   }
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
       nhitpos[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nhitpos");
       fitfrac[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("fitfrac");
       avgnglobal[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnglobal");
-      avgnhit[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnhit");
+      avgnhit[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnhitvz");
     }
   }
   
