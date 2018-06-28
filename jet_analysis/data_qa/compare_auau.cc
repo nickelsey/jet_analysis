@@ -135,6 +135,8 @@ int main(int argc, char* argv[]) {
   TProfile* avg_nhit = new TProfile("avgnhit", "", 100, 0, 4000);
   TProfile* avg_nhit_vz = new TProfile("avgnhitvz", "", 100, 0, 4000);
   
+  TH2D* nglobal_dca = new TH2D("nglobal_dca", "", 100, 0, 4000, 50, 0, 3.0);
+  
   // start the event loop
   // --------------------
   while(reader->NextEvent()) {
@@ -195,6 +197,8 @@ int main(int argc, char* argv[]) {
       
       if (fabs(header->GetPrimaryVertexZ()) > 20.0)
         avg_nhit_vz->Fill(nglobal, track->GetNOfFittedHits());
+      
+      nglobal_dca->Fill(nglobal, track->GetDCA());
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
