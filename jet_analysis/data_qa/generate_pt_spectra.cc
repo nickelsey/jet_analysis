@@ -143,6 +143,7 @@ int main(int argc, char* argv[]) {
   
   // create pT histogram
   TH2D* nglobnprim = new TH2D("nglobnprim", "", 500, 0, 5000, 500, 0, 1500);
+  TH2D* refmultnprim = new TH2D("refmultnprim", "", 800, 0, 800, 500, 0, 1500);
   TH2D* pt = new TH2D("pt", ";p_{T};centrality", 100, 0, 5, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* pt_corr = new TH2D("ptcorr", ";p_{T};centrality", 100, 0, 5,cent_bins, -0.5, cent_bins - 0.5);
   TH2D* refmult = new TH2D("refmult", ";refmult;centrality", 800, 0, 800, cent_bins, -0.5, cent_bins - 0.5);
@@ -180,6 +181,7 @@ int main(int argc, char* argv[]) {
     TStarJetPicoEventHeader* header = event->GetHeader();
     
     nglobnprim->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
+    refmultnprim->Fill(header->GetReferenceMultiplicity(), header->GetNOfPrimaryTracks());
     
     int cent_bin = -1;
     // check if event fired a trigger we will use
