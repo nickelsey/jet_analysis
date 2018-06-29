@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
   map<pair<DATA, CUTS>, TH2D*> fitfrac;
   map<pair<DATA, CUTS>, TProfile*> avgnglobal;
   map<pair<DATA, CUTS>, TProfile*> avgnhit;
+  map<pair<DATA, CUTS>, TH2D*> nglobaldca;
   
   for (auto type : data_types) {
     for (auto cut : cut_types) {
@@ -86,6 +87,7 @@ int main(int argc, char* argv[]) {
       fitfrac[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("fitfrac");
       avgnglobal[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnglobal");
       avgnhit[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnhitvz");
+      nglobaldca[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nglobal_dca");
     }
   }
   
@@ -113,10 +115,12 @@ int main(int argc, char* argv[]) {
   cOptsBottomLeftLegLogy.leg_right_bound = 0.18;
   cOptsBottomLeftLegLogy.leg_left_bound = 0.4;
 
-  // first we want to look at the reco refmult distribution for all datasets w/ low cuts
+  // first we want to look at the reco refmult and dca distribution for all datasets w/ low cuts
   for (auto data : data_types) {
     Print2DSimple(refmultvz[{data.first, CUTS::low}], hopts, coptslogz, FLAGS_outdir, MakeString("refmultvz_", data.second),
                   "", "refmult", "reco refmult", "colz");
+    Print2DSimple(nglobaldca[{data.first, CUTS::low}], hopts, coptslogz, FLAGS_outdir, MakeString("nglobaldca_", data.second),
+                  "", "nglobal", "DCA [cm]", "colz");
   }
   
   // look at refmult for all 4 datasets
