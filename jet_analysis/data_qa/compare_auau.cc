@@ -195,10 +195,10 @@ int main(int argc, char* argv[]) {
       etaphi->Fill(track->GetEta(), track->GetPhi());
       avg_nhit->Fill(nglobal, track->GetNOfFittedHits());
       
-      if (fabs(header->GetPrimaryVertexZ()) > 20.0)
+      if (fabs(header->GetPrimaryVertexZ()) > 20.0) {
         avg_nhit_vz->Fill(nglobal, track->GetNOfFittedHits());
-      
-      nglobal_dca->Fill(nglobal, track->GetDCA(), track->GetPt());
+        nglobal_dca->Fill(nglobal, track->GetDCA(), track->GetPt());
+      }
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);

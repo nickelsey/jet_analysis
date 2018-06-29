@@ -176,7 +176,8 @@ void Overlay1D(const std::vector<H*>& h,
                std::string canvas_title,
                std::string x_axis_label,
                std::string y_axis_label,
-               std::string legend_title = "") {
+               std::string legend_title = "",
+               bool find_good_range = false) {
   
   // first, check that there is a name for each histogram
   if (h.size() != hist_titles.size()) {
@@ -197,6 +198,23 @@ void Overlay1D(const std::vector<H*>& h,
   TCanvas c;
   copts.SetMargins(&c);
   copts.SetLogScale(&c);
+  
+  if (find_good_range) {
+    double lowest, highest;
+    h[0]->GetMinimumAndMaximum(lowest, highest);
+    for (int i = 1; i < h.size(); ++i) {
+      if (h[i]->GetMinimum() < lowest)
+        lowest = h[i]->GetMinimum();
+      if (h[i]->GetMaximum() > highest)
+        highest = h[i]->GetMaximum();
+    }
+    double delta = highest - lowest;
+    double range_min = lowest - delta * 0.1;
+    double range_max = highest + delta * 0.1;
+    if (range_min <= 0 && copts.log_y)
+      range_min = lowest;
+    h[0]->GetYaxis()->SetRangeUser(range_min, range_max);
+  }
   
   // print histograms, giving them some nominal settings to differentiate them
   for (int i = 0; i < h.size(); ++i) {

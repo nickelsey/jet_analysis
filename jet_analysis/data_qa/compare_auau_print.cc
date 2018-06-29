@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
   map<pair<DATA, CUTS>, TH2D*> fitfrac;
   map<pair<DATA, CUTS>, TProfile*> avgnglobal;
   map<pair<DATA, CUTS>, TProfile*> avgnhit;
-  map<pair<DATA, CUTS>, TH2D*> nglobaldca;
+  map<pair<DATA, CUTS>, TH3D*> nglobaldca;
   
   for (auto type : data_types) {
     for (auto cut : cut_types) {
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
       fitfrac[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("fitfrac");
       avgnglobal[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnglobal");
       avgnhit[{type.first, cut.first}] = (TProfile*) input_files[{type.first, cut.first}]->Get("avgnhitvz");
-      nglobaldca[{type.first, cut.first}] = (TH2D*) input_files[{type.first, cut.first}]->Get("nglobal_dca");
+      nglobaldca[{type.first, cut.first}] = (TH3D*) input_files[{type.first, cut.first}]->Get("nglobal_dca");
     }
   }
   
@@ -114,12 +114,15 @@ int main(int argc, char* argv[]) {
   cOptsBottomLeftLegLogy.leg_lower_bound = 0.18;
   cOptsBottomLeftLegLogy.leg_right_bound = 0.18;
   cOptsBottomLeftLegLogy.leg_left_bound = 0.4;
+  canvasOpts cOptsTopLeftLeg;
+  cOptsTopLeftLeg.leg_right_bound = 0.18;
+  cOptsTopLeftLeg.leg_left_bound = 0.4;
 
   // first we want to look at the reco refmult and dca distribution for all datasets w/ low cuts
   for (auto data : data_types) {
     Print2DSimple(refmultvz[{data.first, CUTS::low}], hopts, coptslogz, FLAGS_outdir, MakeString("refmultvz_", data.second),
                   "", "refmult", "reco refmult", "colz");
-    Print2DSimple(nglobaldca[{data.first, CUTS::low}], hopts, coptslogz, FLAGS_outdir, MakeString("nglobaldca_", data.second),
+    Print2DSimple(((TH2D*)nglobaldca[{data.first, CUTS::low}]->Project3D("YX")), hopts, coptslogz, FLAGS_outdir, MakeString("nglobaldca_", data.second),
                   "", "nglobal", "DCA [cm]", "colz");
   }
   
@@ -192,6 +195,24 @@ int main(int argc, char* argv[]) {
     //h1->GetXaxis()->SetRange(lowBin, highBin);
     //h2->GetXaxis()->SetRange(lowBin, highBin);
     PrintWithRatio(h1, h2, "y11", "y14", hopts, cOptsBottomLeftLegLogy, FLAGS_outdir, MakeString("nhitratio", cut.second), "", "nhits", "fraction");
+  }
+  
+  // now do average DCA
+  vector<pair<int, int>> pt_bins{{1, 10}, {11, 20}, {21, 50}};
+  vector<string> pt_bin_names = {"0_1_gev", "1_2_gev", "2_5_gev"};
+  for (auto cut : cut_types) {
+    for (int i = 0; i < pt_bins.size(); ++i) {
+    vector<TProfile*> avg_dca_tmp;
+    vector<string> names_tmp;
+    for (auto data : data_types) {
+      nglobaldca[{data.first, cut.first}]->GetZaxis()->SetRange(pt_bins[i].first, pt_bins[i].second);
+      avg_dca_tmp.push_back(((TH2D*)nglobaldca[{data.first, cut.first}]->Project3D("YX"))->ProfileX());
+      avg_dca_tmp.back()->SetName(MakeString(avg_dca_tmp.back()->GetName(), cut.second, data.second, pt_bin_names[i]).c_str());
+      names_tmp.push_back(data.second);
+    }
+    Overlay1D(avg_dca_tmp, names_tmp, hopts, cOptsTopLeftLeg, FLAGS_outdir, MakeString("avgdca", cut.second, pt_bin_names[i]), "",
+              "nglobal", "<DCA>", pt_bin_names[i], true);
+    }
   }
   
   gflags::ShutDownCommandLineFlags();
