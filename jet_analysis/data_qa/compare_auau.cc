@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
       if (fabs(header->GetPrimaryVertexZ()) > 20.0)
         avg_nhit_vz->Fill(nglobal, track->GetNOfFittedHits());
       
-      nglobal_dca->Fill(nglobal, track->GetDCA());
+      nglobal_dca->Fill(nglobal, track->GetDCA(), track->GetPt());
     }
     recalcRefMult->Fill(refmult, recalc_refmult);
     fulltracks->Fill(nglobal, refmult, nprimary);
