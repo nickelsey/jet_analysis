@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
   TH3::SetDefaultSumw2();
   
   // create pT histogram
+  TH2D* nglobnprim = new TH2D("nglobnprim", "", 500, 0, 5000, 500, 0, 1500);
   TH2D* pt = new TH2D("pt", ";p_{T};centrality", 100, 0, 5, cent_bins, -0.5, cent_bins - 0.5);
   TH2D* pt_corr = new TH2D("ptcorr", ";p_{T};centrality", 100, 0, 5,cent_bins, -0.5, cent_bins - 0.5);
   TH2D* refmult = new TH2D("refmult", ";refmult;centrality", 800, 0, 800, cent_bins, -0.5, cent_bins - 0.5);
@@ -177,6 +178,8 @@ int main(int argc, char* argv[]) {
     
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
+    
+    nglobnprim->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
     
     int cent_bin = -1;
     // check if event fired a trigger we will use

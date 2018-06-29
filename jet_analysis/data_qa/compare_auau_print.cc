@@ -210,8 +210,14 @@ int main(int argc, char* argv[]) {
       avg_dca_tmp.back()->SetName(MakeString(avg_dca_tmp.back()->GetName(), cut.second, data.second, pt_bin_names[i]).c_str());
       names_tmp.push_back(data.second);
     }
+    if (i == 0)
+      avg_dca_tmp[0]->GetYaxis()->SetRangeUser(0.4, 0.8);
+    if (i == 1)
+      avg_dca_tmp[0]->GetYaxis()->SetRangeUser(0.25, 0.6);
+    if (i == 2)
+      avg_dca_tmp[0]->GetYaxis()->SetRangeUser(0.2, 0.5);
     Overlay1D(avg_dca_tmp, names_tmp, hopts, cOptsTopLeftLeg, FLAGS_outdir, MakeString("avgdca", cut.second, pt_bin_names[i]), "",
-              "nglobal", "<DCA>", pt_bin_names[i], true);
+              "nglobal", "<DCA>", pt_bin_names[i], false);
     }
   }
   
