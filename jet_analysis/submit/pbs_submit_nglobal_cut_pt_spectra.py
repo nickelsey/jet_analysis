@@ -182,7 +182,7 @@ if __name__ == "__main__":
   parser.add_argument('--badRuns', default='submit/y14_bad_run.txt', help=' csv file containing runs to mask')
   parser.add_argument('--badTowers', default='submit/y14_bad_tower.txt', help=' csv file containing towers to mask')
   parser.add_argument('--triggers', default='ALL', help=' event triggers to consider: [y7, y10, y11, y14, y6pp, y9pp, y12pp] + [HT, MB, HT2, HT3, VPDMB30, VPDMB5, MBMON, ALL] (default "ALL": accept all events)')
-  parser.add_argument('--nglobal', default='submit/y14_nglobal.root', help=' root file containing nprimary / nglobal cut histogram')
+  parser.add_argument('--nglobal', default='submit/y14_nglob_nprim.root', help=' root file containing nprimary / nglobal cut histogram')
   parser.add_argument('--efficiencycurves', default='submit/y14_effic_dca2.root', help='file containing efficiency histograms')
   parser.add_argument('--nhitsfit', default='15', help='min number of fit points required for a track')
   parser.add_argument('--eta', default='1.0', help='defines eta range for tracks from -eta to +eta')
