@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
   TProfile* avg_nhit = new TProfile("avgnhit", "", 100, 0, 4000);
   TProfile* avg_nhit_vz = new TProfile("avgnhitvz", "", 100, 0, 4000);
   
-  TH2D* nglobal_dca = new TH3D("nglobal_dca", "", 100, 0, 4000, 50, 0, 3.0, 50, 0, 5.0);
+  TH3D* nglobal_dca = new TH3D("nglobal_dca", "", 100, 0, 4000, 50, 0, 3.0, 50, 0, 5.0);
   
   // start the event loop
   // --------------------
