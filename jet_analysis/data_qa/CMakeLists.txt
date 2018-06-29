@@ -64,6 +64,17 @@ add_executable(compare_auau_print ${COMPARE_AUAU_PRINT_SRCS})
 target_link_libraries(compare_auau_print ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} Efficiency Centrality)
 set_target_properties(compare_auau_print PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## create nprimary-nglobal cut for a given dataset
+set(GLOBAL_PRIMARY_SRCS global_primary.cc)
+add_executable(global_primary ${GLOBAL_PRIMARY_SRCS})
+target_link_libraries(global_primary ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} Efficiency Centrality)
+set_target_properties(global_primary PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+## compare pt spectra for y14 & y7
+set(NGLOBAL_PT_SRCS nglobal_cut_pt_spectra.cc)
+add_executable(nglobal_cut_pt_spectra ${NGLOBAL_PT_SRCS})
+target_link_libraries(nglobal_cut_pt_spectra ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality)
+set_target_properties(nglobal_cut_pt_spectra PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 #########################################
 ## install targets
@@ -76,4 +87,6 @@ install(TARGETS print_pp_compare generate_y14_efficiency
 install(TARGETS generate_pt_spectra compare_y14_y7_pt
         DESTINATION bin/data_qa)
 install(TARGETS compare_auau compare_auau_print
+        DESTINATION bin/data_qa)
+install(TARGETS global_primary nglobal_cut_pt_spectra
         DESTINATION bin/data_qa)
