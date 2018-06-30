@@ -41,7 +41,7 @@ struct Options {
   string out_dir     = "tmp";    /* directory to save output in */
   string tow_list    = "";       /* list of hot towers to remove */
   string run_list    = "";       /* list of runs to remove */
-  string nglobal     = ""        /* file containing histogram for nglobal/nprimary cut */
+  string nglobal     = "";       /* file containing histogram for nglobal/nprimary cut */
   string triggers    = "";       /* triggers to analyze (see trigger_lookup.hh) */
   string effcurves   = "";       /* file holding y14 efficiency curves */
   bool useY14Eff     = false;    /* use y14 efficiency curves when doing efficiency corrections */
@@ -51,7 +51,7 @@ struct Options {
   double dca         = 3.0;      /* track dca cut */
   double fitfrac     = 0.0;      /* nhits fit/ nhits prossible */
   double nglobsigma  = 3.0;      /* nsigma away from the mean we accept for nglobal/nprimary cut */
-  int maxnglobal     = 3200;     /* event is thrown away with larger than this nglobal value */
+  int maxnglobal     = 5000;     /* event is thrown away with larger than this nglobal value */
 };
 
 int main(int argc, char* argv[]) {
@@ -101,6 +101,14 @@ int main(int argc, char* argv[]) {
   // build our input chain
   TChain* chain = NewChainFromInput(opts.input);
   
+  // load nglobal_npart cut histogram if needed
+  TFile* nglobal_file = nullptr;
+  TH1D* nglobal_npart = nullptr;
+  if (!opts.nglobal.empty() && boost::filesystem::exists(opts.nglobal)) {
+    nglobal_file = new TFile(opts.nglobal.c_str(), "READ");
+    nglobal_npart = (TH1D*) nglobal_file->Get("nglobnprimcut");
+  }
+  
   // create output file from the given directory, name & id
   string outfile_name = opts.out_dir + "/" + opts.name + opts.id + ".root";
   TFile out(outfile_name.c_str(), "RECREATE");
@@ -113,6 +121,7 @@ int main(int argc, char* argv[]) {
   reader->GetTrackCuts()->SetFitOverMaxPointsCut(opts.fitfrac);  // minimum ratio of fit points used over possible
   reader->GetTrackCuts()->SetMaxPtCut(1000);             // essentially infinity - cut in eventcuts
   
+
   
   // get the triggers IDs that will be used
   std::set<unsigned> triggers = GetTriggerIDs(opts.triggers);
@@ -185,6 +194,21 @@ int main(int argc, char* argv[]) {
     
     TStarJetPicoEvent* event = reader->GetEvent();
     TStarJetPicoEventHeader* header = event->GetHeader();
+    
+    // if there is an nglobal cut, apply it now
+    if (opts.maxnglobal > 0) {
+      if (header->GetNGlobalTracks() > opts.maxnglobal)
+        continue;
+    }
+    
+    // first check if it passes an npart nglobal cut if required
+    if (nglobal_npart) {
+      int nglob_bin = nglobal_npart->FindBin(header->GetNGlobalTracks());
+      double mean_nprim = nglobal_npart->GetBinContent(nglob_bin);
+      double sig_nprim = nglobal_npart->GetBinError(nglob_bin);
+      if ( fabs(mean_nprim - header->GetNOfPrimaryTracks()) > sig_nprim * opts.nglobsigma)
+        continue;
+    }
     
     nglobnprim->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
     refmultnprim->Fill(header->GetReferenceMultiplicity(), header->GetNOfPrimaryTracks());
