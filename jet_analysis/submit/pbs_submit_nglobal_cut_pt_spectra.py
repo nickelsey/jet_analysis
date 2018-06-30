@@ -138,7 +138,7 @@ def main(args) :
       clargs = '--outDir=' + args.output + ' --input=' + files[i] + ' --id=' + str(i)
       clargs = clargs + ' --name=' + args.name + ' --runList=' + args.badRuns
       clargs = clargs + ' --towList=' + args.badTowers + ' --triggers=' + args.triggers
-      clargs = clargs + ' --efficiencyCurves=' + args.efficiencyCurves + ' --nhitsfit=' + args.nhitsfit
+      clargs = clargs + ' --efficiencyCurves=' + args.efficiencycurves + ' --nhitsfit=' + args.nhitsfit
       clargs = clargs + ' --eta=' + args.eta + ' --dca=' + args.dca + ' --fitfrac=' + args.fitfrac
       clargs = clargs + ' --year14=' + args.year14 + ' --year7=' + args.year7 + ' --nglobal=' + args.nglobal
       clargs = clargs + ' --nglobsigma=' + args.nglobalsigma + ' --maxnglobal=' + args.maxnglobal
