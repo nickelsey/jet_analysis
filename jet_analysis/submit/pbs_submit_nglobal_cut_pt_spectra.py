@@ -172,7 +172,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Submit jobs via PBS & resubmit if necessary')
   parser.add_argument('strings', metavar='S', nargs='*', help=' input files ')
   parser.add_argument('--name', default='job_', help=' job name (identifier for qsub)')
-  parser.add_argument('--mem', type=int, default=2, help=' memory required per job [GB]')
+  parser.add_argument('--mem', type=int, default=3, help=' memory required per job [GB]')
   parser.add_argument('--nodes', type=int, default=1, help=' number of nodes required per job')
   parser.add_argument('--ppn', type=int, default=1, help=' number of processors per node required per job')
   parser.add_argument('--priority', type=int, default=0, help=' queue priority')
@@ -191,7 +191,7 @@ if __name__ == "__main__":
   parser.add_argument('--year14', default='false', help='set flag for year 14')
   parser.add_argument('--year7', default='false', help='set flag for year 7')
   parser.add_argument('--nglobalsigma', default='3.0', help=' deviation allowed away from the mean of nglobal/nprimary mean')
-  parser.add_argument('--maxnglobal', default='3200')
+  parser.add_argument('--maxnglobal', default='3100')
   args = parser.parse_args()
   main( args )
 
