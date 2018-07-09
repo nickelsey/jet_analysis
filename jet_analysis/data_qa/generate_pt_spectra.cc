@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
         continue;
       }
       avg_eff[cent_bin]->Fill(track->GetPt(), eff);
-      pt_corr->Fill(track->GetPt(), cent_bin);
+      pt_corr->Fill(track->GetPt(), cent_bin, 1.0 / eff);
     }
     nsel->Fill(selected, cent_bin);
     nprim->Fill(selected, cent_bin);

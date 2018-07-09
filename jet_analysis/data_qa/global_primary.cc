@@ -24,6 +24,33 @@ DEFINE_int32(rebinGlobal, 1, "rebin the nglobal axis");
 DEFINE_int32(rebinPrimary, 1, "rebin the nprimary axis");
 DEFINE_double(nsigma, 2.0, "number of sigma to cut on");
 
+pair<double, double> EstimateMeanSigma(TH1D* h) {
+  unique_ptr<TF1> tmp = make_unique<TF1>("tmpf", "gaus(0)", 0, 1500);
+  
+  h->Scale(1.0 / h->Integral());
+  h->GetXaxis()->SetRange(3, h->GetNbinsX());
+  
+  int last_bin = h->FindLastBinAbove(0);
+  double last_bin_center = h->GetBinCenter(last_bin);
+  int max_bin = h->GetMaximumBin();
+  double max_bin_center = h->GetBinCenter(max_bin);
+  
+  tmp->SetParameter(1, 0.0001);
+  tmp->SetParameter(2, max_bin_center);
+  tmp->SetParameter(3, (max_bin_center - last_bin_center)/2.0);
+  
+  double est_mean = tmp->GetParameter("Mean");
+  double est_sigma = tmp->GetParameter("Sigma");
+  
+  if (est_sigma > 40) {
+    
+    int last_bin = h->FindLastBinAbove(0);
+    
+  }
+  
+  return {est_mean, est_sigma};
+}
+
 int main(int argc, char* argv[]) {
   
   gflags::ParseCommandLineFlags(&argc, &argv, true);

@@ -76,6 +76,13 @@ add_executable(nglobal_cut_pt_spectra ${NGLOBAL_PT_SRCS})
 target_link_libraries(nglobal_cut_pt_spectra ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality)
 set_target_properties(nglobal_cut_pt_spectra PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## compare P16id and P17id production
+set(P17_P16_SRCS p16id_p17id_compare.cc)
+add_executable(p16id_p17id_compare ${P17_P16_SRCS})
+target_link_libraries(p16id_p17id_compare ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(p16id_p17id_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+
 #########################################
 ## install targets
 install(TARGETS check_refmult comprehensive_data_quality
@@ -89,4 +96,6 @@ install(TARGETS generate_pt_spectra compare_y14_y7_pt
 install(TARGETS compare_auau compare_auau_print
         DESTINATION bin/data_qa)
 install(TARGETS global_primary nglobal_cut_pt_spectra
+        DESTINATION bin/data_qa)
+install(TARGETS p16id_p17id_compare
         DESTINATION bin/data_qa)
