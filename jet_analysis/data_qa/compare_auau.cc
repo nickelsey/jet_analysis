@@ -124,10 +124,11 @@ int main(int argc, char* argv[]) {
   TH3D* lumiTracks_vz = new TH3D("lumitracksvz", ";zdc rate [kHz];nglobal;nprimary", 100, 0, 100, 100, 0, 4000, 200, 0, 1200);
   TH2D* recalcRefMult_vz = new TH2D("refmultvz", ";refmult;recalc refmult", 200, 0, 800, 200, 0, 800);
   
-  TH2D* pt = new TH2D("pt", ";pt", 9, -0.5, 8.5, 100, 0, 10);
-  TH2D* nhit = new TH2D("nhit", ";nhit", 9, -0.5, 8.5, 50, 0, 50);
-  TH2D* nhitpos = new TH2D("nhitpos", ";nhitpos", 9, -0.5, 8.5, 50, 0, 50);
-  TH2D* fitfrac = new TH2D("fitfrac", ";fitfrac", 9, -0.5, 8.5, 100, 0, 1.0);
+  TH2D* pt = new TH2D("pt", ";centrality;pt", 9, -0.5, 8.5, 100, 0, 10);
+  TH2D* nhit = new TH2D("nhit", ";centrality;nhit", 9, -0.5, 8.5, 50, 0, 50);
+  TH2D* nhitpos = new TH2D("nhitpos", ";centrality;nhitpos", 9, -0.5, 8.5, 50, 0, 50);
+  TH2D* fitfrac = new TH2D("fitfrac", ";centrality;fitfrac", 9, -0.5, 8.5, 100, 0, 1.0);
+  TH2D* nvertices = new TH2D("vertices", ";centrality;vertices", 9, -0.5, 8.5, 50, 0, 50);
   
   TH2D* etaphi = new TH2D("etaphi", ";eta;phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   
@@ -176,6 +177,8 @@ int main(int argc, char* argv[]) {
     
     if (cent_bin < 0 || cent_bin > 8)
       continue;
+    
+    nvertices->Fill(cent_bin, header->GetNumberOfVertices());
     
     // do track loop
     TList* tracks = reader->GetListOfSelectedTracks();

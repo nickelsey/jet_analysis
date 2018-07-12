@@ -229,11 +229,11 @@ int main(int argc, char* argv[]) {
   PrettyPrint1D(dVz, hopts, coptslogy, "dV_{z}", FLAGS_outdir, "dvz", "", "dV_{z}", "fraction");
   PrettyPrint1D(dnprim, hopts, copts, "dN_{primary}", FLAGS_outdir, "dnprim", "", "dN_{primary}", "fraction");
   PrettyPrint1D(dnprimmatched, hopts, coptslogy, "dN_{primary}", FLAGS_outdir, "dnprimmatched", "", "dN_{primary}", "fraction");
-  PrettyPrint1D(dnglobal, hopts, copts, "dN_{global}", FLAGS_outdir, "dnglobal", "", "dN_{global}", "fraction");
+  PrettyPrint1D(dnglobal, hopts, coptslogy, "dN_{global}", FLAGS_outdir, "dnglobal", "", "dN_{global}", "fraction");
   PrettyPrint1D(dVzmatched, hopts, coptslogy, "dV_{z}", FLAGS_outdir, "dvzmatched", "", "dV_{z}", "fraction");
   
-  LOG(INFO) << "probability to have 10 or more: " << dnprimmatched->Integral(dnprimmatched->GetXaxis()->FindBin(10), 200);
-  LOG(INFO) << "probability to have 100 or more: " << dnprimmatched->Integral(dnprimmatched->GetXaxis()->FindBin(100), 200);
+  LOG(INFO) << "probability to have 10 or more: " << dnglobal->Integral(dnglobal->GetXaxis()->FindBin(10), 200);
+  LOG(INFO) << "probability to have 100 or more: " << dnglobal->Integral(dnglobal->GetXaxis()->FindBin(100), 200);
   
   gflags::ShutDownCommandLineFlags();
   return 0;
