@@ -192,6 +192,9 @@ int main(int argc, char* argv[]) {
   TH2D* runID_grefmult = new TH2D(MakeString(prefix, "runidgrefmult").c_str(), ";runID;gRefMult",
                                   runID_bins, runID_low_edge, runID_high_edge,
                                   800, 0, 800);
+  TH2D* runID_nprim = new TH2D(MakeString(prefix, "runidnprim").c_str(), ";runID;N_{primary}",
+                               runID_bins, runID_low_edge, runID_high_edge,
+                               800, 0, 1600);
   TH2D* zdc_refmult = new TH2D(MakeString(prefix, "zdcrefmult").c_str(), ";zdc[khz];refMult",
                                100, 0, 100,
                                800, 0, 800);
@@ -379,6 +382,7 @@ int main(int argc, char* argv[]) {
     // fill event level histograms
     runID_refmult->Fill(runidxmap, header->GetReferenceMultiplicity());
     runID_grefmult->Fill(runidxmap, header->GetGReferenceMultiplicity());
+    runID_nprim->Fill(runidxmap, header->GetNOfPrimaryTracks());
     zdc_refmult->Fill(zdc_khz, header->GetReferenceMultiplicity());
     bbc_refmult->Fill(bbc_khz, header->GetReferenceMultiplicity());
     zdc_grefmult->Fill(zdc_khz, header->GetGReferenceMultiplicity());

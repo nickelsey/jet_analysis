@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cassert>
 #include <vector>
+#include <cmath>
 
 // include boost for filesystem manipulation
 #include "boost/filesystem.hpp"
@@ -182,12 +183,21 @@ int main(int argc, char* argv[]) {
                      "p_{T}", "1/Nevents dN/dp_{T}");
   
   // and corrected pT
-  auto y7_pt_corr_cent = ProjectXByBin(y7_pt_corr, "y7ptcorrproj", false);
-  auto y14_pt_corr_cent = ProjectXByBin(y14_pt_corr, "y14ptcorrproj", false);
+  auto y7_pt_corr_cent = ProjectXByBin(y7_pt_corr, "y7ptcorr", false);
+  auto y14_pt_corr_cent = ProjectXByBin(y14_pt_corr, "y14ptcorr", false);
   for (int i = 0; i < y7_ref_cent.size(); ++i) {
     y7_pt_corr_cent[i]->Scale(1.0 / y7_ref_cent[i]->GetEntries());
     y14_pt_corr_cent[i]->Scale(1.0 / y14_ref_cent[i]->GetEntries());
+    
+    for (int j = 1; j <= y14_pt_corr_cent[i]->GetNbinsX(); ++j) {
+      if (!std::isfinite(y14_pt_corr_cent[i]->GetBinContent(j))) {
+        y14_pt_corr_cent[i]->SetBinContent(j, 0.00);
+        y14_pt_corr_cent[i]->SetBinError(j, 0.00);
+      }
+    }
   }
+  
+  
   PrintForCentralityRatio(y7_pt_corr_cent, y14_pt_corr_cent, hOpts, cOptsLogy, opts.out_dir, "ptcorr", "",
                           "p_{T}", "1/Nevents dN/dp_{T}");
   

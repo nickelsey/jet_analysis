@@ -3,7 +3,7 @@
 #include "jet_analysis/util/common.hh"
 #include "jet_analysis/util/string_util.hh"
 #include "jet_analysis/util/root_print_routines.hh"
-
+#include "jet_analysis/centrality/centrality_run14.hh"
 #include "TFile.h"
 #include "TTree.h"
 #include "TTreeReader.h"
@@ -44,6 +44,8 @@ struct Event {
   std::vector<int> nprim;
   std::vector<int> refmult;
   std::vector<double> rank;
+  std::vector<double> pt;
+  std::vector<double> dca;
 };
 
 typedef unordered_map<pair<int, int>, Event, PairHash> event_map;
@@ -66,6 +68,8 @@ bool ReadInTree(string filename, string treename, event_map& map) {
     TTreeReaderValue<std::vector<double>> rank(reader, "rank");
     TTreeReaderValue<std::vector<int>> nprim(reader, "nprim");
     TTreeReaderValue<std::vector<int>> refmult(reader, "refmult");
+    TTreeReaderValue<std::vector<double>> dca(reader, "dca");
+    TTreeReaderValue<std::vector<double>> pt(reader, "pt");
     while (reader.Next()) {
       Event evt;
       evt.runid = *runid;
@@ -81,6 +85,8 @@ bool ReadInTree(string filename, string treename, event_map& map) {
       evt.rank = *rank;
       evt.nprim = *nprim;
       evt.refmult = *refmult;
+      evt.dca = *dca;
+      evt.pt = *pt;
       map[{*runid, *eventid}] = evt;
     }
     
@@ -126,10 +132,12 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "loading P17id tree";
   ReadInTree(FLAGS_p17id, FLAGS_tree, p17id);
   LOG(INFO) << "successfully loaded in trees";
-  
+ 
+  TH1D* rank_p16id = new TH1D("p16id_rank", "", 150, -10, 5);
   TH1D* Vz_p16id = new TH1D("p16id_vz", "", 100, -50, 50);
   TH1D* dVz_p16id = new TH1D("p16id_dvz", "", 100, 0, 50);
   TH1D* Vz_p17id = new TH1D("p17id_vz", "", 100, -50, 50);
+  TH1D* rank_p17id = new TH1D("p17id_rank", "", 150, -10, 5);
   TH1D* dVz_p17id = new TH1D("p17id_dvz", "", 100, 0, 50);
   TH1D* dVz = new TH1D("dvz", "", 100, 0, 20);
   TH1D* dVzmatched = new TH1D("dvzmatched", "", 100, 0, 20);
@@ -137,6 +145,25 @@ int main(int argc, char* argv[]) {
   TH1D* dnprimmatched = new TH1D("dnprimmatched", "", 200, -500, 500);
   TH1D* dnglobal = new TH1D("dnglobal", "", 200, -500, 500);
   
+  // some centrality analyses
+  TH2D* dVzToNominal_p16 = new TH2D("dvztonom16", "", 8, 0, 8, 100, 0, 50);
+  TH2D* nominalDCA_p16   = new TH2D("nominaldca16", "", 8, 0, 8, 100, 0, 5);
+  TH2D* nominalPt_p16    = new TH2D("nominalpt16", "", 8, 0, 8, 100, 0, 2);
+  TH2D* nominalMult_p16  = new TH2D("nominalmult16", "", 8, 0, 8, 100, 0, 1500);
+  TH2D* closestDCA_p16   = new TH2D("closestdca16", "", 8, 0, 8, 100, 0, 5);
+  TH2D* closestPt_p16    = new TH2D("closestpt16", "", 8, 0, 8, 100, 0, 2);
+  TH2D* closestMult_p16  = new TH2D("closestmult16", "", 8, 0, 8, 100, 0, 1500);
+  
+  TH2D* dVzToNominal_p17 = new TH2D("dvztonom17", "", 8, 0, 8, 100, 0, 50);
+  TH2D* nominalDCA_p17   = new TH2D("nominaldca17", "", 8, 0, 8, 100, 0, 5);
+  TH2D* nominalPt_p17    = new TH2D("nominalpt17", "", 8, 0, 8, 100, 0, 2);
+  TH2D* nominalMult_p17  = new TH2D("nominalmult17", "", 8, 0, 8, 100, 0, 1500);
+  TH2D* closestDCA_p17   = new TH2D("closestdca17", "", 8, 0, 8, 100, 0, 5);
+  TH2D* closestPt_p17    = new TH2D("closestpt17", "", 8, 0, 8, 100, 0, 2);
+  TH2D* closestMult_p17  = new TH2D("closestmult17", "", 8, 0, 8, 100, 0, 1500);
+  
+  // create centrality definition
+  CentralityRun14 centrality;
   
   for (auto& entry : p16id) {
     auto key = entry.first;
@@ -146,43 +173,114 @@ int main(int argc, char* argv[]) {
     if (p17id.find(key) == p17id.end())
       continue;
     auto p17id_event = p17id[key];
-    
-    Vz_p16id->Fill(p16id_event.vz[0]);
-    Vz_p17id->Fill(p17id_event.vz[0]);
-    
-    dVz_p16id->Fill(fabs(p16id_event.vz[0] - p16id_event.vpdvz));
-    dVz_p17id->Fill(fabs(p17id_event.vz[0] - p17id_event.vpdvz));
-    
-    dVz->Fill(fabs(p16id_event.vz[0] - p17id_event.vz[0]));
-    dnprim->Fill(p16id_event.nprim[0] - p17id_event.vz[0]);
-    dnglobal->Fill(p16id_event.nglobal - p17id_event.nglobal);
-    
+
+    int id_p16 = -1;
     int nprim_p16 = -1;
     double vz_p16 = 0.0;
+    double dca_p16 = 0;
+    double pt_p16 = 0;
+    int id_p17 = -1;
     int nprim_p17 = -1;
     double vz_p17 = 0.0;
+    double dca_p17 = 0;
+    double pt_p17 = 0;
+    
     for (int i = 0; i < p16id_event.vz.size(); ++i) {
       if (fabs(p16id_event.vz[i] - p16id_event.vpdvz) < 3.0) {
+        id_p16 = i;
         vz_p16 = p16id_event.vz[i];
         nprim_p16 = p16id_event.nprim[i];
+        dca_p16 = p16id_event.dca[i];
+        pt_p16 = p16id_event.pt[i];
         break;
       }
     }
     for (int i = 0; i < p17id_event.vz.size(); ++i) {
       if (fabs(p17id_event.vz[i] - p17id_event.vpdvz) < 3.0) {
+        id_p17 = i;
         vz_p17 = p17id_event.vz[i];
         nprim_p17 = p17id_event.nprim[i];
+        dca_p17 = p17id_event.dca[i];
+        pt_p17 = p17id_event.pt[i];
         break;
       }
     }
+    
     if (nprim_p16 < 0 || nprim_p17 < 0)
       continue;
+
+    rank_p16id->Fill(p16id_event.rank[id_p16]);
+    rank_p17id->Fill(p17id_event.rank[id_p17]);
+   
+    Vz_p16id->Fill(p16id_event.vz[id_p16]);
+    Vz_p17id->Fill(p17id_event.vz[id_p17]);
+    
+    dVz_p16id->Fill(fabs(p16id_event.vz[id_p16] - p16id_event.vpdvz));
+    dVz_p17id->Fill(fabs(p17id_event.vz[id_p17] - p17id_event.vpdvz));
+    
+    dVz->Fill(fabs(p16id_event.vz[id_p16] - p17id_event.vz[id_p17]));
+    dnprim->Fill(p16id_event.nprim[id_p16] - p17id_event.vz[id_p17]);
+    dnglobal->Fill(p16id_event.nglobal - p17id_event.nglobal);
+    
+
+
+    centrality.setEvent(p16id_event.runid, p16id_event.refmult[id_p16], p16id_event.zdcrate, vz_p16);
+    int cent16 = centrality.centrality9();
+    centrality.setEvent(p17id_event.runid, p17id_event.refmult[id_p17], p17id_event.zdcrate, vz_p17);
+    int cent17 = centrality.centrality9();
+    
+    nominalDCA_p16->Fill(cent16, dca_p16);
+    nominalPt_p16->Fill(cent16, pt_p16);
+    nominalMult_p16->Fill(cent16, nprim_p16);
+    
+    nominalDCA_p17->Fill(cent17, dca_p17);
+    nominalPt_p17->Fill(cent17, pt_p17);
+    nominalMult_p17->Fill(cent17, nprim_p17);
     
     dnprimmatched->Fill(nprim_p16 - nprim_p17);
     dVzmatched->Fill(vz_p16 - vz_p17);
     
+    // find the secondary vertices
+    int nprim_secondary_p16 = -1;
+    int nprim_secondary_p17 = -1;
+    double vz_secondary_p16 = 0;
+    double vz_secondary_p17 = 0;
+    double dca_secondary_p16 = 0;
+    double dca_secondary_p17 = 0;
+    double pt_secondary_p16 = 0;
+    double pt_secondary_p17 = 0;
+    double closestDvz_p16 = 9999;
+    double closestDvz_p17 = 9999;
+    for (int i = 0; i < p16id_event.vz.size(); ++i) {
+      if (fabs(p16id_event.vz[i] - vz_p16) < closestDvz_p16 && i != id_p16) {
+        closestDvz_p16 = fabs(p16id_event.vz[i] - vz_p16);
+        vz_secondary_p16 = p16id_event.vz[i];
+        nprim_secondary_p16 = p16id_event.nprim[i];
+        dca_secondary_p16 = p16id_event.dca[i];
+        pt_secondary_p16 = p16id_event.pt[i];
+      }
+    }
+    for (int i = 0; i < p17id_event.vz.size(); ++i) {
+      if (fabs(p17id_event.vz[i] - vz_p17) < closestDvz_p17 && i != id_p17) {
+        closestDvz_p17 = fabs(p17id_event.vz[i] - vz_p17);
+        vz_secondary_p17 = p17id_event.vz[i];
+        nprim_secondary_p17 = p17id_event.nprim[i];
+        dca_secondary_p17 = p17id_event.dca[i];
+        pt_secondary_p17 = p17id_event.pt[i];
+      }
+    }
+    
+    dVzToNominal_p16->Fill(cent16, fabs(vz_p16 - vz_secondary_p16));
+    closestDCA_p16->Fill(cent16, dca_secondary_p16);
+    closestPt_p16->Fill(cent16, pt_secondary_p16);
+    closestMult_p16->Fill(cent16, nprim_secondary_p16);
+    
+    dVzToNominal_p17->Fill(cent17, fabs(vz_p17 - vz_secondary_p17));
+    closestDCA_p17->Fill(cent17, dca_secondary_p17);
+    closestPt_p17->Fill(cent17, pt_secondary_p17);
+    closestMult_p17->Fill(cent17, nprim_secondary_p17);
+    
   }
-  
   
   // print results
   // create our histogram and canvas options
@@ -212,6 +310,8 @@ int main(int argc, char* argv[]) {
   cOptsTopLeftLeg.leg_right_bound = 0.18;
   cOptsTopLeftLeg.leg_left_bound = 0.4;
   
+  rank_p16id->Scale(1.0 / rank_p16id->Integral());
+  rank_p17id->Scale(1.0 / rank_p17id->Integral());
   Vz_p16id->Scale(1.0 / Vz_p16id->Integral());
   Vz_p17id->Scale(1.0 / Vz_p17id->Integral());
   dVz_p16id->Scale(1.0 / dVz_p16id->Integral());
@@ -221,7 +321,9 @@ int main(int argc, char* argv[]) {
   dnglobal->Scale(1.0 / dnglobal->Integral());
   dnprimmatched->Scale(1.0 / dnprimmatched->Integral());
   dVzmatched->Scale(1.0 / dVzmatched->Integral());
-  
+
+  Overlay1D(rank_p16id, rank_p17id, "P16id", "P17id", hopts, copts, FLAGS_outdir, "compare_rank", "", "rank", "fraction");
+
   Overlay1D(Vz_p16id, Vz_p17id, "P16id", "P17id", hopts, copts, FLAGS_outdir, "compare_vz",
             "", "V_{z}", "fraction");
   Overlay1D(dVz_p16id, dVz_p17id, "P16id", "P17id", hopts, coptslogy, FLAGS_outdir, "compare_dvz",
@@ -234,10 +336,68 @@ int main(int argc, char* argv[]) {
   
   LOG(INFO) << "probability to have 10 or more: " << dnglobal->Integral(dnglobal->GetXaxis()->FindBin(10), 200);
   LOG(INFO) << "probability to have 100 or more: " << dnglobal->Integral(dnglobal->GetXaxis()->FindBin(100), 200);
+ 
+  TProfile * nomP16Mult_avg = (TProfile*) nominalMult_p16->ProfileX();
+  TProfile * secP16Mult_avg = (TProfile*) closestMult_p16->ProfileX();
+  TProfile * nomP17Mult_avg = (TProfile*) nominalMult_p17->ProfileX();
+  TProfile * secP17Mult_avg = (TProfile*) closestMult_p17->ProfileX();
+
+  TProfile * nomP16DCA_avg = (TProfile*) nominalDCA_p16->ProfileX();
+  TProfile * secP16DCA_avg = (TProfile*) closestDCA_p16->ProfileX();
+  TProfile * nomP17DCA_avg = (TProfile*) nominalDCA_p17->ProfileX();
+  TProfile * secP17DCA_avg = (TProfile*) closestDCA_p17->ProfileX();
+  
+  TProfile * nomP16Pt_avg = (TProfile*) nominalPt_p16->ProfileX();
+  TProfile * secP16Pt_avg = (TProfile*) closestPt_p16->ProfileX();
+  TProfile * nomP17Pt_avg = (TProfile*) nominalPt_p17->ProfileX();
+  TProfile * secP17Pt_avg = (TProfile*) closestPt_p17->ProfileX();
+  
+  TProfile * p16dvz_avg = (TProfile*) dVzToNominal_p16->ProfileX();
+  TProfile * p17dvz_avg = (TProfile*) dVzToNominal_p17->ProfileX();
+  
+  p16dvz_avg->GetYaxis()->SetRangeUser(6, 24);
+  Overlay1D( p16dvz_avg, p17dvz_avg, "P16id", "P17id", hopts, copts, FLAGS_outdir, "dvz_avg", "",
+            "centrality", "<dV_{z} [cm]>");
+  Overlay1D( nomP16Mult_avg, nomP17Mult_avg, "P16id nominal", "P17id nominal", hopts, copts, FLAGS_outdir, "primary_mult_avg", "",
+            "centrality", "<N_{primary}>");
+  secP16Mult_avg->GetYaxis()->SetRangeUser(0, 100);
+  Overlay1D( secP16Mult_avg, secP17Mult_avg, "P16id secondary", "P17id secondary", hopts, copts, FLAGS_outdir, "secondary_mult_avg", "",
+            "centrality", "<N_{primary}>");
+  nomP16DCA_avg->GetYaxis()->SetRangeUser(0, 5);
+  Overlay1D( nomP16DCA_avg, nomP17DCA_avg, "P16id nominal", "P17id nominal", hopts, copts, FLAGS_outdir, "primary_dca_avg", "",
+            "centrality", "<DCA [cm]>");
+  secP16DCA_avg->GetYaxis()->SetRangeUser(0, 5);
+  Overlay1D( secP16DCA_avg, secP17DCA_avg, "P16id secondary", "P17id secondary", hopts, copts, FLAGS_outdir, "secondary_dca_avg", "",
+            "centrality", "<DCA [cm]>");
+  nomP16Pt_avg->GetYaxis()->SetRangeUser(0, 2);
+  Overlay1D( nomP16Pt_avg, nomP17Pt_avg, "P16id nominal", "P17id nominal", hopts, copts, FLAGS_outdir, "primary_pt_avg", "",
+            "centrality", "<p_{T}>");
+  secP16Pt_avg->GetYaxis()->SetRangeUser(0, 2);
+  Overlay1D( secP16Pt_avg, secP17Pt_avg, "P16id secondary", "P17id secondary", hopts, copts, FLAGS_outdir, "secondary_pt_avg", "",
+            "centrality", "<p_{T}>");
+  
+  TH1D* central_dvz_p16 = (TH1D*) dVzToNominal_p16->ProjectionY("tmp111", 1, 1);
+  TH1D* central_dvz_p17 = (TH1D*) dVzToNominal_p17->ProjectionY("tmp222", 1, 1);
+  
+  central_dvz_p16->Scale(1.0 / central_dvz_p16->Integral());
+  central_dvz_p17->Scale(1.0 / central_dvz_p17->Integral());
+  central_dvz_p16->GetYaxis()->SetRangeUser(0.0, 0.2);
+  Overlay1D(central_dvz_p16, central_dvz_p17, "P16id", "P17id", hopts, copts, FLAGS_outdir, "dvz_central", "", "dV_{z}", "fraction");
   
   gflags::ShutDownCommandLineFlags();
   return 0;
 }
+
+//template<typename H>
+// void Print2DSimple(H* h,
+//                    histogramOpts hopts,
+//                    canvasOpts copts,
+//                    std::string output_loc,
+//                    std::string output_name,
+//                    std::string canvas_title,
+//                    std::string x_axis_label,
+//                    std::string y_axis_label,
+//                    std::string opt = "COLZ")
 
 //void Overlay1D(H* h1,
 //               H* h2,
