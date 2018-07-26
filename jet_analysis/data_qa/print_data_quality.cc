@@ -80,6 +80,7 @@ int main(int argc, char* argv[]) {
   // easy lookup
   std::unordered_map<string, TH2D*> runid_refmult;
   std::unordered_map<string, TH2D*> runid_grefmult;
+  std::unordered_map<string, TH2D*> runid_nprim;
   std::unordered_map<string, TH2D*> zdc_refmult;
   std::unordered_map<string, TH2D*> bbc_refmult;
   std::unordered_map<string, TH2D*> zdc_grefmult;
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]) {
   for (auto prefix : prefixes) {
     runid_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidrefmult").c_str())});
     runid_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidgrefmult").c_str())});
+    runid_nprim.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidnprim").c_str())});
     zdc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcrefmult").c_str())});
     bbc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "bbcrefmult").c_str())});
     zdc_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcgrefmult").c_str())});
@@ -169,146 +171,148 @@ int main(int argc, char* argv[]) {
   // printing routines
   // -----------------
   
-  // event level
-  // -----------
-  TH2D* lumi_refmult = (TH2D*) zdc_refmult["pre"]->Clone("zdc_refmult_clone");
-  lumi_refmult->Add(zdc_refmult["low"]);
-  lumi_refmult->Add(zdc_refmult["mid"]);
-  lumi_refmult->Add(zdc_refmult["high"]);
-  TH1D* low_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_low", 1, 33);
-  low_lumi_refmult->Scale(1.0/low_lumi_refmult->Integral());
-  TH1D* mid_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_mid", 34, 66);
-  mid_lumi_refmult->Scale(1.0/mid_lumi_refmult->Integral());
-  TH1D* high_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_high", 67, 100);
-  high_lumi_refmult->Scale(1.0/high_lumi_refmult->Integral());
-  std::vector<TH1D*> lumi_refmult_bins{low_lumi_refmult, mid_lumi_refmult, high_lumi_refmult};
-  std::vector<string> lumi_refmult_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
-  Overlay1D(lumi_refmult_bins, lumi_refmult_bin_names, hOpts, cOpts, opts.out_dir, "lumirefmult", "",
-            "refMult", "fraction", "ZDC Rate");
   
-  // print refmult as a function of vz
-  TH2D* vz_ref = (TH2D*) vz_refmult["pre"]->Clone("vz_ref_clone");
-  vz_ref->Add(vz_refmult["low"]);
-  vz_ref->Add(vz_refmult["mid"]);
-  vz_ref->Add(vz_refmult["high"]);
-  TH1D* low_vz_refmult = (TH1D*) vz_ref->ProjectionY("_low", 1, 33);
-  low_vz_refmult->Scale(1.0/low_vz_refmult->Integral());
-  TH1D* mid_vz_refmult = (TH1D*) vz_ref->ProjectionY("_mid", 34, 66);
-  mid_vz_refmult->Scale(1.0/mid_vz_refmult->Integral());
-  TH1D* high_vz_refmult = (TH1D*) vz_ref->ProjectionY("_high", 67, 100);
-  high_vz_refmult->Scale(1.0/high_vz_refmult->Integral());
-  std::vector<TH1D*> vz_ref_bins{low_vz_refmult, mid_vz_refmult, high_vz_refmult};
-  std::vector<string> vz_ref_bin_names{"-30 < V_{z} < -10 cm",
-                                       "-10 < V_{z} < 10 cm",
-                                       "10 < V_{z} < 30 cm"};
-  Overlay1D(vz_ref_bins, vz_ref_bin_names, hOpts, cOpts, opts.out_dir, "vzrefmult", "",
-            "refMult", "fraction", "V_{z}");
   
-  // vz, vx, vy
-  TH2D* runid_vz_full = (TH2D*) runid_vz["pre"]->Clone("vz_full_clone");
-  runid_vz_full->Add(runid_vz["low"]);
-  runid_vz_full->Add(runid_vz["mid"]);
-  runid_vz_full->Add(runid_vz["high"]);
-  TProfile* vz_prof = (TProfile*) runid_vz_full->ProfileX("vz_runid_profile");
-  PrettyPrint1D(vz_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vz", "", "runID", "<V_{z}>");
-  
-  TH2D* runid_vx_full = (TH2D*) runid_vx["pre"]->Clone("vx_full_clone");
-  runid_vx_full->Add(runid_vx["low"]);
-  runid_vx_full->Add(runid_vx["mid"]);
-  runid_vx_full->Add(runid_vx["high"]);
-  TProfile* vx_prof = (TProfile*) runid_vx_full->ProfileX("vx_runid_profile");
-  PrettyPrint1D(vx_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vx", "", "runID", "<V_{x}>");
-  
-  TH2D* runid_vy_full = (TH2D*) runid_vy["pre"]->Clone("vy_full_clone");
-  runid_vy_full->Add(runid_vy["low"]);
-  runid_vy_full->Add(runid_vy["mid"]);
-  runid_vy_full->Add(runid_vy["high"]);
-  TProfile* vy_prof = (TProfile*) runid_vy_full->ProfileX("vy_runid_profile");
-  PrettyPrint1D(vy_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vy", "", "runID", "<V_{y}>");
-  
-  // Vz - VPD Vz as a function of luminosity
-  TH2D* zdc_dvz = (TH2D*) zdc_vzvpdvz["pre"]->Clone("zdc_dvz");
-  zdc_dvz->Add(zdc_vzvpdvz["low"]);
-  zdc_dvz->Add(zdc_vzvpdvz["mid"]);
-  zdc_dvz->Add(zdc_vzvpdvz["high"]);
-  TH1D* low_lumi_dvz = zdc_dvz->ProjectionY("_lowdvz", 1, 33);
-  low_lumi_dvz->Scale(1.0/low_lumi_dvz->Integral());
-  TH1D* mid_lumi_dvz = zdc_dvz->ProjectionY("_middvz", 34, 66);
-  mid_lumi_dvz->Scale(1.0/mid_lumi_dvz->Integral());
-  TH1D* high_lumi_dvz = zdc_dvz->ProjectionY("_highdvz", 67, 100);
-  high_lumi_dvz->Scale(1.0/high_lumi_dvz->Integral());
-  std::vector<TH1D*> lumi_dvz_bins{low_lumi_dvz, mid_lumi_dvz, high_lumi_dvz};
-  std::vector<string> lumi_dvz_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
-  Overlay1D(lumi_dvz_bins, lumi_dvz_bin_names, hOpts, cOpts, opts.out_dir, "lumidvz", "",
-            "V_{z} - VPD V_{z}", "fraction", "ZDC Rate");
-  
-
-  // tracks
-  // ------
-  
-  // average pt over time
-  TH2D* runid_pt_full = (TH2D*) runid_pt["pre"]->Clone("runid_pt_clone");
-  runid_pt_full->Add(runid_pt["low"]);
-  runid_pt_full->Add(runid_pt["mid"]);
-  runid_pt_full->Add(runid_pt["high"]);
-  TProfile* pt_prof = (TProfile*) runid_pt_full->ProfileX("runid_pt_profile_x");
-  PrettyPrint1D(pt_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_pt", "", "runID", "<p_{T}>");
-  
-  // pT spectrum with ratios
-  TH2D* zdc_pt_full = (TH2D*) zdc_pt["pre"]->Clone("zdc_pt_clone");
-  zdc_pt_full->Add(zdc_pt["low"]);
-  zdc_pt_full->Add(zdc_pt["mid"]);
-  zdc_pt_full->Add(zdc_pt["high"]);
-  TH1D* low_lumi_pt = zdc_pt_full->ProjectionY("_lowpt", 1, 20);
-  low_lumi_pt->RebinX(4);
-  low_lumi_pt->Scale(1.0/low_lumi_pt->Integral());
-  TH1D* mid_lumi_pt = zdc_pt_full->ProjectionY("_midpt", 21, 66);
-  mid_lumi_pt->RebinX(4);
-  mid_lumi_pt->Scale(1.0/mid_lumi_pt->Integral());
-  TH1D* high_lumi_pt = zdc_pt_full->ProjectionY("_highpt", 67, 100);
-  high_lumi_pt->RebinX(4);
-  high_lumi_pt->Scale(1.0/high_lumi_pt->Integral());
-  TH1D* y7_pt = (TH1D*) zdc_pt["y7"]->ProjectionY("y7_pt");
-  y7_pt->Scale(1.0/y7_pt->Integral());
-  std::vector<TH1D*> tmp_vec{mid_lumi_pt, high_lumi_pt};
-  std::vector<string> tmp_vec_name{"21-66 kHz", "67-100 kHz"};
-  PrintWithRatios(low_lumi_pt, tmp_vec, "0-20 kHz", tmp_vec_name, hOpts, cOpts, opts.out_dir,
-                  "pt_zdc", "", "p_{T}", "fraction", "ZDC Rate");
-  
-  // barrel calorimeter
-  // ------------------
-  
-  // average tower E_{T}, y14 only
-  TH2D* y14_e = (TH2D*) tow_towe["pre"]->Clone("y14et");
-  y14_e->Add(tow_towe["low"]);
-  y14_e->Add(tow_towe["mid"]);
-  y14_e->Add(tow_towe["high"]);
-  TProfile* y14_avg_e = (TProfile*) y14_e->ProfileX();
-  PrettyPrint1D(y14_avg_e, hOpts, cOptsNoLeg, "", opts.out_dir, "tow_avg_e", "", "towerID", "<E>");
-  
-  // average tower energy as a function of run day
-  TH2D* runid_e = (TH2D*) runid_towe["pre"]->Clone("y14runide");
-  runid_e->Add(runid_towe["low"]);
-  runid_e->Add(runid_towe["mid"]);
-  runid_e->Add(runid_towe["high"]);
-  TProfile* y14_runid_avg_e = (TProfile*) runid_e->ProfileX();
-  PrettyPrint1D(y14_runid_avg_e, hOpts, cOptsNoLeg, "", opts.out_dir, "runid_avg_e", "", "runID", "<E>");
-  
-  // eT spectra
-  TH2D* zdc_et = (TH2D*) zdc_towet["pre"]->Clone("y14zdcet");
-  zdc_et->Add(zdc_towet["low"]);
-  zdc_et->Add(zdc_towet["mid"]);
-  zdc_et->Add(zdc_towet["high"]);
-  TH1D* low_lumi_et = zdc_et->ProjectionY("_lowet", 1, 33);
-  low_lumi_et->Scale(1.0/low_lumi_et->Integral());
-  TH1D* mid_lumi_et = zdc_et->ProjectionY("_midet", 34, 66);
-  mid_lumi_et->Scale(1.0/mid_lumi_et->Integral());
-  TH1D* high_lumi_et = zdc_et->ProjectionY("_highet", 67, 100);
-  high_lumi_et->Scale(1.0/high_lumi_et->Integral());
-  std::vector<TH1D*> lumi_et_bins{low_lumi_et, mid_lumi_et, high_lumi_et};
-  std::vector<string> lumi_et_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
-  Overlay1D(lumi_et_bins, lumi_et_bin_names, hOpts, cOpts, opts.out_dir, "lumiet", "",
-            "E_{T}", "fraction", "ZDC Rate");
+//  // event level
+//  // -----------
+//  TH2D* lumi_refmult = (TH2D*) zdc_refmult["pre"]->Clone("zdc_refmult_clone");
+//  lumi_refmult->Add(zdc_refmult["low"]);
+//  lumi_refmult->Add(zdc_refmult["mid"]);
+//  lumi_refmult->Add(zdc_refmult["high"]);
+//  TH1D* low_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_low", 1, 33);
+//  low_lumi_refmult->Scale(1.0/low_lumi_refmult->Integral());
+//  TH1D* mid_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_mid", 34, 66);
+//  mid_lumi_refmult->Scale(1.0/mid_lumi_refmult->Integral());
+//  TH1D* high_lumi_refmult = (TH1D*) lumi_refmult->ProjectionY("_high", 67, 100);
+//  high_lumi_refmult->Scale(1.0/high_lumi_refmult->Integral());
+//  std::vector<TH1D*> lumi_refmult_bins{low_lumi_refmult, mid_lumi_refmult, high_lumi_refmult};
+//  std::vector<string> lumi_refmult_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
+//  Overlay1D(lumi_refmult_bins, lumi_refmult_bin_names, hOpts, cOpts, opts.out_dir, "lumirefmult", "",
+//            "refMult", "fraction", "ZDC Rate");
+//
+//  // print refmult as a function of vz
+//  TH2D* vz_ref = (TH2D*) vz_refmult["pre"]->Clone("vz_ref_clone");
+//  vz_ref->Add(vz_refmult["low"]);
+//  vz_ref->Add(vz_refmult["mid"]);
+//  vz_ref->Add(vz_refmult["high"]);
+//  TH1D* low_vz_refmult = (TH1D*) vz_ref->ProjectionY("_low", 1, 33);
+//  low_vz_refmult->Scale(1.0/low_vz_refmult->Integral());
+//  TH1D* mid_vz_refmult = (TH1D*) vz_ref->ProjectionY("_mid", 34, 66);
+//  mid_vz_refmult->Scale(1.0/mid_vz_refmult->Integral());
+//  TH1D* high_vz_refmult = (TH1D*) vz_ref->ProjectionY("_high", 67, 100);
+//  high_vz_refmult->Scale(1.0/high_vz_refmult->Integral());
+//  std::vector<TH1D*> vz_ref_bins{low_vz_refmult, mid_vz_refmult, high_vz_refmult};
+//  std::vector<string> vz_ref_bin_names{"-30 < V_{z} < -10 cm",
+//                                       "-10 < V_{z} < 10 cm",
+//                                       "10 < V_{z} < 30 cm"};
+//  Overlay1D(vz_ref_bins, vz_ref_bin_names, hOpts, cOpts, opts.out_dir, "vzrefmult", "",
+//            "refMult", "fraction", "V_{z}");
+//
+//  // vz, vx, vy
+//  TH2D* runid_vz_full = (TH2D*) runid_vz["pre"]->Clone("vz_full_clone");
+//  runid_vz_full->Add(runid_vz["low"]);
+//  runid_vz_full->Add(runid_vz["mid"]);
+//  runid_vz_full->Add(runid_vz["high"]);
+//  TProfile* vz_prof = (TProfile*) runid_vz_full->ProfileX("vz_runid_profile");
+//  PrettyPrint1D(vz_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vz", "", "runID", "<V_{z}>");
+//
+//  TH2D* runid_vx_full = (TH2D*) runid_vx["pre"]->Clone("vx_full_clone");
+//  runid_vx_full->Add(runid_vx["low"]);
+//  runid_vx_full->Add(runid_vx["mid"]);
+//  runid_vx_full->Add(runid_vx["high"]);
+//  TProfile* vx_prof = (TProfile*) runid_vx_full->ProfileX("vx_runid_profile");
+//  PrettyPrint1D(vx_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vx", "", "runID", "<V_{x}>");
+//
+//  TH2D* runid_vy_full = (TH2D*) runid_vy["pre"]->Clone("vy_full_clone");
+//  runid_vy_full->Add(runid_vy["low"]);
+//  runid_vy_full->Add(runid_vy["mid"]);
+//  runid_vy_full->Add(runid_vy["high"]);
+//  TProfile* vy_prof = (TProfile*) runid_vy_full->ProfileX("vy_runid_profile");
+//  PrettyPrint1D(vy_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_vy", "", "runID", "<V_{y}>");
+//
+//  // Vz - VPD Vz as a function of luminosity
+//  TH2D* zdc_dvz = (TH2D*) zdc_vzvpdvz["pre"]->Clone("zdc_dvz");
+//  zdc_dvz->Add(zdc_vzvpdvz["low"]);
+//  zdc_dvz->Add(zdc_vzvpdvz["mid"]);
+//  zdc_dvz->Add(zdc_vzvpdvz["high"]);
+//  TH1D* low_lumi_dvz = zdc_dvz->ProjectionY("_lowdvz", 1, 33);
+//  low_lumi_dvz->Scale(1.0/low_lumi_dvz->Integral());
+//  TH1D* mid_lumi_dvz = zdc_dvz->ProjectionY("_middvz", 34, 66);
+//  mid_lumi_dvz->Scale(1.0/mid_lumi_dvz->Integral());
+//  TH1D* high_lumi_dvz = zdc_dvz->ProjectionY("_highdvz", 67, 100);
+//  high_lumi_dvz->Scale(1.0/high_lumi_dvz->Integral());
+//  std::vector<TH1D*> lumi_dvz_bins{low_lumi_dvz, mid_lumi_dvz, high_lumi_dvz};
+//  std::vector<string> lumi_dvz_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
+//  Overlay1D(lumi_dvz_bins, lumi_dvz_bin_names, hOpts, cOpts, opts.out_dir, "lumidvz", "",
+//            "V_{z} - VPD V_{z}", "fraction", "ZDC Rate");
+//
+//
+//  // tracks
+//  // ------
+//
+//  // average pt over time
+//  TH2D* runid_pt_full = (TH2D*) runid_pt["pre"]->Clone("runid_pt_clone");
+//  runid_pt_full->Add(runid_pt["low"]);
+//  runid_pt_full->Add(runid_pt["mid"]);
+//  runid_pt_full->Add(runid_pt["high"]);
+//  TProfile* pt_prof = (TProfile*) runid_pt_full->ProfileX("runid_pt_profile_x");
+//  PrettyPrint1D(pt_prof, hOpts, cOptsNoLeg, "", opts.out_dir, "run_avg_pt", "", "runID", "<p_{T}>");
+//
+//  // pT spectrum with ratios
+//  TH2D* zdc_pt_full = (TH2D*) zdc_pt["pre"]->Clone("zdc_pt_clone");
+//  zdc_pt_full->Add(zdc_pt["low"]);
+//  zdc_pt_full->Add(zdc_pt["mid"]);
+//  zdc_pt_full->Add(zdc_pt["high"]);
+//  TH1D* low_lumi_pt = zdc_pt_full->ProjectionY("_lowpt", 1, 20);
+//  low_lumi_pt->RebinX(4);
+//  low_lumi_pt->Scale(1.0/low_lumi_pt->Integral());
+//  TH1D* mid_lumi_pt = zdc_pt_full->ProjectionY("_midpt", 21, 66);
+//  mid_lumi_pt->RebinX(4);
+//  mid_lumi_pt->Scale(1.0/mid_lumi_pt->Integral());
+//  TH1D* high_lumi_pt = zdc_pt_full->ProjectionY("_highpt", 67, 100);
+//  high_lumi_pt->RebinX(4);
+//  high_lumi_pt->Scale(1.0/high_lumi_pt->Integral());
+//  TH1D* y7_pt = (TH1D*) zdc_pt["y7"]->ProjectionY("y7_pt");
+//  y7_pt->Scale(1.0/y7_pt->Integral());
+//  std::vector<TH1D*> tmp_vec{mid_lumi_pt, high_lumi_pt};
+//  std::vector<string> tmp_vec_name{"21-66 kHz", "67-100 kHz"};
+//  PrintWithRatios(low_lumi_pt, tmp_vec, "0-20 kHz", tmp_vec_name, hOpts, cOpts, opts.out_dir,
+//                  "pt_zdc", "", "p_{T}", "fraction", "ZDC Rate");
+//
+//  // barrel calorimeter
+//  // ------------------
+//
+//  // average tower E_{T}, y14 only
+//  TH2D* y14_e = (TH2D*) tow_towe["pre"]->Clone("y14et");
+//  y14_e->Add(tow_towe["low"]);
+//  y14_e->Add(tow_towe["mid"]);
+//  y14_e->Add(tow_towe["high"]);
+//  TProfile* y14_avg_e = (TProfile*) y14_e->ProfileX();
+//  PrettyPrint1D(y14_avg_e, hOpts, cOptsNoLeg, "", opts.out_dir, "tow_avg_e", "", "towerID", "<E>");
+//
+//  // average tower energy as a function of run day
+//  TH2D* runid_e = (TH2D*) runid_towe["pre"]->Clone("y14runide");
+//  runid_e->Add(runid_towe["low"]);
+//  runid_e->Add(runid_towe["mid"]);
+//  runid_e->Add(runid_towe["high"]);
+//  TProfile* y14_runid_avg_e = (TProfile*) runid_e->ProfileX();
+//  PrettyPrint1D(y14_runid_avg_e, hOpts, cOptsNoLeg, "", opts.out_dir, "runid_avg_e", "", "runID", "<E>");
+//
+//  // eT spectra
+//  TH2D* zdc_et = (TH2D*) zdc_towet["pre"]->Clone("y14zdcet");
+//  zdc_et->Add(zdc_towet["low"]);
+//  zdc_et->Add(zdc_towet["mid"]);
+//  zdc_et->Add(zdc_towet["high"]);
+//  TH1D* low_lumi_et = zdc_et->ProjectionY("_lowet", 1, 33);
+//  low_lumi_et->Scale(1.0/low_lumi_et->Integral());
+//  TH1D* mid_lumi_et = zdc_et->ProjectionY("_midet", 34, 66);
+//  mid_lumi_et->Scale(1.0/mid_lumi_et->Integral());
+//  TH1D* high_lumi_et = zdc_et->ProjectionY("_highet", 67, 100);
+//  high_lumi_et->Scale(1.0/high_lumi_et->Integral());
+//  std::vector<TH1D*> lumi_et_bins{low_lumi_et, mid_lumi_et, high_lumi_et};
+//  std::vector<string> lumi_et_bin_names{"0-33 kHz", "34-66 kHz", "67-100 kHz"};
+//  Overlay1D(lumi_et_bins, lumi_et_bin_names, hOpts, cOpts, opts.out_dir, "lumiet", "",
+//            "E_{T}", "fraction", "ZDC Rate");
   
   return 0;
 }
