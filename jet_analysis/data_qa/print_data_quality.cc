@@ -21,11 +21,11 @@ using std::string;
 struct Options {
   string input       = "";       /* root file/root file list*/
   string out_dir     = "tmp";    /* directory to save output in */
-  bool   use_y7      = true;     /* whether or not to include y7 comparisons */
+  bool   use_y7      = false;    /* whether or not to include y7 comparisons */
   bool   use_high    = true;     /* flag to include high luminosity y14 data */
   bool   use_mid     = true;     /* flag to include mid luminosity y14 data */
   bool   use_low     = true;     /* flag to include low luminosity y14 data */
-  bool   use_pre     = true;     /* flag to include AuAu_200_production_2014 data */
+  bool   use_pre     = false;    /* flag to include AuAu_200_production_2014 data */
 };
 
 int main(int argc, char* argv[]) {
@@ -81,6 +81,7 @@ int main(int argc, char* argv[]) {
   std::unordered_map<string, TH2D*> runid_refmult;
   std::unordered_map<string, TH2D*> runid_grefmult;
   std::unordered_map<string, TH2D*> runid_nprim;
+  std::unordered_map<string, TH2D*> runid_nglob;
   std::unordered_map<string, TH2D*> zdc_refmult;
   std::unordered_map<string, TH2D*> bbc_refmult;
   std::unordered_map<string, TH2D*> zdc_grefmult;
@@ -126,6 +127,7 @@ int main(int argc, char* argv[]) {
     runid_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidrefmult").c_str())});
     runid_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidgrefmult").c_str())});
     runid_nprim.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidnprim").c_str())});
+    runid_nglob.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "runidnglob").c_str())});
     zdc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcrefmult").c_str())});
     bbc_refmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "bbcrefmult").c_str())});
     zdc_grefmult.insert({prefix, (TH2D*) input.Get(MakeString(prefix, "zdcgrefmult").c_str())});
@@ -171,7 +173,53 @@ int main(int argc, char* argv[]) {
   // printing routines
   // -----------------
   
+  // first, nprimary vs runid
+  std::vector<TProfile*> runid_nprim_avg_set;
+  std::vector<std::string> runid_nprim_avg_prefix;
+  if (opts.use_high) {
+    runid_nprim_avg_set.push_back((TProfile*) runid_nprim["high"]->ProfileX());
+    runid_nprim_avg_prefix.push_back("high");
+  }
+  if (opts.use_low) {
+    runid_nprim_avg_set.push_back((TProfile*) runid_nprim["low"]->ProfileX());
+    runid_nprim_avg_prefix.push_back("low");
+  }
+  if (opts.use_mid) {
+    runid_nprim_avg_set.push_back((TProfile*) runid_nprim["mid"]->ProfileX());
+    runid_nprim_avg_prefix.push_back("mid");
+  }
+  if (opts.use_pre) {
+    runid_nprim_avg_set.push_back((TProfile*) runid_nprim["pre"]->ProfileX());
+    runid_nprim_avg_prefix.push_back("pre");
+  }
+  runid_nprim_avg_set[0]->GetXaxis()->SetRangeUser(1200, 1400);
+  runid_nprim_avg_set[0]->GetYaxis()->SetRangeUser(200, 500);
+  Overlay1D(runid_nprim_avg_set, runid_nprim_avg_prefix, hOpts, cOpts, opts.out_dir, "runidnprim",
+            "", "run ID", "<N_{primary}>", "", false);
   
+  // then, nglobal vs runid
+  std::vector<TProfile*> runid_nglob_avg_set;
+  std::vector<std::string> runid_nglob_avg_prefix;
+  if (opts.use_high) {
+    runid_nglob_avg_set.push_back((TProfile*) runid_nglob["high"]->ProfileX());
+    runid_nglob_avg_prefix.push_back("high");
+  }
+  if (opts.use_low) {
+    runid_nglob_avg_set.push_back((TProfile*) runid_nglob["low"]->ProfileX());
+    runid_nglob_avg_prefix.push_back("low");
+  }
+  if (opts.use_mid) {
+    runid_nglob_avg_set.push_back((TProfile*) runid_nglob["mid"]->ProfileX());
+    runid_nglob_avg_prefix.push_back("mid");
+  }
+  if (opts.use_pre) {
+    runid_nglob_avg_set.push_back((TProfile*) runid_nglob["pre"]->ProfileX());
+    runid_nglob_avg_prefix.push_back("pre");
+  }
+  runid_nglob_avg_set[0]->GetXaxis()->SetRangeUser(1200, 1400);
+  runid_nglob_avg_set[0]->GetYaxis()->SetRangeUser(1000, 2500);
+  Overlay1D(runid_nglob_avg_set, runid_nglob_avg_prefix, hOpts, cOpts, opts.out_dir, "runidnglob",
+            "", "run ID", "<N_{global}>", "", false);
   
 //  // event level
 //  // -----------
