@@ -130,4 +130,26 @@ std::set<T> ParseArgString(std::string str) {
   return ret;
 }
 
+template<typename T>
+std::vector<T> ParseArgStringToVec(std::string str) {
+  std::vector<T> ret;
+  
+  // remove all spaces
+  str.erase(patch::remove_if(str.begin(), str.end(), ::isspace), str.end());
+  
+  std::string token;
+  while ( str.find(",") != std::string::npos ) {
+    size_t pos = str.find(",");
+    token = str.substr(0, pos);
+    if (CanCast<T>(token)) {
+      ret.push_back(CastTo<T>(token));
+      str.erase(0, pos + 1);
+    }
+  }
+  if (CanCast<T>(str))
+    ret.push_back(CastTo<T>(str));
+  
+  return ret;
+}
+
 #endif // ARG_HELPER_HH

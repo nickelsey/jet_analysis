@@ -82,6 +82,12 @@ add_executable(p16id_p17id_compare ${P17_P16_SRCS})
 target_link_libraries(p16id_p17id_compare ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
 set_target_properties(p16id_p17id_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## compare multiple y14 productions
+set(RUN14_COMPARE_SRCS compare_y14_productions.cc)
+add_executable(compare_y14_productions ${RUN14_COMPARE_SRCS})
+target_link_libraries(compare_y14_productions ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(compare_y14_productions PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
 
 #########################################
 ## install targets
@@ -97,5 +103,5 @@ install(TARGETS compare_auau compare_auau_print
         DESTINATION bin/data_qa)
 install(TARGETS global_primary nglobal_cut_pt_spectra
         DESTINATION bin/data_qa)
-install(TARGETS p16id_p17id_compare
+install(TARGETS p16id_p17id_compare compare_y14_productions
         DESTINATION bin/data_qa)
