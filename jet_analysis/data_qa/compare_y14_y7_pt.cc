@@ -53,7 +53,8 @@ void PrintForCentralityRatio(std::vector<TH1D*> y7, std::vector<TH1D*> y14, hist
   }
 }
 
-void PrintForCentrality(std::vector<TH1D*> y7, std::vector<TH1D*> y14, histogramOpts hOpts, canvasOpts cOpts,
+template<class H>
+void PrintForCentrality(std::vector<H*> y7, std::vector<H*> y14, histogramOpts hOpts, canvasOpts cOpts,
                string out_dir, string name, string canvas_name, string x_axis, string y_axis) {
   for (int i = 0; i < y7.size(); ++i) {
     std::string cent_name = name + MakeString(i).c_str();
@@ -165,6 +166,10 @@ int main(int argc, char* argv[]) {
     y7_eff[i] = (TProfile*) input_y7.Get(name.c_str());
   }
   
+  // print efficiencies
+  PrintForCentrality(y7_eff, y14_eff, hOpts, cOpts, opts.out_dir, "efficiency", "",
+                     "p_{T}", "<efficiency>");
+  
   // do refmult first
   auto y7_ref_cent = ProjectXByBin(y7_refmult, "y7refmult", true);
   auto y14_ref_cent = ProjectXByBin(y14_refmult, "y14reftmult", true);
@@ -222,6 +227,16 @@ int main(int argc, char* argv[]) {
   PrintForCentrality(y7_nhitfrac_cent, y14_nhitfrac_cent, hOpts, cOptsBottomLeftLeg, opts.out_dir, "nhitsfrac", "",
                      "fit points / possible", "fraction");
   
+  
+  // test
+  TProfile* py14 = y14_eff[0];
+  TProfile* py7  = y7_eff[0];
+  
+  // ratio
+  py7->Divide(py14);
+  y14_pt_corr_cent[0]->Divide(py7);
+  PrintWithRatio(y7_pt_corr_cent[0], y14_pt_corr_cent[0], "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "testname",
+                 "", "p_T", "1/N");
   
   
 //  // normalize

@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <random>
+#include <iostream>
 
 bool CheckDijetDefinition(DijetDefinition def, fastjet::JetAlgorithm lead_alg, fastjet::JetAlgorithm sub_alg,
                           double lead_R, double sub_R, double lead_pt, double sub_pt, double lead_const_init_pt,
@@ -26,8 +27,8 @@ bool CheckDijetDefinition(DijetDefinition def, fastjet::JetAlgorithm lead_alg, f
                           fastjet::AreaType area_type, int ghost_repeat, double ghost_area, double grid_scatter,
                           double pt_scatter, double mean_ghost_pt, fastjet::JetDefinition bkg_def,
                           fastjet::AreaDefinition bkg_area_lead, fastjet::AreaDefinition bkg_area_sub) {
-  std::shared_ptr<MatchDef> lead = def.lead;
-  std::shared_ptr<MatchDef> sub = def.sub;
+  MatchDef* lead = def.lead;
+  MatchDef* sub = def.sub;
   
   // check the leading jet
   if (lead->InitialJetDef().R() != lead_R ||
@@ -274,11 +275,13 @@ int main () {
       dijet_worker_output.lead_hard.phi() != leading_jet.phi() ||
       dijet_worker_output.lead_hard.m() != leading_jet.m())
     return 1;
+  
   if (dijet_worker_output.sublead_hard.pt() != subleading_jet.pt() ||
       dijet_worker_output.sublead_hard.eta() != subleading_jet.eta() ||
       dijet_worker_output.sublead_hard.phi() != subleading_jet.phi() ||
       dijet_worker_output.sublead_hard.m() != subleading_jet.m())
     return 1;
+  
   if (fabs(dijet_worker_output.lead_hard.area() - leading_jet.area()) > 0.001 ||
       fabs(dijet_worker_output.sublead_hard.area() != subleading_jet.area()) > 0.001 )
     return 1;
@@ -324,6 +327,7 @@ int main () {
   
   if (matched_to_lead.size() == 0 || matched_to_sublead.size() == 0)
     return 1;
+  
   
   fastjet::PseudoJet matched_lead_jet =  matched_to_lead[0];
   fastjet::PseudoJet matched_sublead_jet =  matched_to_sublead[0];

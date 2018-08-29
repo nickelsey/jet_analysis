@@ -1,4 +1,4 @@
-#include "jet_analysis/dijet_worker/dijet_matrix.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/dijet_matrix.hh"
 #include "jet_analysis/util/selector_compare.hh"
 
 #include "fastjet/JetDefinition.hh"
@@ -14,8 +14,8 @@ bool CheckDijetDefinition(DijetDefinition def, fastjet::JetAlgorithm lead_alg, f
                           fastjet::AreaType area_type, int ghost_repeat, double ghost_area, double grid_scatter,
                           double pt_scatter, double mean_ghost_pt, fastjet::JetDefinition bkg_def,
                           fastjet::AreaDefinition bkg_area_lead, fastjet::AreaDefinition bkg_area_sub) {
-  std::shared_ptr<MatchDef> lead = def.lead;
-  std::shared_ptr<MatchDef> sub = def.sub;
+  MatchDef* lead = def.lead;
+  MatchDef* sub = def.sub;
   
   // check the leading jet
   if (lead->InitialJetDef().R() != lead_R ||

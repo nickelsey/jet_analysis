@@ -1,7 +1,7 @@
 #include "jet_analysis/util/dijet_key.hh"
-#include "jet_analysis/dijet_worker/jet_def.hh"
-#include "jet_analysis/dijet_worker/match_def.hh"
-#include "jet_analysis/dijet_worker/dijet_definition.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/jet_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/dijet_definition.hh"
 
 #include <iostream>
 
@@ -26,8 +26,8 @@ int main() {
   JetDef def_D(fastjet::antikt_algorithm, 0.7);
   def_D.SetConstituentSelector(const_sel);
   
-  auto match_A = std::make_shared<MatchDef>(def_A, def_B, 0.4);
-  auto match_B = std::make_shared<MatchDef>(def_C, def_D, 0.6);
+  MatchDef* match_A = new MatchDef(def_A, def_B, 0.4);
+  MatchDef* match_B = new MatchDef(def_C, def_D, 0.6);
   
   DijetDefinition dijet_A(match_A, match_B);
   

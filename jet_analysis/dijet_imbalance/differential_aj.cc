@@ -657,12 +657,12 @@ int main(int argc, char* argv[]) {
         }
         
         // run the worker
-        auto worker_out = worker.Run(input);
+        auto& worker_out = worker.Run(input);
         
         // process any found di-jet pairs
-        for (auto result : worker_out) {
+        for (auto& result : worker_out) {
           std::string key = result.first;
-          ClusterOutput out = result.second;
+          ClusterOutput& out = result.second;
           
           if (out.found_lead)
             lead_jet_count_dict[key]->Fill(header->GetReferenceMultiplicity());

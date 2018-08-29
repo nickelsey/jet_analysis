@@ -59,6 +59,12 @@ add_executable(print_results_with_systematics_qm ${PRINT_AUAU_PP_SYS_QM_SRC})
 target_link_libraries(print_results_with_systematics_qm ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(print_results_with_systematics_qm PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/dijet_imbalance)
 
+## test macro
+set(COMPARE_WORKER_SRCS compare_worker_output.cc)
+add_executable(compare_worker_output ${COMPARE_WORKER_SRCS})
+target_link_libraries(compare_worker_output ${ROOT_LIBRARIES} ${Boost_LIBRARIES}  Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(compare_worker_output PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/dijet_imbalance)
+
 #########################################
 ## install targets
 install(TARGETS basic_dijet_imbalance
@@ -76,4 +82,6 @@ install(TARGETS print_auau_pp_results
 install(TARGETS print_results_with_systematics
         DESTINATION bin/dijet_imbalance)
 install(TARGETS print_results_with_systematics_qm
+        DESTINATION bin/dijet_imbalance)
+install(TARGETS compare_worker_output
         DESTINATION bin/dijet_imbalance)

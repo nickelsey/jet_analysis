@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string>
 
-#include "jet_analysis/dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/jet_def.hh"
 
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/AreaDefinition.hh"
@@ -103,5 +103,26 @@ int main() {
       full_def.CanBackgroundSub() != true)
     return 1;
   
+  // now test our EquivalentCluster algorithm
+  // which should be false for any difference between
+  // two jetdefs EXCEPT for jet selectors
+  JetDef equivalent1;
+  JetDef equivalent2;
+  
+  if (!equivalent1.EquivalentCluster(equivalent2))
+    return 1;
+  
+  JetDef equivalent3(fastjet::antikt_algorithm, 0.4);
+  JetDef equivalent4(fastjet::antikt_algorithm, 0.5);
+  JetDef equivalent5(fastjet::kt_algorithm, 0.4);
+  
+  if (equivalent3.EquivalentCluster(equivalent4))
+    return 1;
+  if (equivalent3.EquivalentCluster(equivalent5))
+    return 1;
+  if (equivalent4.EquivalentCluster(equivalent5))
+    return 1;
+  
   return 0;
 }
+

@@ -76,11 +76,11 @@ add_executable(nglobal_cut_pt_spectra ${NGLOBAL_PT_SRCS})
 target_link_libraries(nglobal_cut_pt_spectra ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality)
 set_target_properties(nglobal_cut_pt_spectra PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
-## compare P16id and P17id production
-set(P17_P16_SRCS p16id_p17id_compare.cc)
-add_executable(p16id_p17id_compare ${P17_P16_SRCS})
-target_link_libraries(p16id_p17id_compare ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
-set_target_properties(p16id_p17id_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+## compare vertexing in multiple productions
+set(RUN14_VERTEX_SRCS run14_vertex_comparison.cc)
+add_executable(run14_vertex_comparison ${RUN14_VERTEX_SRCS})
+target_link_libraries(run14_vertex_comparison ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(run14_vertex_comparison PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 ## compare multiple y14 productions
 set(RUN14_COMPARE_SRCS compare_y14_productions.cc)
@@ -88,6 +88,17 @@ add_executable(compare_y14_productions ${RUN14_COMPARE_SRCS})
 target_link_libraries(compare_y14_productions ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
 set_target_properties(compare_y14_productions PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## ANOTHER pT comparison macro
+set(GEN_14_7_COMPARE_SRCS generate_y14_y7_compare.cc)
+add_executable(generate_y14_y7_compare ${GEN_14_7_COMPARE_SRCS})
+target_link_libraries(generate_y14_y7_compare ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(generate_y14_y7_compare PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+## track quality quick
+set(TRACK_QUALITY_SRCS track_quality_quick.cc)
+add_executable(track_quality_quick ${TRACK_QUALITY_SRCS})
+target_link_libraries(track_quality_quick ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(track_quality_quick PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
 #########################################
 ## install targets
@@ -103,5 +114,7 @@ install(TARGETS compare_auau compare_auau_print
         DESTINATION bin/data_qa)
 install(TARGETS global_primary nglobal_cut_pt_spectra
         DESTINATION bin/data_qa)
-install(TARGETS p16id_p17id_compare compare_y14_productions
+install(TARGETS run14_vertex_comparison compare_y14_productions
+        DESTINATION bin/data_qa)
+install(TARGETS generate_y14_y7_compare track_quality_quick
         DESTINATION bin/data_qa)

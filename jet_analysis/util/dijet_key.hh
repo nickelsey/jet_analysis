@@ -7,9 +7,9 @@
 #include <sstream>
 #include <iomanip>
 
-#include "jet_analysis/dijet_worker/dijet_definition.hh"
-#include "jet_analysis/dijet_worker/jet_def.hh"
-#include "jet_analysis/dijet_worker/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/dijet_definition.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/jet_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/match_def.hh"
 
 #include "jet_analysis/util/selector_compare.hh"
 
@@ -18,8 +18,8 @@ std::string MakeKeyFromDijetDefinition(const DijetDefinition& def) {
   
   
   
-  std::shared_ptr<MatchDef> lead_match = def.lead;
-  std::shared_ptr<MatchDef> sub_match = def.sub;
+  MatchDef* lead_match = def.lead;
+  MatchDef* sub_match = def.sub;
   
   // get all the values we will need
   std::string leadInitR, leadInitAlg, leadInitPt, subInitR, subInitAlg, subInitPt;

@@ -121,8 +121,8 @@ std::set<T> ParseArgString(std::string str) {
     token = str.substr(0, pos);
     if (CanCast<T>(token)) {
       ret.insert(CastTo<T>(token));
-      str.erase(0, pos + 1);
     }
+    str.erase(0, pos + 1);
   }
   if (CanCast<T>(str))
     ret.insert(CastTo<T>(str));
@@ -143,8 +143,8 @@ std::vector<T> ParseArgStringToVec(std::string str) {
     token = str.substr(0, pos);
     if (CanCast<T>(token)) {
       ret.push_back(CastTo<T>(token));
-      str.erase(0, pos + 1);
     }
+    str.erase(0, pos + 1);
   }
   if (CanCast<T>(str))
     ret.push_back(CastTo<T>(str));

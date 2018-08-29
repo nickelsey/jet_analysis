@@ -1,13 +1,14 @@
-#include "jet_analysis/dijet_worker/jet_def.hh"
-#include "jet_analysis/dijet_worker/match_def.hh"
-#include "jet_analysis/dijet_worker/dijet_definition.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/jet_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/dijet_definition.hh"
+#include "jet_analysis/util/make_unique.h"
 
 int main() {
 
   DijetDefinition default_def;
-
-  if (*default_def.lead != MatchDef() ||
-      *default_def.sub != MatchDef())
+  
+  if (default_def.lead != nullptr ||
+      default_def.sub != nullptr)
     return 1;
   
   if (default_def.IsValid() != false ||
@@ -15,12 +16,12 @@ int main() {
     return 1;
   
   JetDef valid_jetdef(fastjet::antikt_algorithm, 0.4);
-  std::shared_ptr<MatchDef> valid_matchdef =
-      std::make_shared<MatchDef>(valid_jetdef, valid_jetdef);
-  DijetDefinition valid_dijetdef(valid_matchdef, valid_matchdef);
+  MatchDef* valid_matchdef1 = new MatchDef(valid_jetdef, valid_jetdef);
+  MatchDef* valid_matchdef2 = new MatchDef(valid_jetdef, valid_jetdef);
+  DijetDefinition valid_dijetdef(valid_matchdef1, valid_matchdef2);
   
-  if (*valid_dijetdef.lead != *valid_matchdef ||
-      *valid_dijetdef.sub != *valid_matchdef)
+  if (*valid_dijetdef.lead != *valid_matchdef1 ||
+      *valid_dijetdef.sub != *valid_matchdef2)
     return 1;
   
   if (valid_dijetdef.IsValid() != true ||
@@ -28,8 +29,7 @@ int main() {
     return 1;
   
   JetDef default_jetdef;
-  std::shared_ptr<MatchDef> valid_matchdef_no_matching =
-      std::make_shared<MatchDef>(valid_jetdef, default_jetdef);
+  MatchDef* valid_matchdef_no_matching = new MatchDef(valid_jetdef, default_jetdef);
   DijetDefinition valid_dijetdef_no_matching(valid_matchdef_no_matching, valid_matchdef_no_matching);
   if (valid_dijetdef_no_matching.IsValid() != true ||
       valid_dijetdef_no_matching.DoMatching() != false)

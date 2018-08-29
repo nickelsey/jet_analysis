@@ -51,7 +51,6 @@ set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable benchmark testing.")
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "Disable benchmark install to avoid overwriting.")
 add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/benchmark)
 include_directories(${PROJECT_SOURCE_DIR}/third_party/benchmark/include)
-list(APPEND SFD_DEPENDENCY_LIBS benchmark)
 
 # restore the build shared libs option.
 set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS})

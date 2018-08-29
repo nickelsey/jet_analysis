@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <memory>
 
-#include "jet_analysis/dijet_worker/dijet_matrix.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/dijet_matrix.hh"
 
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
@@ -22,7 +22,7 @@ struct ClusterOutput {
         found_sublead(false),
         found_match(false) { }
   
-  ClusterOutput(std::shared_ptr<DijetDefinition> def) :
+  ClusterOutput(DijetDefinition* def) :
         dijet_def(def),
         found_lead(false),
         found_sublead(false),
@@ -30,7 +30,7 @@ struct ClusterOutput {
   
   inline bool FoundDijet() {return found_match;}
   
-  std::shared_ptr<DijetDefinition> dijet_def;
+  DijetDefinition* dijet_def;
   
   bool found_lead;
   bool found_sublead;
@@ -51,8 +51,6 @@ struct ClusterOutput {
   fastjet::PseudoJet sublead_match;
   double sublead_match_rho;
   double sublead_match_sigma;
-  
-  
 };
 
 class DijetWorker : public DijetMatrix {
@@ -95,7 +93,12 @@ public:
   // of calling run.
   std::unordered_map<std::string, ClusterOutput>& Dijets() {return cluster_result;}
   
+  int n_recluster;
+  
 private:
+  
+  // clears all of the containers
+  void Clear();
   
   // the next three functions are used to try and cut down
   // on run time by only clustering leading/subleading jet
@@ -124,6 +127,7 @@ private:
   
   std::unordered_map<std::string, ClusterOutput> cluster_result;
   
+
 };
 
 #endif // DIJET_WORKER_HH

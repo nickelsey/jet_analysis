@@ -1,5 +1,5 @@
-#include "jet_analysis/dijet_worker/match_def.hh"
-#include "jet_analysis/dijet_worker/jet_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/match_def.hh"
+#include "jet_analysis/dijet_worker/dijet_matrix/jet_def.hh"
 
 
 

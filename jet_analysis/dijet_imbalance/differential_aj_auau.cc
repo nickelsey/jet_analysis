@@ -295,6 +295,9 @@ int main(int argc, char* argv[]) {
     sublead_jet_count_dict.insert({key, sublead_tmp});
   }
   
+  TH1D* h_ntracks = new TH1D("ntracks", "", 100, 0, 100);
+  fastjet::Selector track_pt_min_selector_tmp = fastjet::SelectorPtMin(2.0) && fastjet::SelectorAbsRapMax(1.0);
+  
   // initialize centrality definition
   CentralityRun14 centrality;
   
@@ -303,6 +306,7 @@ int main(int argc, char* argv[]) {
   
   // start the analysis loop
   // -----------------------
+  std::set<std::pair<int, int>> suspect_events{{8139067, 2890}, {8133016, 3377}, {8159021, 24232}, {8174095, 4791}, {8141106, 85038}};
   try {
     while (reader->NextEvent()) {
       // Print out reader status every 10 seconds
@@ -310,7 +314,7 @@ int main(int argc, char* argv[]) {
       
       // headers for convenience
       TStarJetPicoEventHeader* header = reader->GetEvent()->GetHeader();
-      
+  
       // check if event fired a trigger we will use
       if (triggers.size() != 0) {
         bool use_event = false;
@@ -334,14 +338,15 @@ int main(int argc, char* argv[]) {
       // select tracks above the minimum pt threshold
       primary_particles = track_pt_min_selector(primary_particles);
       
+      h_ntracks->Fill(track_pt_min_selector_tmp(primary_particles).size());
+      
       // run the worker
-      auto worker_out = worker.Run(primary_particles);
+      auto& worker_out = worker.Run(primary_particles);
       
       // process any found di-jet pairs
-      for (auto result : worker_out) {
+      for (auto& result : worker_out) {
         std::string key = result.first;
-        ClusterOutput out = result.second;
-        
+        ClusterOutput& out = result.second;
         if (out.found_lead)
           lead_jet_count_dict[key]->Fill(header->GetReferenceMultiplicity());
         if (out.found_sublead)
