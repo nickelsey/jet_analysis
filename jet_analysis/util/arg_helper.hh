@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <set>
+#include <vector>
 
 
 bool Consume(std::string& arg, const std::string& seq) {
