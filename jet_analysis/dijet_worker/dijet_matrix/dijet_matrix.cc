@@ -411,9 +411,11 @@ void DijetMatrix::Initialize() {
           continue;
       }
       
+      auto tmp = std::make_unique<DijetDefinition>(lead.get(), sub.get(), 0.4);
+      
       std::string key = MakeKeyFromDijetDefinition(*tmp);
       
-      dijet_defs[key] = std::make_unique<DijetDefinition>(lead.get(), sub.get(), 0.4);
+      dijet_defs[key] = std::move(tmp);
       keys.insert(key);
     }
   }
