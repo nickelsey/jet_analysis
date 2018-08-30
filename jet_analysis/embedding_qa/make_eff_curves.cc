@@ -37,8 +37,8 @@ DEFINE_string(output, "tmp", "output directory");
 std::vector<TH1D*> SplitOnYAxis(TH2D* h) {
   std::vector<TH1D*> ret;
   
-  for (int i = i; i <= h->GetYaxis()->GetNbins(); ++i) {
-    string name = MakeString(h->GetName(), "_", i);
+  for (int i = 1; i <= h->GetXaxis()->GetNbins(); ++i) {
+    string name = MakeString(h->GetName(), "_", i-1);
     TH1D* tmp = h->ProjectionY(name.c_str(), i, i);
     ret.push_back(tmp);
   }
