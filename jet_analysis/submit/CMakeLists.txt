@@ -28,6 +28,7 @@ install(FILES y12_runids.root DESTINATION submit)
 install(FILES y14_runids.root DESTINATION submit)
 install(FILES y7_runids.root DESTINATION submit)
 install(FILES y7_effic.root DESTINATION submit)
+install(FILES y11_efficiency.root DESTINATION submit)
 install(FILES empty_list.txt DESTINATION submit)
 install(DIRECTORY pp_list DESTINATION submit
         FILES_MATCHING PATTERN "CMakeLists.txt" EXCLUDE

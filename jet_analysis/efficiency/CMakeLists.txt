@@ -2,7 +2,7 @@
 ## run 4 as a stand in, until we get our embedding finalized
 ## for run 14
 
-ADD_LIBRARY(Efficiency SHARED run4_eff.cc run14_eff.cc run7_eff.cc run7_eff_old.cc)
+ADD_LIBRARY(Efficiency SHARED run4_eff.cc run14_eff.cc run7_eff.cc run7_eff_old.cc run11_eff.cc)
 target_link_libraries(Efficiency ${ROOT_LIBRARIES})
 
 #########################################

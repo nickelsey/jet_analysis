@@ -40,6 +40,13 @@ add_executable(generate_y14_efficiency ${GEN_EFF_SRCS})
 target_link_libraries(generate_y14_efficiency ${ROOT_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(generate_y14_efficiency PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## generate efficiency curves for Run 11 from StEfficiencyMakerLite
+set(GEN_EFF_Y11_SRCS generate_y11_efficiency.cc)
+add_executable(generate_y11_efficiency ${GEN_EFF_Y11_SRCS})
+target_link_libraries(generate_y11_efficiency ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
+set_target_properties(generate_y11_efficiency PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
+
 ## generate pt spectra and QA for different data sets
 set(GEN_PT_SPEC_SRCS generate_pt_spectra.cc)
 add_executable(generate_pt_spectra ${GEN_PT_SPEC_SRCS})
@@ -133,4 +140,7 @@ install(TARGETS run14_vertex_comparison compare_y14_productions
 install(TARGETS generate_y14_y7_compare track_quality_quick
         DESTINATION bin/data_qa)
 install(TARGETS compare_y7_y4_pt generate_y11_pt_spectrum
+        DESTINATION bin/data_qa)
+
+install(TARGETS generate_y11_efficiency
         DESTINATION bin/data_qa)
