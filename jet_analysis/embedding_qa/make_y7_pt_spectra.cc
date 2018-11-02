@@ -102,6 +102,7 @@ int main(int argc, char* argv[]) {
   TH2D* pt = new TH2D("pt", ";centrality;p_{T}", cent_bins, -0.5, cent_bins - 0.5, 50, 0, 5);
   TH2D* pt_corr = new TH2D("ptcorr", ";centrality;p_{T}",cent_bins, -0.5, cent_bins - 0.5, 50, 0, 5);
   TH2D* refmult = new TH2D("refmult", ";centrality;refmult", cent_bins, -0.5, cent_bins - 0.5, 800, 0, 800);
+  TH1D* centrality = new TH1D("centrality", "", cent_bins, -0.5, cent_bins - 0.5);
   TH2D* frac = new TH2D("discarded", "", cent_bins, -0.5, cent_bins - 0.5, 10, 0, 1.0);
   TH2D* nprim = new TH2D("nprim", "", cent_bins, -0.5, cent_bins - 0.5, 100, 0, 1200);
   TH2D* nsel = new TH2D("nsel", "", cent_bins, -0.5, cent_bins - 0.5, 100, 0, 12000);
@@ -110,8 +111,8 @@ int main(int argc, char* argv[]) {
   TH2D* nhitsfitfrac = new TH2D("nhitsfitfrac", "", cent_bins, -0.5, cent_bins - 0.5, 50, 0, 1.0);
   TH3D* dca = new TH3D("dcapt", "", cent_bins, -0.5, cent_bins - 0.5, 50, 0, 3, 50, 0, 5);
   
-  std::vector<TProfile*> avg_eff(8);
-  for (int i = 0; i < 8; ++i) {
+  std::vector<TProfile*> avg_eff(9);
+  for (int i = 0; i < 9; ++i) {
     avg_eff[i] = new TProfile(MakeString("eff", i).c_str(), "", 100, 0, 5.0);
   }
   
@@ -152,7 +153,7 @@ int main(int argc, char* argv[]) {
       continue;
     
     refmult->Fill(cent_bin, header->GetGReferenceMultiplicity());
-    
+    centrality->Fill(cent_bin);
     // get tracks & towers
     TList* tracks = reader->GetListOfSelectedTracks();
     int selected = 0;

@@ -9,10 +9,8 @@
 #ifndef DIJET_DEFINITION_HH
 #define DIJET_DEFINITION_HH
 
-#include <memory>
-
+#include "jet_analysis/util/common.hh"
 #include "jet_analysis/dijet_worker/dijet_matrix/match_def.hh"
-#include "jet_analysis/util/make_unique.h"
 
 class DijetDefinition {
 public:
@@ -21,8 +19,8 @@ public:
                   lead(rhs.lead), sub(rhs.sub), dPhi(rhs.dPhi) { };
   DijetDefinition(MatchDef* lead, MatchDef* sub, double phi = 0.4) :
                   lead(lead), sub(sub), dPhi(phi) { };
-  DijetDefinition(std::unique_ptr<MatchDef> lead, std::unique_ptr<MatchDef>sub, double phi = 0.4) :
-                  lead(lead.get()), sub(sub.get()), dPhi(phi) { };
+//  DijetDefinition(std::unique_ptr<MatchDef> lead, std::unique_ptr<MatchDef>sub, double phi = 0.4) :
+//                  lead(lead.get()), sub(sub.get()), dPhi(phi) { };
   
   virtual ~DijetDefinition() { };
   

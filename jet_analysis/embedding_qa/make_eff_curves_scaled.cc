@@ -33,7 +33,7 @@ DEFINE_string(input, "eff_input.root", "root file with embedding QA");
 DEFINE_string(name, "efficiency_curves_scaled", "ouput root file name");
 DEFINE_string(output, "tmp", "output directory");
 DEFINE_double(dcaCut, 1.0, "dca boundary");
-
+DEFINE_string(alt, "", "alternate data");
 using std::string;
 
 std::vector<TH1D*> SplitOnYAxis(TH2D* h) {
@@ -65,7 +65,7 @@ std::vector<double> ScaleFactor(TH3D* data, TH3D* sim) {
     double data_int = data_tmp->Integral(data_tmp->FindBin(FLAGS_dcaCut), data_tmp->GetXaxis()->GetNbins());
     double sim_int = sim_tmp->Integral(sim_tmp->FindBin(FLAGS_dcaCut), sim_tmp->GetXaxis()->GetNbins());
     
-    ret[i] = sim_int - data_int;
+    ret[i] = data_int - sim_int;
   }
   return ret;
 }
@@ -78,16 +78,14 @@ std::vector<std::vector<double>> ScaleFactorPtDep(TH3D* data, TH3D* sim) {
   double dpt = (range_high - range_low) / nbins;
   std::vector<std::vector<double>> ret(centBins, std::vector<double>(nbins));
   for (int i = 0; i < centBins; ++i) {
-    data->GetXaxis()->SetRange(i+1, i+1);
-    sim->GetXaxis()->SetRange(i+1, i+1);
-    for (int j = 0; j < nbins; ++i) {
-      
+    ret.push_back(std::vector<double>());
+    for (int j = 0; j < nbins; ++j) {
       int cent_bin = i+1;
       double pt_low = range_low + (j * dpt);
       double pt_high = range_low + ((j + 1) * dpt);
       int pt_bin_low = data->GetYaxis()->FindBin(pt_low);
       int pt_bin_high = data->GetYaxis()->FindBin(pt_high);
-      
+
       string data_name =  MakeString("data_", i, "_", j);
       string sim_name =  MakeString("sim_", i, "_", j);
       
@@ -95,11 +93,13 @@ std::vector<std::vector<double>> ScaleFactorPtDep(TH3D* data, TH3D* sim) {
       TH1D* sim_tmp = (TH1D*) sim->ProjectionZ(sim_name.c_str(), cent_bin, cent_bin, pt_bin_low, pt_bin_high);
       data_tmp->Scale(1.0 / data_tmp->Integral());
       sim_tmp->Scale(1.0 / sim_tmp->Integral());
-      
+
       double data_int = data_tmp->Integral(data_tmp->FindBin(FLAGS_dcaCut), data_tmp->GetXaxis()->GetNbins());
       double sim_int = sim_tmp->Integral(sim_tmp->FindBin(FLAGS_dcaCut), sim_tmp->GetXaxis()->GetNbins());
-      
-      ret[i][j] = sim_int - data_int;
+
+      ret[i][j] = data_int - sim_int;
+      //ret[i].push_back(sim_int - data_int);
+
       
     }
   }
@@ -139,13 +139,104 @@ int main(int argc, char* argv[]) {
   
   std::vector<TH1D*> centrality_curves = SplitOnYAxis(rc);
   
+  // find scale factor
+  TH3D* data_dca = (TH3D*) input.Get("datadcascale");
+  data_dca->SetName("firstdcadata");
+  TH3D* sim_dca = (TH3D*) input.Get("recodcascale");
+  sim_dca->SetName("firstdcasim");
+  auto scale_factors = ScaleFactorPtDep(data_dca, sim_dca);
+  
+  for (int i = 0; i < scale_factors.size(); ++i) {
+    for (int j = 0; j < scale_factors[i].size(); ++j)
+    std::cout << "scale bin: " << i << "  " << j << " " << scale_factors[i][j] << std::endl;
+  }
+  
   std::string outname = FLAGS_output + "/" + FLAGS_name + ".root";
   TFile out(outname.c_str(), "RECREATE");
   
   for (int i = 0; i < centrality_curves.size(); ++i) {
     std::string name = "cent_bin_" + std::to_string(i);
     centrality_curves[i]->SetName(name.c_str());
+    //centrality_curves[i]->Scale(1.0 - scale_factors[i]);
+    for (int j = 1; j <= centrality_curves[i]->GetXaxis()->GetNbins(); ++j) {
+      centrality_curves[i]->SetBinContent(j, centrality_curves[i]->GetBinContent(j) * (1.0 - scale_factors[i][j]));
+    }
     centrality_curves[i]->Write();
+  }
+  
+  if (!FLAGS_alt.empty()) {
+    // load root file and create output
+    if (!boost::filesystem::exists(FLAGS_alt)) {
+      std::cerr << "input file does not exist: " << FLAGS_alt << std::endl;;
+      return 1;
+    }
+    
+    TFile input_alt(FLAGS_alt.c_str(), "READ");
+    TH3D* data_dca_alt = (TH3D*) input.Get("datadcascale");
+    data_dca_alt->SetName("seconddcadata");
+    TH3D* sim_dca_alt = (TH3D*) input.Get("recodcascale");
+    sim_dca_alt->SetName("seconddcasim");
+    
+    TProfile* first_dca = (TProfile*) ((TH2D*) sim_dca->Project3D("zx"))->ProfileX();
+    TProfile* second_dca = (TProfile*) ((TH2D*) sim_dca_alt->Project3D("zx"))->ProfileX();
+    
+    TCanvas c;
+    first_dca->Draw();
+    second_dca->Draw("SAME");
+    c.SaveAs("tmp.pdf");
+    
+    // create our histogram and canvas options
+    histogramOpts hopts;
+    canvasOpts copts;
+    canvasOpts coptslogz;
+    coptslogz.log_z = true;
+    canvasOpts coptslogy;
+    coptslogy.log_y = true;
+    canvasOpts cOptsBottomLeg;
+    cOptsBottomLeg.leg_upper_bound = 0.4;
+    cOptsBottomLeg.leg_lower_bound = 0.18;
+    cOptsBottomLeg.leg_right_bound = 0.9;
+    cOptsBottomLeg.leg_left_bound = 0.7;
+    canvasOpts cOptsBottomLeftLeg;
+    cOptsBottomLeftLeg.leg_upper_bound = 0.4;
+    cOptsBottomLeftLeg.leg_lower_bound = 0.18;
+    cOptsBottomLeftLeg.leg_right_bound = 0.18;
+    cOptsBottomLeftLeg.leg_left_bound = 0.4;
+    canvasOpts cOptsBottomLeftLegLogy;
+    cOptsBottomLeftLegLogy.log_y = true;
+    cOptsBottomLeftLegLogy.leg_upper_bound = 0.4;
+    cOptsBottomLeftLegLogy.leg_lower_bound = 0.18;
+    cOptsBottomLeftLegLogy.leg_right_bound = 0.18;
+    cOptsBottomLeftLegLogy.leg_left_bound = 0.4;
+    canvasOpts cOptsTopLeftLeg;
+    cOptsTopLeftLeg.leg_right_bound = 0.18;
+    cOptsTopLeftLeg.leg_left_bound = 0.4;
+    
+    std::vector<double> tmp;
+    for (int i = 1; i <= first_dca->GetXaxis()->GetNbins(); ++i)
+      tmp.push_back(first_dca->GetBinContent(i));
+    std::reverse(tmp.begin(), tmp.end());
+    for (int i = 1; i <= first_dca->GetXaxis()->GetNbins(); ++i)
+      first_dca->SetBinContent(i, tmp[i-1]);
+    
+    PrintWithRatio(first_dca, second_dca, "P17id", "P16id", hopts, copts, FLAGS_output, "dca", "", "centrality", "<DCA[cm]>", "");
+    
+    // print histograms & their ratios
+    //template <typename H>
+    //void PrintWithRatio(H* h1,
+    //                    H* h2,
+    //                    std::string h1_title,
+    //                    std::string h2_title,
+    //                    histogramOpts hopts,
+    //                    canvasOpts copts,
+    //                    std::string output_loc,
+    //                    std::string output_name,
+    //                    std::string canvas_title,
+    //                    std::string x_axis_label,
+    //                    std::string y_axis_label,
+    //                    std::string legend_title = "")
+
+    
   }
   
   out.Close();

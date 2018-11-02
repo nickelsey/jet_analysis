@@ -127,10 +127,10 @@ int main(int argc, char* argv[]) {
   // and set a lower limit on 0-20% for year 7
   CentralityRun14 centrality;
 
-  int cent_bins = 8;
-  std::vector<std::pair<int, int>> CentBoundariesY7{{399, 1000}, {269, 398}, {178, 268}, {114, 177},
+  int cent_bins = 9;
+  std::vector<std::pair<int, int>> CentBoundariesY7{{485, 1000}, {399, 484}, {269, 398}, {178, 268}, {114, 177},
                                           {69, 113}, {39, 68}, {21, 38}, {10, 20}};
-  std::vector<std::pair<int, int>> CentBoundariesY14{{0,1}, {2, 3}, {4, 5}, {6, 7}, {8, 9},
+  std::vector<std::pair<int, int>> CentBoundariesY14{{0,0}, {1,1}, {2, 3}, {4, 5}, {6, 7}, {8, 9},
                                             {10, 11}, {12, 13}, {14, 15}};
   
   // change to output file
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
   TH2D* nhitpos_inner_vz = new TH2D("innervz", "", 60, 0, 60, cent_bins, -0.5, cent_bins - 0.5);
   
   std::vector<TProfile*> avg_eff(8);
-  for (int i = 0; i < 8; ++i) {
+  for (int i = 0; i < 9; ++i) {
     avg_eff[i] = new TProfile(MakeString("eff", i).c_str(), "", 100, 0, 5.0);
   }
   
@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
   TH2D* etaphi_pt1 = new TH2D("etaphi1", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   TH2D* etaphi_pt2 = new TH2D("etaphi2", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
   TH2D* etaphi_pt3 = new TH2D("etaphi3", ";#eta;#phi", 40, -1, 1, 40, -TMath::Pi(), TMath::Pi());
-  
+  std::cout << "got here" << std::endl;
   // start the event loop
   // --------------------
   while(reader->NextEvent()) {
@@ -224,13 +224,13 @@ int main(int argc, char* argv[]) {
     }
     
     TStarJetVectorContainer<TStarJetVector>* container = reader->GetOutputContainer();
-  
+    
     // get tracks & towers
     TList* tracks = reader->GetListOfSelectedTracks();
     int selected = 0;
     TIter nextTrack(tracks);
     while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
-  
+      
       if (fabs(track->GetEta()) > opts.eta || track->GetPt() < 0.2)
         continue;
       selected++;
@@ -265,6 +265,7 @@ int main(int argc, char* argv[]) {
           eff = run7Eff->AuAuEff(track->GetPt(), track->GetEta(), 2);
       }
       else if (opts.useY14Eff) {
+        
         eff = run14Eff->AuAuEff(track->GetPt(), track->GetEta(), centrality.centrality16(),
                                 header->GetZdcCoincidenceRate());
       }
@@ -276,6 +277,7 @@ int main(int argc, char* argv[]) {
         counts++;
         continue;
       }
+      
       avg_eff[cent_bin]->Fill(track->GetPt(), eff);
       pt_corr->Fill(track->GetPt(), cent_bin, 1.0 / eff);
     }

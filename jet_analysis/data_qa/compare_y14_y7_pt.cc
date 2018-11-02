@@ -228,15 +228,37 @@ int main(int argc, char* argv[]) {
                      "fit points / possible", "fraction");
   
   
-  // test
-  TProfile* py14 = y14_eff[0];
-  TProfile* py7  = y7_eff[0];
+  TFile out(MakeString(opts.out_dir, "/ratio.root").c_str(), "RECREATE");
+  for (int i = 0; i < y7_pt_corr_cent.size(); ++i) {
+    TProfile* y14_eff_proj = y14_eff[i];
+    TProfile* y7_eff_proj = y7_eff[i];
+    std::string cent_ratio_name = "eff_ratio_" + std::to_string(i);
+    TH1D* ratio = (TH1D*) y7_pt_corr_cent[i]->Clone(cent_ratio_name.c_str());
+    if (ratio->GetEntries() <= 0)
+      continue;
+    ratio->Divide(y14_pt_corr_cent[i]);
+    
+    TF1* fit = new TF1(MakeString("fit_", i).c_str(),"[0]", 2, 5);
+    fit->SetParameter(0, 1.3);
+    ratio->Fit(fit, "", "", 2.0, 5.0);
+    
+    out.cd();
+    ratio->Write();
+  }
   
-  // ratio
-  py7->Divide(py14);
-  y14_pt_corr_cent[0]->Divide(py7);
-  PrintWithRatio(y7_pt_corr_cent[0], y14_pt_corr_cent[0], "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "testname",
-                 "", "p_T", "1/N");
+  out.Close();
+  
+  
+//  TProfile* py14 = y14_eff[0];
+//  TProfile* py7  = y7_eff[0];
+//
+//  // ratio
+//  py7->Divide(py14);
+//  y14_pt_corr_cent[0]->Divide(py7);
+//  PrintWithRatio(y7_pt_corr_cent[0], y14_pt_corr_cent[0], "run 7", "run 14", hOpts, cOptsLogy, opts.out_dir, "testname",
+//                 "", "p_T", "1/N");
+//
+  
   
   
 //  // normalize
