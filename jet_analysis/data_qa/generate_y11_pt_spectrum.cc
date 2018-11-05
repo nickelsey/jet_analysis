@@ -139,8 +139,7 @@ int main(int argc, char* argv[]) {
     
       
       // do efficiency corrected pt spectrum
-      double eff = efficiency.AuAuEff(track->GetPt(), track->GetEta(), cent_bin);
-    
+      double eff = efficiency.AuAuEff(track->GetPt(), cent_bin);
       norm++;
       
       pt->Fill(track->GetPt(), cent_bin);

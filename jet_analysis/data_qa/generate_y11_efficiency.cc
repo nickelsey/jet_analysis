@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) {
 
 	std::vector<TH2D*> mc_projection;
 	std::vector<TH2D*> match_projection;
+	std::vector<TH1D*> mc_profile;
+	std::vector<TH1D*> match_profile;
 
 	for (int i = 0; i < 9; ++i) {
 		mc->GetZaxis()->SetRange(i+1, i+1);
@@ -45,6 +47,8 @@ int main(int argc, char* argv[]) {
 
 		std::string mc_name = "mc" + std::to_string(i);
 		std::string match_name = "cent" + std::to_string(i);
+		std::string mc_name_proj = "mcproj" + std::to_string(i);
+		std::string match_name_proj = "cent" + std::to_string(i) + "proj";
 
 		mc_projection.push_back((TH2D*) mc->Project3D("yx"));
 		mc_projection[i]->SetName(mc_name.c_str());
@@ -53,10 +57,18 @@ int main(int argc, char* argv[]) {
 		mc_projection[i]->RebinX(5);
 		match_projection[i]->RebinX(5);
 
+		mc_profile.push_back((TH1D*) mc_projection[i]->ProjectionX());
+		mc_profile[i]->SetName(mc_name_proj.c_str());
+		match_profile.push_back((TH1D*) match_projection[i]->ProjectionX());
+		match_profile[i]->SetName(match_name_proj.c_str());
+
 		match_projection[i]->Divide(mc_projection[i]);
+		match_profile[i]->Divide(mc_profile[i]);
 	}
 
 	for (auto& h : match_projection)
+		h->Write();
+	for (auto& h : match_profile)
 		h->Write();
 	out.Close();
 

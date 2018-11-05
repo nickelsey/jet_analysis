@@ -9,6 +9,7 @@
 
 #include "TFile.h"
 #include "TH2D.h"
+#include "TH1D.h"
 
 class Run11Eff {
 public:
@@ -19,11 +20,13 @@ public:
 	bool LoadFile(std::string filename);
   
   double AuAuEff(double pt, double eta, int cent);
+  double AuAuEff(double pt, int cent);
   
 private:
 
 	TFile* input_;
   std::vector<TH2D*> curves_;
+  std::vector<TH1D*> curves_1d_;
   
   double max_pt_;
   
