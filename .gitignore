@@ -1,5 +1,8 @@
 # ignore lists for git
 
+# visual studio files
+.vscode*
+
 # that crap emacs generates
 *~
 
