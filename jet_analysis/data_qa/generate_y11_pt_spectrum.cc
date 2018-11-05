@@ -24,10 +24,23 @@
 #include "TProfile.h"
 #include "TStyle.h"
 
+#include "TStarJetPicoReader.h"
+#include "TStarJetPicoEvent.h"
+#include "TStarJetPicoEventHeader.h"
+#include "TStarJetPicoEventCuts.h"
+#include "TStarJetPicoPrimaryTrack.h"
+#include "TStarJetPicoTower.h"
+#include "TStarJetPicoTrackCuts.h"
+#include "TStarJetPicoTowerCuts.h"
+#include "TStarJetVectorContainer.h"
+#include "TStarJetVector.h"
+#include "TStarJetPicoTriggerInfo.h"
+#include "TStarJetPicoUtils.h"
+
 DEFINE_string(name, "y11_pt", "output file name");
 DEFINE_int32(id, 0, "job id");
-DEFINE_string(input, "y7_y4_compare/run4_pt.root", "input run4 root file");
-DEFINE_string(effFile, "submit/y11_effic.root", "efficiency curves for Run 11");
+DEFINE_string(input, "y11.root", "input run11 root file");
+DEFINE_string(effFile, "submit/y11_efficiency.root", "efficiency curves for Run 11");
 DEFINE_string(outdir, "y11_pt", "output directory");
 
 int main(int argc, char* argv[]) {
@@ -48,12 +61,12 @@ int main(int argc, char* argv[]) {
   TChain* chain = NewChainFromInput(FLAGS_input);
   
   // load Run11 efficiency curves
-  Run11Eff eff(FLAGS_effFile);
+  Run11Eff efficiency(FLAGS_effFile);
 
   // initialize the reader(s)
   TStarJetPicoReader* reader = new TStarJetPicoReader();
-  InitReaderWithDefaults(reader, chain, "submit/y7_y6_bad_tower.txt", "");
-  reader->GetTrackCuts()->SetDCACut(3.0);                // distance of closest approach to primary vtx
+  InitReaderWithDefaults(reader, chain, "submit/empty_list.txt", "");
+  reader->GetTrackCuts()->SetDCACut(1.0);                // distance of closest approach to primary vtx
   reader->GetTrackCuts()->SetMinNFitPointsCut(20);       // minimum fit points in track reco
   reader->GetTrackCuts()->SetFitOverMaxPointsCut(0.52);  // minimum ratio of fit points used over possible
   reader->GetTrackCuts()->SetMaxPtCut(1000);             // essentially infinity - cut in eventcuts
@@ -83,6 +96,70 @@ int main(int argc, char* argv[]) {
   TH2D* nhitsfitfrac = new TH2D("nhitsfitfrac", "", 50, 0, 1.0, cent_bins, -0.5, cent_bins - 0.5);
   TH3D* dca = new TH3D("dcapt", "", 50, 0, 3, 50, 0, 5, cent_bins, -0.5, cent_bins - 0.5);
   
+  std::vector<TProfile*> avg_eff(8);
+  for (int i = 0; i < 9; ++i) {
+    avg_eff[i] = new TProfile(MakeString("eff", i).c_str(), "", 100, 0, 5.0);
+  }
+
+  // start the event loop
+  // --------------------
+  while(reader->NextEvent()) {
+    double counts = 0;
+    double norm = 0;
+    // Print out reader status every 10 seconds
+    reader->PrintStatus(10);
+    
+    TStarJetPicoEvent* event = reader->GetEvent();
+    TStarJetPicoEventHeader* header = event->GetHeader();
+    
+    nglobnprim->Fill(header->GetNGlobalTracks(), header->GetNOfPrimaryTracks());
+    refmultnprim->Fill(header->GetReferenceMultiplicity(), header->GetNOfPrimaryTracks());
+    
+    int cent_bin = header->GetReferenceCentrality();
+    
+    if (cent_bin < 0 || cent_bin > 8)
+      continue;
+    
+    cent_bin = 8 - cent_bin;
+    refmult->Fill(header->GetGReferenceMultiplicity(), cent_bin);
+    
+    
+    // get tracks
+    TList* tracks = reader->GetListOfSelectedTracks();
+    int selected = 0;
+    TIter nextTrack(tracks);
+    while(TStarJetPicoPrimaryTrack* track = (TStarJetPicoPrimaryTrack*) nextTrack()) {
+      if (fabs(track->GetEta()) > 1.0 || track->GetPt() < 0.2)
+        continue;
+      selected++;
+      nhitsfit->Fill(track->GetNOfFittedHits(),cent_bin);
+      dca->Fill(track->GetDCA(), track->GetPt(), cent_bin);
+      nhitspos->Fill(track->GetNOfPossHits(), cent_bin);
+      nhitsfitfrac->Fill((double)track->GetNOfFittedHits()/track->GetNOfPossHits(), cent_bin);
+    
+      
+      // do efficiency corrected pt spectrum
+      double eff = efficiency.AuAuEff(track->GetPt(), track->GetEta(), cent_bin);
+    
+      norm++;
+      
+      pt->Fill(track->GetPt(), cent_bin);
+      
+      if (eff < 0 || eff > 1.0) {
+        counts++;
+        continue;
+      }
+      
+      avg_eff[cent_bin]->Fill(track->GetPt(), eff);
+      pt_corr->Fill(track->GetPt(), cent_bin, 1.0 / eff);
+    }
+    nsel->Fill(selected, cent_bin);
+    nprim->Fill(selected, cent_bin);
+    frac->Fill(counts/norm, cent_bin);
+  }
+  
+  out.Write();
+  out.Close();
   
 
   return 0;
