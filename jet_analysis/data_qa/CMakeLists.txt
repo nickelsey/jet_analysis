@@ -59,6 +59,12 @@ add_executable(generate_y11_pt_spectrum ${GEN_PT_RUN11_SRCS})
 target_link_libraries(generate_y11_pt_spectrum ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES} Efficiency Centrality ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES})
 set_target_properties(generate_y11_pt_spectrum PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
 
+## generate rho for different data sets
+set(GEN_RHO_SRCS generate_rho.cc)
+add_executable(generate_rho ${GEN_RHO_SRCS})
+target_link_libraries(generate_rho ${ROOT_LIBRARIES} ${TSTARJETPICO_LIBRARIES} ${Boost_LIBRARIES}  ${FASTJET_LIBRARIES} Efficiency Centrality ${GFLAGS_LIBRARIES} ${GLOG_LIBRARIES})
+set_target_properties(generate_rho PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/data_qa)
+
 
 ## compare pt spectra for y14 & y7
 set(COMPARE_PT_SRCS compare_y14_y7_pt.cc)
@@ -148,4 +154,6 @@ install(TARGETS generate_y14_y7_compare track_quality_quick
 install(TARGETS compare_y7_y4_pt generate_y11_pt_spectrum
         DESTINATION bin/data_qa)
 install(TARGETS generate_y11_efficiency compare_y7_y11_pt
+        DESTINATION bin/data_qa)
+install(TARGETS generate_rho
         DESTINATION bin/data_qa)
